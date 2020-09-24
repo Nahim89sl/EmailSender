@@ -121,7 +121,6 @@ namespace EmailSender.ViewModel
             }
         }
 
-        private int timestamp;
         //Telegramm
         private Telegram telegram;
         public Telegram Telegram
@@ -187,6 +186,7 @@ namespace EmailSender.ViewModel
             set { Set(()=>ReaderModel,ref readerModel, value); }
         }
 
+        
         ///Settings block
         private ISettingsService _settingsService;
         public SettingsModel Settings;
@@ -247,6 +247,20 @@ namespace EmailSender.ViewModel
                 Settings.IsStartRead = value;
             }
         }
+
+        //letter configuration
+        private Letter letterTemplate;
+
+        public Letter LetterTemplate
+        {
+            get { return letterTemplate; }
+            set { Set(()=>LetterTemplate, ref letterTemplate,value);}
+        }
+
+
+
+
+
 
         public RelayCommand StartSendingCommand
         {
@@ -365,52 +379,59 @@ namespace EmailSender.ViewModel
             _ReaderLetters = ServiceLocator.Current.GetInstance<IReaderLetter>();
 
             logger = LogManager.GetCurrentClassLogger();
-            logger.Info("App 8.6.004 started");
+            logger.Info("App 8.6.006 started");
             OurMails = new ObservableCollection<Receiver>();
             Settings = _settingsService.Load();
             validate = true;
 
-            if(Settings!=null)
+
+            Akkaunt = Settings.Akkaunt;
+            Pauses = Settings.Pauses;
+            FieldMapping = Settings.FieldMapping;
+            Telegram = Settings.Telegram;
+            Answer = Settings.Answer;
+            ReaderModel = Settings.ReaderModel;
+            LetterTemplate = Settings.LetterTemplate;
+
+
+
+            _Subject = Settings.Subject;
+            _EmailText = Settings.EmailText;
+            ReceiversListPath = Settings.ReceiversListPath;
+            OurMailsListPath = Settings.OurMailsListPath;
+
+            //restore list of receivers
+            if (File.Exists(Settings.ReceiversListPath))
             {
-                Akkaunt = Settings?.Akkaunt ?? new Akkaunt();
-                Pauses = Settings?.Pauses ?? new Pauses();
-                FieldMapping = Settings?.FieldMapping ?? new FieldMapping();
-                Telegram = Settings?.Telegram ?? new Telegram();
-                Answer = Settings?.Answer ?? new Answer();
-                ReaderModel = Settings?.ReaderModel ?? new ReaderModel();
-
-                _Subject = Settings.Subject;
-                _EmailText = Settings.EmailText;
-
-                //restore list of receivers
-                if (File.Exists(Settings.ReceiversListPath))
-                {
-                    ReceiversListPath = Settings.ReceiversListPath;
-                    Receivers = _fileService.Open(ReceiversListPath, FieldMapping);
-                }
-                else
-                {
-                    Receivers = new ObservableCollection<Receiver>();
-                }
-                //restore list of our mails
-                if (File.Exists(Settings.OurMailsListPath))
-                {
-                    OurMailsListPath = Settings.OurMailsListPath;
-                    _ourMailsService.LoadAsync(Settings.OurMailsListPath, OurMails);
-                }
-                logger.Info("Settings were loaded");
+                ReceiversListPath = Settings.ReceiversListPath;
+                Receivers = _fileService.Open(ReceiversListPath, FieldMapping);
             }
             else
             {
-                Akkaunt = new Akkaunt();
-                Answer = new Answer();
-                FieldMapping = new FieldMapping();
-                Pauses = new Pauses();
+                ReceiversListPath = "";
                 Receivers = new ObservableCollection<Receiver>();
-                logger.Info("Settings were empty");
-                Telegram = new Telegram();
-                ReaderModel = new ReaderModel();
             }
+
+            //restore list of our mails
+            if (File.Exists(Settings.OurMailsListPath))
+            {
+                
+                OurMailsListPath = Settings.OurMailsListPath;
+                _ourMailsService.LoadAsync(Settings.OurMailsListPath, OurMails);
+            }
+            else
+            {
+                OurMailsListPath = "";
+            }
+            logger.Info("Settings were loaded");
+            //restore list of ranges
+            if (!File.Exists(Pauses.RangePath))
+            {
+                Pauses.ActiveRange = new RangePause();
+                Pauses.Ranges = new ObservableCollection<RangePause>();
+            }
+
+           
 
             LoadReseiversCommand = new RelayCommand(ExecudeLoadResaivers);
             StartSendingCommand = new RelayCommand(ExecutStartSend, CanExecutStartSend);
@@ -432,13 +453,7 @@ namespace EmailSender.ViewModel
 
             IsStartRead = Settings.IsStartRead;
             IsStartValidate = Settings.IsStartValidate;
-
-            Settings.Answer = Answer;
-            Settings.Akkaunt = Akkaunt;
-            Settings.Pauses = Pauses;
-            Settings.FieldMapping = FieldMapping;
-            Settings.Telegram = Telegram;
-            Settings.ReaderModel = ReaderModel;
+           
             ReaderModel.IsReadNow = "wait reading";
             hiddenSend = 0;
             ourSend = 0;
@@ -595,14 +610,11 @@ namespace EmailSender.ViewModel
                         }
                         else
                         {
-                            string subject = "";
-                            string mailText = "";
+                            Letter sendLetter = null;                           
                             try
                             {
-                                subject = _textRandomize.TextConverter(receiver, Subject);
-                                logger.Info("Subject: " + subject);
-                                mailText = _textRandomize.TextConverter(receiver, EmailText);
-                                logger.Info("Subject: " + mailText);
+                                //make ready letter for sending
+                                sendLetter = _textRandomize.LetterRandomizeText(receiver, LetterTemplate);
                             }
                             catch(Exception ex)
                             {
@@ -623,7 +635,7 @@ namespace EmailSender.ViewModel
                                 ourSend = 0;
                                 var ourReceiver = OurMails.OrderBy(a => a.Count).FirstOrDefault();
                                 ourReceiver.Count++;
-                                await _sendService.SendAsync(Akkaunt, ourReceiver, subject, mailText);
+                                await _sendService.SendAsync(Akkaunt, ourReceiver, sendLetter);
                                 logger.Info("Sended to our mail " + ourReceiver.Email);
                                 int p = 10;
                                 try
@@ -642,7 +654,7 @@ namespace EmailSender.ViewModel
                                 LabelStatus = receiver.Email;
                             });
                             logger.Info("try send email to " + receiver.Email);
-                            await _sendService.SendAsync(Akkaunt, receiver, subject, mailText);
+                            await _sendService.SendAsync(Akkaunt, receiver, sendLetter);
                             logger.Info("Akkaunt status " + Akkaunt.Status);
                             logger.Info("Sended to " + receiver.Email);                            
                             receiver.StatusSend = "SENDED";

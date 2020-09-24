@@ -160,6 +160,79 @@ namespace EmailSender.Services
             }
         }
 
+        public async Task SendAsync(Akkaunt mailServer, Receiver receiver, Letter letter)
+        {
+            if ((receiver.Email == "") || (letter.Subject == "") || (letter.Text == ""))
+            {
+                logger.Error("wrong input parameters");
+            }
+
+            //responce for compose letter                       
+            response = await client.GetAsync("http://" + mailServer.Domen + "/webmail/?_task=mail&_action=compose");
+
+            var responseContent = await response.Content.ReadAsStringAsync();
+            //check auth
+            if (responseContent.Contains("task=login"))
+            {
+                auth = await Authentification(mailServer);
+                response = await client.GetAsync("http://" + mailServer.Domen + "/webmail/?_task=mail&_action=compose");
+                responseContent = await response.Content.ReadAsStringAsync();
+            }
+            if (auth)
+            {
+
+
+                if (!responseContent.Contains("task=login"))
+                {
+                    string id = GetId(responseContent);
+                    string token = GetToken(responseContent);
+
+                    StringContent fieldsData = new StringContent("_token=" + token +
+                        "&_task=mail&_action=send&_id=" + id +
+                        "&_attachments=&_from=1&_to=" + receiver.Email +
+                        "&_cc=" + receiver.CC +
+                        "&_bcc=" + receiver.Bcc +
+                        "&_replyto=&_followupto=&_subject=" + letter.Subject +
+                        "&editorSelector=plain&_priority=0&_store_target=Sent&_draft_saveid=&_draft=&_is_html=0&_framed=1&_message=" + letter.Text,
+                        Encoding.UTF8,
+                        "application/x-www-form-urlencoded");
+
+
+                    // send mail requiest
+                    response = await client.PostAsync("http://" + mailServer.Domen + "/webmail/?_task=mail&_unlock=loading" + TUnix.Timestamp().ToString() + "&_framed=1&_lang=en_US", fieldsData);
+                    if (response.StatusCode != HttpStatusCode.OK)
+                    {
+                        Debug.Print("status code" + response.StatusCode.ToString());
+                    }
+                    responseContent = await response.Content.ReadAsStringAsync();
+                    if (responseContent.Contains("sent_successfully"))
+                    {
+                        logger.Info("Send successfully to " + receiver.Email);
+                    }
+                    else
+                    {
+                        Regex rgx = new Regex("(?<=display_message\\().*?(?=\\);)");
+                        var match = rgx.Match(responseContent);
+                        if (match.Success)
+                        {
+                            logger.Error("Send propblem: " + match.Value);
+                            mailServer.Status = "Send propblem: " + match.Value;
+                        }
+                        else
+                        {
+                            logger.Error("Send propblem: " + responseContent);
+                            mailServer.Status = "Server propblem: " + match.Value;
+                        }
+                    }
+                }
+                else
+                {
+                    logger.Error("Auth error " + response.StatusCode.ToString());
+                    mailServer.Status = "Auth error";
+                }
+            }
+        }
+
         private string GetId(string textPage)
         {
             var regex = new Regex("(?<=_id\" value=\").*?(?=\">)");

@@ -15,8 +15,10 @@ namespace EmailSender.Model
             Answer = new Answer();
             ReaderModel = new ReaderModel();
             Telegram = new Telegram();
-
         }
+
+
+
         public string SenderListPath { get; set; }
         public string OurMailsListPath { get; set; }
         public string OurReceiversListPath { get; set; }
@@ -30,6 +32,8 @@ namespace EmailSender.Model
         public Telegram Telegram { get; set; }
         public Answer Answer { get; set; }
         public ReaderModel ReaderModel { get; set; }
+        public Letter LetterTemplate { get; set; }
+
 
         //read mails
         public int RederPauseInterval { get; set; }

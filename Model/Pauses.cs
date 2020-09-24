@@ -12,164 +12,134 @@ namespace EmailSender.Model
 {
     public class Pauses : ObservableObject
     {
+        private RangePause _stockRange;
+        
         public Pauses()
         {            
             Ranges = new ObservableCollection<RangePause>();
-            dopPauseRange = new RangePause();
+            _dopPauseRange = new RangePause();
             ActiveRange = new RangePause();
-            dopPauseStart = 0;
-            mainRangeChange = 0;          
-            stockRange = new RangePause() { Id = 0, Start = 30, End = 400 };
+            _dopPauseStart = 0;
+            _mainRangeChange = 0;
+            _stockRange = new RangePause() { Id = 0, Start = 300, End = 400 };
         }
 
-        private RangePause stockRange;
-
         public ObservableCollection<RangePause> Ranges { get; set; }
-
-
-        
         public int MainPauseChange { get; set; }
-        public int MainPauseStart { get; set; }
-        public int MainPauseEnd { get; set; }
         public int DopPause { get; set; }
-        public int DopPauseStart { get; set; }
-        public int DopPauseEnd { get; set; }
         public int SendToOurMail { get; set; }
         public int SendHiddenCopy { get; set; }
 
+        private int _mainRangeChange; //time value for change Active Range
+        private int _dopPauseStart;   //time value for use dop pause
 
-
-        
-        public RangePause activeRange;
+        //It is for random generation pause at that time
+        private RangePause _activeRange;
         public RangePause ActiveRange
         {
             get
             {
-                return activeRange;
+                return _activeRange;
             }
             set
             {
-                Set(()=>ActiveRange, ref activeRange, value);
+                Set(()=>ActiveRange, ref _activeRange, value);
             }
 
         }
 
-        private RangePause dopPauseRange;
+        //the range of dop pause for random generation
+        private RangePause _dopPauseRange;
         public RangePause DopPauseRange
         {
             get
             {
-                return dopPauseRange;
+                return _dopPauseRange;
             }
             set
             {
-                Set(() => DopPauseRange, ref dopPauseRange, value);
+                Set(() => DopPauseRange, ref _dopPauseRange, value);
             }
 
         }
 
-
-        private string rangePath;
+        //File path for downloading ranges
+        private string _rangePath;
         public string RangePath 
         {
             get 
             {
-                return rangePath;
+                return _rangePath;
             }
             set
             {
-                Set(()=>RangePath,ref rangePath, value);
+                Set(()=>RangePath,ref _rangePath, value);
             } 
                 
         }
-
         
-        private int mainRangeChange; //point of start work active range
-
-
-
-        private int dopPauseStart;  //poin of start work dop pause
+        
 
         public int GetPause()
         {
             ILogger logger = LogManager.GetCurrentClassLogger();
+            var resPause = 0;
+            var rnd = new Random();
+            var nowTime = TUnix.Timestamp();
             try
             {
-                Random rnd = new Random();
-                int nowTime = TUnix.Timestamp();
-
-                if (mainRangeChange == 0) { mainRangeChange = nowTime + MainPauseChange; } // at first time we do not need change interval
-                if (dopPauseStart == 0) { dopPauseStart = nowTime + DopPause; } //at first time we set new dop pause
-                if (nowTime > mainRangeChange)
+                if (_mainRangeChange == 0) { _mainRangeChange = nowTime + MainPauseChange; }  //at first time we do not need change interval
+                if (_dopPauseStart == 0) { _dopPauseStart = nowTime + DopPause; }             //at first time we set new dop pause
+                
+                if (nowTime > _mainRangeChange)     //check if necessary change range
                 {
-                    //change active range
-                    ChangeRange();
-                    mainRangeChange = nowTime + MainPauseChange; //update timestamp for next time                
+                    var resRange = ChangeRange(Ranges,ActiveRange);
+                    if (resRange != null)
+                    {
+                        ActiveRange = resRange;
+                    }
+                    _mainRangeChange = nowTime + MainPauseChange; //update timestamp for next time                
                 }
 
                 logger.Info("Active Range " + ActiveRange.Start.ToString() + "-" + ActiveRange.End.ToString());
-                int mainPause = rnd.Next(ActiveRange.Start, ActiveRange.End);
+                resPause = rnd.Next(ActiveRange.Start, ActiveRange.End);
 
-                if (nowTime > dopPauseStart)
+                if (nowTime > _dopPauseStart)                                       //check if necessary take dop pause
                 {
-                    //add dop pause to main pause
-                    int dop = rnd.Next(DopPauseRange.Start, DopPauseRange.End);
-                    mainPause += dop;
-                    dopPauseStart = nowTime + DopPause; //update timestamp for next time
+                    int dop = rnd.Next(DopPauseRange.Start, DopPauseRange.End);   
+                    resPause += dop;                                                //just add dop pause to main
+                    _dopPauseStart = nowTime + DopPause;                            //update timestamp for dop pause for next time
                     logger.Info("Add dop pause " + dop.ToString());
                 }
-                logger.Info("App pause " + mainPause.ToString());
-                return mainPause;
+                logger.Info("App pause " + resPause.ToString());
+                return resPause;
             }
             catch (Exception ex)
             {
                 logger.Error("GetPause "+ex.Message);
             }
-            return 0;
+            return resPause;
         }
 
-        private void ChangeRange()
-        {
-            ILogger logger = LogManager.GetCurrentClassLogger();
-            try
+        public  RangePause ChangeRange(ObservableCollection<RangePause> pauseRanges, RangePause activePauseRange)
+        {                          
+            if ((pauseRanges.Count>0)&&(activePauseRange!=null))
             {
-                if (Ranges.Count>0)
-                {
-                    int id = ActiveRange.Id;
-                    ActiveRange = Ranges.Where(a => a.Id > ActiveRange.Id)?.FirstOrDefault() ?? null;
-
-                    if (id != ActiveRange.Id)
-                    {
-                        logger.Info("Change main pause Interval " + ActiveRange.Start.ToString() + "-" + ActiveRange.End.ToString());
-                    }
-
-                    if(ActiveRange == null)
-                    {
-                        ActiveRange = Ranges.Last();
-                        logger.Error("Set Last range value " + ActiveRange.Start.ToString() + "-" + ActiveRange.End.ToString());
-                    }
-                }
-                else
-                {
-                    logger.Error("ChangeRange pause ranges = 0");
-                }
-            }catch(Exception ex)
-            {
-                logger.Error("ChangeRange" + ex.Message);
-                ActiveRange = stockRange;
-                logger.Error("Set Last range value "+ActiveRange.Start.ToString()+"-"+ActiveRange.End.ToString());
-            }            
+                RangePause resRange = pauseRanges.Where(a => a.Id > activePauseRange.Id)?.FirstOrDefault() ?? pauseRanges.Last();
+                return resRange;
+            }
+            return null;                   
         }
 
         public void CheckPauses()
         {
             if(ActiveRange == null)
             {
-                ActiveRange = new RangePause() { Id = 0, Start = 10, End = 11 };
+                ActiveRange = _stockRange;
             }
             if (DopPauseRange == null)
             {
-                DopPauseRange = new RangePause() { Id = 0, Start = 10, End = 11 };
+                DopPauseRange = _stockRange;
             }
             if(Ranges == null)
             {

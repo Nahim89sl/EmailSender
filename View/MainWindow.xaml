@@ -1051,6 +1051,10 @@
 
                 </Grid>
             </TabItem>
+
+            <TabItem Name="tab6" Header="Telegram">
+                <ContentControl Content="{StaticResource Telega}"/>
+            </TabItem>
         </TabControl>
 
 

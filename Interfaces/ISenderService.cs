@@ -11,6 +11,7 @@ namespace EmailSender.Interfaces
         //string Send(string fromName, string fromMail, string resaiverName, string resaiverMail, string hiddenName, string hiddenMail, string textMail, string subject);
         Task<bool> Authentification(Akkaunt mailServer);
         Task SendAsync(Akkaunt mailServer, Receiver receiver, string subject, string mailText);
+        Task SendAsync(Akkaunt mailServer, Receiver receiver, Letter letter);
         bool ValidateReceiver(Receiver receiver);
     }
 }

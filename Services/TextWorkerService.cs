@@ -10,6 +10,15 @@ namespace EmailSender.Services
     public class TextWorkerService : ITextWorker
     {
 
+        public Letter LetterRandomizeText(Receiver receiver, Letter letter)
+        {
+            Letter resLetter = new Letter();
+            resLetter.Subject = TextConverter(receiver, letter.Subject);
+            resLetter.Text = TextConverter(receiver, letter.Text);
+            return resLetter;
+        }
+        
+        
         public string TextConverter(Receiver receiver, string text) 
         {
             
