@@ -983,8 +983,9 @@ namespace EmailSender.ViewModel
                             {
                                 ReaderModel.NextReadInt = TUnix.Timestamp() + ReaderModel.RederPauseInterval;
                             });
-                            logger.Info("Read mails");
+                            logger.Info("Start read mails");
                             ExecuteReadMail();
+                            logger.Info("Finished read mails");
                         }
                         Thread.Sleep(5000);
                     }

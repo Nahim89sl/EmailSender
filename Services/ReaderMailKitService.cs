@@ -23,6 +23,7 @@ namespace EmailSender.Services
         private ImapClient client;
         private IMailFolder folderRead;
         private IMailFolder folderTrash;
+
         public ReaderMailKitService()
         {
             logger = LogManager.GetCurrentClassLogger();
@@ -70,11 +71,13 @@ namespace EmailSender.Services
                 if (delLetter)
                 {
                     client.Inbox.MoveTo(uidMail, folderTrash);
+                    logger.Info(letter.Subject + "move to Trash");
                 }
                 else
                 {
                     client.Inbox.MoveTo(uidMail, folderRead);
                     answerReceivers.Add(letter);
+                    logger.Info(letter.Subject + "move to Read");
                 }
                 k++;
                 if (k > 300) { break; }
@@ -147,6 +150,8 @@ namespace EmailSender.Services
             } 
             return "";
         }
+        
+        
         private bool FilterText(string text, string stopWords)
         {
             Regex rgx = new Regex(stopWords);
@@ -157,5 +162,6 @@ namespace EmailSender.Services
             }
             return false;    
         }
+
     }
 }

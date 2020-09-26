@@ -950,34 +950,6 @@
                             Content="{Binding ReaderModel.NextTimeRead}"
                         />
 
-                        <Label
-                            Grid.Row="6"
-                            Grid.Column="0"
-                            Content="Телеграм бот"
-                        />
-
-                        <TextBox
-                            Height="20"
-                            Width="200" 
-                            Grid.Row="6"
-                            Grid.Column="1"
-                            Text="{Binding Telegram.TgApiKey}"                           
-                        />
-
-                        <Label
-                            
-                            Grid.Row="7"
-                            Grid.Column="0"
-                            Content="Абонент для бота"
-                        />
-
-                        <TextBox
-                            Height="20"
-                            Width="200" 
-                            Grid.Row="7"
-                            Grid.Column="1"
-                            Text="{Binding Telegram.TgIdUser}"                           
-                        />
 
                     </Grid>
 
