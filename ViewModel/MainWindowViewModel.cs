@@ -103,9 +103,6 @@ namespace EmailSender.ViewModel
             }
         }
 
-        //text of email
-        private string _Subject;
-        private string _EmailText;
 
         //Property for fields mapping
         private FieldMapping fieldMapping;
@@ -121,13 +118,13 @@ namespace EmailSender.ViewModel
             }
         }
 
-        //Telegramm
+       /* //Telegramm
         private Telegram telegram;
         public Telegram Telegram
         {
             get { return telegram; }
             set { Set(()=>Telegram,ref telegram,value); }
-        }
+        }*/
         //Answer
         private Answer answer;
         public Answer Answer
@@ -135,35 +132,7 @@ namespace EmailSender.ViewModel
             get { return answer; }
             set { Set(()=>Answer,ref answer,value); }
         }
-        //letter fields
-        public string Subject
-        {
-            get
-            {
-                return _Subject;
-            }
-            set
-            {
-                _Subject = value;
-                Settings.Subject = value;
-                _settingsService.Save(Settings);
-            }
-        }
-        public string EmailText
-        {
-            get
-            {
-                return _EmailText;
-            }
-            set
-            {
-                _EmailText = value;
-                Settings.EmailText = value;
-                _settingsService.Save(Settings);
-            }
-        }
 
-        //--end letter fields
 
         public bool StopToken;      
 
@@ -245,6 +214,17 @@ namespace EmailSender.ViewModel
             set { 
                 Set(() => IsStartRead, ref isStartRead, value);
                 Settings.IsStartRead = value;
+            }
+        }
+        //point of starting send service with start app
+        private bool _isStartSend;
+        public bool IsStartSend
+        {
+            get { return _isStartSend; }
+            set
+            {
+                Set(() => IsStartSend, ref _isStartSend, value);
+                Settings.IsStartSend = value;
             }
         }
 
@@ -379,59 +359,9 @@ namespace EmailSender.ViewModel
             _ReaderLetters = ServiceLocator.Current.GetInstance<IReaderLetter>();
 
             logger = LogManager.GetCurrentClassLogger();
-            logger.Info("App 8.6.006 started");
-            OurMails = new ObservableCollection<Receiver>();
-            Settings = _settingsService.Load();
-            validate = true;
-
-
-            Akkaunt = Settings.Akkaunt;
-            Pauses = Settings.Pauses;
-            FieldMapping = Settings.FieldMapping;
-            Telegram = Settings.Telegram;
-            Answer = Settings.Answer;
-            ReaderModel = Settings.ReaderModel;
-            LetterTemplate = Settings.LetterTemplate;
-
-
-
-            _Subject = Settings.Subject;
-            _EmailText = Settings.EmailText;
-            ReceiversListPath = Settings.ReceiversListPath;
-            OurMailsListPath = Settings.OurMailsListPath;
-
-            //restore list of receivers
-            if (File.Exists(Settings.ReceiversListPath))
-            {
-                ReceiversListPath = Settings.ReceiversListPath;
-                Receivers = _fileService.Open(ReceiversListPath, FieldMapping);
-            }
-            else
-            {
-                ReceiversListPath = "";
-                Receivers = new ObservableCollection<Receiver>();
-            }
-
-            //restore list of our mails
-            if (File.Exists(Settings.OurMailsListPath))
-            {
-                
-                OurMailsListPath = Settings.OurMailsListPath;
-                _ourMailsService.LoadAsync(Settings.OurMailsListPath, OurMails);
-            }
-            else
-            {
-                OurMailsListPath = "";
-            }
+            logger.Info("App 8.7.008 started");
+            LoadAppSettings();
             logger.Info("Settings were loaded");
-            //restore list of ranges
-            if (!File.Exists(Pauses.RangePath))
-            {
-                Pauses.ActiveRange = new RangePause();
-                Pauses.Ranges = new ObservableCollection<RangePause>();
-            }
-
-           
 
             LoadReseiversCommand = new RelayCommand(ExecudeLoadResaivers);
             StartSendingCommand = new RelayCommand(ExecutStartSend, CanExecutStartSend);
@@ -449,16 +379,11 @@ namespace EmailSender.ViewModel
             StartReaderServiceCommand = new RelayCommand(ExecuteStartReaderService, CanExecuteStartReaderService);
             StopReaderServiceCommand = new RelayCommand(ExecuteStopReaderService, CanExecuteStopReaderService);
             SendMailCommand = new RelayCommand(ExecuteSendMail, CanExecuteSendMail);
-            Akkaunt.Status = "";
 
-            IsStartRead = Settings.IsStartRead;
-            IsStartValidate = Settings.IsStartValidate;
-           
-            ReaderModel.IsReadNow = "wait reading";
-            hiddenSend = 0;
-            ourSend = 0;
-            StopReadTocken = false;
-            Pauses.CheckPauses();
+            if (IsStartSend)
+            {
+                ExecutStartSend();
+            }
         }
 
         private async void ExecuteLoadOurMialsAsync()
@@ -468,7 +393,7 @@ namespace EmailSender.ViewModel
                 if (_dialogService.OpenFileDialog() == true)
                 {
                     OurMails.Clear();
-                    _ourMailsService.LoadAsync(_dialogService.FilePath, OurMails);
+                    OurMails =_ourMailsService.LoadAsync(_dialogService.FilePath);
                     OurMailsListPath = _dialogService.FilePath;
                     RaisePropertyChanged(() => OurMails);
                     RaisePropertyChanged(() => OurMailsListPath);
@@ -539,6 +464,7 @@ namespace EmailSender.ViewModel
                 logger.Error("ExecudeLoadResaivers " + ex.Message);
             }            
         }
+        
         //start sending our mails
         public async void ExecutStartSend()
         {
@@ -550,18 +476,21 @@ namespace EmailSender.ViewModel
 
             if (IsStartValidate)
             {
+                logger.Info($"Start ExecudeStartValidateAsync command");
                 ExecudeStartValidateAsync();
+
             }
             if (IsStartRead)
             {
+                logger.Info($"Start ExecudeStartValidateAsync command");
                 ExecuteStartReaderService();
             }
-            if ((Subject == "") || (EmailText == ""))
+
+            if ((letterTemplate.Subject == "") || (LetterTemplate.Text == ""))
             {
                 MessageBox.Show("Проверьте правильность заполнения темы и текста отправляемого письма");
                 return;
             }
-
 
             try
             {
@@ -581,6 +510,7 @@ namespace EmailSender.ViewModel
             {
                 await Task.Run(async () =>
                 {
+                    int sendedMailsCounters = 0;
                     
                     while (StopToken)
                     {
@@ -641,11 +571,15 @@ namespace EmailSender.ViewModel
                                 try
                                 {
                                     p = Pauses.GetPause();
+
                                 }catch(Exception ex)
                                 {
                                     logger.Error("GetPause "+ex.Message);
-                                }                                
+                                }
+
+                                logger.Info($"start after uor mail send pause {p}");
                                 Thread.Sleep(p * 1000);
+                                logger.Info($"Finished pause");
                             }
                             
                             //send mail
@@ -658,6 +592,7 @@ namespace EmailSender.ViewModel
                             logger.Info("Akkaunt status " + Akkaunt.Status);
                             logger.Info("Sended to " + receiver.Email);                            
                             receiver.StatusSend = "SENDED";
+                            sendedMailsCounters++;
                             //get pause
                             int pause = 10;
                             try
@@ -672,13 +607,22 @@ namespace EmailSender.ViewModel
                             DispatcherHelper.CheckBeginInvokeOnUI(() => {
                                 LabelStatus = "Pause "+pause.ToString();                                
                             });
+
+                            logger.Info( $"start pause {pause}");
                             Thread.Sleep(pause * 1000);
+                            logger.Info($"Finish pause");
 
                             try
                             {
-                                await Task.Run(() => {
-                                    _fileService.SaveChanges(ReceiversListPath, receiver, FieldMapping);
-                                });
+                                //will sqve send list per some period
+                                if (sendedMailsCounters > 30)
+                                {
+                                    sendedMailsCounters = 0;
+                                    logger.Info("Resave send list");
+                                    Task.Run(() => {
+                                        _fileService.SaveChanges(ReceiversListPath, receiver, FieldMapping);
+                                    });
+                                }
                             }
                             catch(Exception ex)
                             {
@@ -711,6 +655,7 @@ namespace EmailSender.ViewModel
             }
             return true;
         }
+        
         //Stop sending mails
         private void ExecutStopSend()
         {
@@ -725,18 +670,11 @@ namespace EmailSender.ViewModel
                 logger.Error("ExecutStopSend " + ex.Message);
             }            
         }
-        private bool  CanExecutStopSend()
+        private bool CanExecutStopSend()
         {
             return StopToken;
         }
-        public void ExecuteShowMessage()
-        {
-            MessageBox.Show("Message");
-        }
-        public bool CanExecuteShowMessage()
-        {
-            return true;
-        }
+        
         //Check authorisation of akkaunt
         private void ExecudeCheckAkkaunt()
         {
@@ -760,6 +698,7 @@ namespace EmailSender.ViewModel
         {
             return true;
         }
+
         //load reanges for pauses
         private void ExecudeLoadRanges()
         {
@@ -804,8 +743,8 @@ namespace EmailSender.ViewModel
                 IdReceiver = 0,
                 PersonName = "PersonName",
             };
-            string subject = _textRandomize.TextConverter(testReceiver, Subject);
-            string mailText = _textRandomize.TextConverter(testReceiver, EmailText);
+            string subject = _textRandomize.TextConverter(testReceiver, LetterTemplate.Subject);
+            string mailText = _textRandomize.TextConverter(testReceiver, LetterTemplate.Text);
             await _sendService.SendAsync(Akkaunt, testReceiver, subject, mailText);
             RaisePropertyChanged(() => Akkaunt);
             TestEmailStatus = "Sended";
@@ -819,74 +758,7 @@ namespace EmailSender.ViewModel
             }
             return false;
         }
-        //Read Mails 
-        private void ExecuteReadMail()
-        {
-            try
-            {
-                DispatcherHelper.CheckBeginInvokeOnUI(() => {
-                    ReaderModel.LastTimeRead = DateTime.Now.ToString("dd.MM.yyyy HH:mm");
-                    StartReadMailCommand.RaiseCanExecuteChanged();
-                    ReaderModel.NextReadInt = TUnix.Timestamp() + ReaderModel.RederPauseInterval;
-                    ReaderModel.NextTimeRead = TUnix.TimeStamToStr(ReaderModel.NextReadInt);
-                    ReaderModel.IsReadNow = "Reading";
-                    StartReadMailCommand.RaiseCanExecuteChanged();
-                });
-                Task.Run(async () => {
-                    LettersAnsw = _ReaderLetters.ReadMails(Akkaunt, ReaderModel.StopWords);
-                    foreach (var letter in LettersAnsw)
-                    {
-                        Receiver receiverAns = Receivers.Where(a => a.Email == letter.EmailSender).FirstOrDefault();
-                        if (receiverAns != null)
-                        {
-                            //update status of receiver
-                            DispatcherHelper.CheckBeginInvokeOnUI(() => {
-                                receiverAns.StatusSend = "answered";
-                            });
-                            letter.Id = receiverAns.IdReceiver;
-                            //send answer to receiver
-                            if (ReaderModel.CanSendAnswer)
-                            {
-                                await _sendService.SendAsync(Akkaunt, receiverAns, _textRandomize.TextConverter(receiverAns, ReaderModel.AnswerLetter.Subject), _textRandomize.TextConverter(receiverAns, ReaderModel.AnswerLetter.Text));
-                                logger.Info("Send answer to " + receiverAns.Email);
-                            }
-                        }
-                    }
-                    //save changes to files
-                    ReaderModel.ReportFilePath1 = ReaderModel.ReportFolder1 + "\\Report_" + Akkaunt.Domen + ".xlsx";
-                    ReaderModel.ReportFilePath2 = ReaderModel.ReportFolder2 + "\\Report_" + Akkaunt.Domen + ".xlsx";
-                    _fileService.AddToReport(ReaderModel.ReportFilePath1, LettersAnsw);
-                    _fileService.AddToReport(ReaderModel.ReportFilePath2, LettersAnsw);
-                    _fileService.Save(ReceiversListPath, Receivers, FieldMapping);
-                    DispatcherHelper.CheckBeginInvokeOnUI(() =>
-                    {
-                        ReaderModel.IsReadNow = "wait for reading";
-                        StartReadMailCommand.RaiseCanExecuteChanged();
-                    });
-                });
-            }
-            catch (Exception ex)
-            {
-                logger.Error("ExecuteReadMail " + ex.Message);
-            }
-        }
-
-        private bool CanExecuteReadMail()
-        {
-            if(ReaderModel.IsReadNow == "Reading")
-            {
-                return false;
-            }
-            return true;
-        }
-        private void ExecuteStopReadMail()
-        {
-
-        }
-        private bool CanExecuteStopReadMail()
-        {
-            return true;
-        }
+      
         //clear app's settings
         private void ExecuteClearSettings()
         {
@@ -961,10 +833,102 @@ namespace EmailSender.ViewModel
             return validate;
         }
 
+        //Read Mails 
+        private void ExecuteReadMail()
+        {
+            if (ReaderModel.StopWords.Length < 5)
+            {
+                MessageBox.Show("Настройки Стоп слов введены неверно. Проверьте их правильность");
+                return;
+            }
+            
+            
+            logger.Info($"Start Read command");
+            try
+            {
+                DispatcherHelper.CheckBeginInvokeOnUI(() => {
+                    ReaderModel.LastTimeRead = DateTime.Now.ToString("dd.MM.yyyy HH:mm");
+                    ReaderModel.NextReadInt = TUnix.Timestamp() + ReaderModel.RederPauseInterval;
+                    ReaderModel.NextTimeRead = TUnix.TimeStamToStr(ReaderModel.NextReadInt);
+                    ReaderModel.IsReadNow = "Reading";
+                    StartReadMailCommand.RaiseCanExecuteChanged();
+                });
+                Task.Run(async () => {
+                    LettersAnsw = _ReaderLetters.ReadMails(Akkaunt, ReaderModel.StopWords);
+                    foreach (var letter in LettersAnsw)
+                    {
+                        Receiver receiverAns = Receivers.Where(a => a.Email == letter.EmailSender).FirstOrDefault();
+                        if (receiverAns != null)
+                        {
+                            //update status of receiver
+                            DispatcherHelper.CheckBeginInvokeOnUI(() => {
+                                receiverAns.StatusSend = "answered";
+                            });
+                            letter.Id = receiverAns.IdReceiver;
+                            //send answer to receiver
+                            if (ReaderModel.CanSendAnswer)
+                            {
+                                await _sendService.SendAsync(Akkaunt, receiverAns, _textRandomize.TextConverter(receiverAns, ReaderModel.AnswerLetter.Subject), _textRandomize.TextConverter(receiverAns, ReaderModel.AnswerLetter.Text));
+                                logger.Info("Send answer to " + receiverAns.Email);
+                            }
+                        }
+                    }
+                    //save changes to files
+                    try
+                    {
+                        ReaderModel.ReportFilePath1 = ReaderModel.ReportFolder1 + "\\Report_" + Akkaunt.Domen + ".xlsx";
+                        ReaderModel.ReportFilePath2 = ReaderModel.ReportFolder2 + "\\Report_" + Akkaunt.Domen + ".xlsx";
+                        _fileService.AddToReport(ReaderModel.ReportFilePath1, LettersAnsw);
+                        _fileService.AddToReport(ReaderModel.ReportFilePath2, LettersAnsw);
+                        _fileService.Save(ReceiversListPath, Receivers, FieldMapping);
+                        logger.Info("Finish reading, save results ");
+                        DispatcherHelper.CheckBeginInvokeOnUI(() =>
+                        {
+                            ReaderModel.IsReadNow = "wait for reading";
+                            StartReadMailCommand.RaiseCanExecuteChanged();
+                        });
+                    }
+                    catch (Exception ex)
+                    {
+                        logger.Error("ExecuteReadMail Save report" + ex.Message);
+                        DispatcherHelper.CheckBeginInvokeOnUI(() =>
+                        {
+                            ReaderModel.IsReadNow = ex.Message;
+                            StartReadMailCommand.RaiseCanExecuteChanged();
+                        });
+                    }
+
+                });
+            }
+            catch (Exception ex)
+            {
+                logger.Error("ExecuteReadMail " + ex.Message);
+            }
+        }
+        private bool CanExecuteReadMail()
+        {
+            if (ReaderModel.IsReadNow == "Reading")
+            {
+                return false;
+            }
+            return true;
+        }
+        private void ExecuteStopReadMail()
+        {
+
+        }
+        private bool CanExecuteStopReadMail()
+        {
+            return true;
+        }
+
+
+        //read mail servece
         private void ExecuteStartReaderService()
         {
             try
             {
+                logger.Info("Start reading service");
                 DispatcherHelper.CheckBeginInvokeOnUI(() =>
                 {
                     StopReadTocken = true;
@@ -990,9 +954,10 @@ namespace EmailSender.ViewModel
                         Thread.Sleep(5000);
                     }
                 });
-            }catch(Exception ex)
+            }
+            catch(Exception ex)
             {
-                logger.Error(ex.Message);
+                logger.Error("ExecuteStartReaderService " + ex.Message);
             }
         }
         private bool CanExecuteStartReaderService()
@@ -1017,6 +982,94 @@ namespace EmailSender.ViewModel
         {
             return StopReadTocken;
         }
-    
+
+        private void LoadAppSettings()
+        {
+
+            Settings = _settingsService.Load();
+
+            validate = true;
+
+            if (Settings.Akkaunt == null)
+            {
+                Akkaunt = new Akkaunt();
+            }
+            else
+            {
+                Akkaunt = Settings.Akkaunt;
+                Akkaunt.Status = "";
+                Settings.Akkaunt = Akkaunt;
+            }
+
+            if (Settings.Pauses == null)
+            {
+                Pauses = new Pauses();
+                Settings.Pauses = new Pauses();
+            }
+            else
+            {
+                Pauses = Settings.Pauses;
+                //restore list of ranges
+                if (!File.Exists(Pauses.RangePath))
+                {
+                    Pauses.ActiveRange = new RangePause();
+                    Pauses.Ranges = new ObservableCollection<RangePause>();
+                }
+
+            }
+            Pauses.CheckPauses();
+
+            if(Settings.FieldMapping == null) Settings.FieldMapping = new FieldMapping();
+            FieldMapping = Settings.FieldMapping;
+
+            //if (Settings.Telegram == null) Settings.Telegram = new Telegram();
+            //Telegram = Settings.Telegram;
+
+            if (Settings.Answer == null) Settings.Answer = new Answer();
+            Answer = Settings.Answer;
+
+            if (Settings.ReaderModel == null) Settings.ReaderModel = new ReaderModel();
+            ReaderModel = Settings.ReaderModel;
+
+            if (Settings.LetterTemplate == null) Settings.LetterTemplate = new Letter();
+            LetterTemplate = Settings.LetterTemplate;
+
+            //restore list of receivers
+            ReceiversListPath = Settings.ReceiversListPath;
+            if (File.Exists(Settings.ReceiversListPath))
+            {
+                ReceiversListPath = Settings.ReceiversListPath;
+                Receivers = _fileService.Open(ReceiversListPath, FieldMapping);
+            }
+            else
+            {
+                ReceiversListPath = "";
+                Receivers = new ObservableCollection<Receiver>();
+            }
+            //restore list of our mails
+            OurMailsListPath = Settings.OurMailsListPath;
+
+            if (File.Exists(Settings.OurMailsListPath))
+            {
+                OurMailsListPath = Settings.OurMailsListPath;
+                OurMails = _ourMailsService.LoadAsync(Settings.OurMailsListPath);
+            }
+            else
+            {
+                OurMailsListPath = "";
+                OurMails = new ObservableCollection<Receiver>();
+            }
+            
+            IsStartRead = Settings.IsStartRead;
+            IsStartValidate = Settings.IsStartValidate;
+            IsStartSend = Settings.IsStartSend;
+
+            ReaderModel.IsReadNow = "Wait for reading";
+            hiddenSend = 0;
+            ourSend = 0;
+            StopReadTocken = false;
+        }
+
+
     }
 }

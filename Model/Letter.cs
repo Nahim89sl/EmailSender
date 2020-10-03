@@ -7,7 +7,15 @@ namespace EmailSender.Model
 {
     public class Letter : ObservableObject
     {
-		private string subject;
+
+        public Letter()
+        {
+            Subject = "";
+            Text = "";
+        }
+
+
+        private string subject;
 		public string Subject
 		{
 			get { return subject; }
@@ -18,7 +26,10 @@ namespace EmailSender.Model
 		public string Text
 		{
 			get { return text; }
-			set { Set(() => Text, ref text, value); }
+            set
+            {
+                Set(() => Text, ref text, value);
+            }
 		}
 
         private string emailSender;

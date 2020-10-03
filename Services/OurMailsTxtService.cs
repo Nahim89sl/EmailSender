@@ -5,21 +5,24 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.IO;
 using System.Text;
+using System.Threading.Tasks;
 
 namespace EmailSender.Services
 {
     class OurMailsTxtService : IOurMails
     {
-        public async void LoadAsync(string path, ObservableCollection<Receiver> receivers)
+        public  ObservableCollection<Receiver> LoadAsync(string path)
         {
-            using (StreamReader sr = new StreamReader(path, System.Text.Encoding.UTF8))
+            var receivers = new ObservableCollection<Receiver>();
+            if (File.Exists(path))
             {
-                string line;
-                while ((line = await sr.ReadLineAsync()) != null)
+                var lines = File.ReadAllLines(path);
+                foreach (var line in lines)
                 {
                     receivers.Add(new Receiver() { Email = line, Count = 0 });
                 }
             }
+            return receivers;
         }
     }
 }

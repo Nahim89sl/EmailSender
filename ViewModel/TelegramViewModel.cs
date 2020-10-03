@@ -21,7 +21,6 @@ namespace EmailSender.ViewModel
             get { return receiverId; }
             set { receiverId = value; }
         }
-        
 
         public TelegramViewModel()
         {

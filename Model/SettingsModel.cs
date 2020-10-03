@@ -7,23 +7,9 @@ namespace EmailSender.Model
 {
     public class SettingsModel
     {
-       public SettingsModel()
-        {
-            Pauses = new Pauses();
-            Akkaunt = new Akkaunt();
-            FieldMapping = new FieldMapping();
-            Answer = new Answer();
-            ReaderModel = new ReaderModel();
-            Telegram = new Telegram();
-        }
 
-
-
-        public string SenderListPath { get; set; }
         public string OurMailsListPath { get; set; }
         public string OurReceiversListPath { get; set; }
-        public string Subject { get; set; }
-        public string EmailText { get; set; }
         public string ReceiversListPath { get; set; }
    
         public Pauses Pauses { set; get; }
@@ -35,14 +21,10 @@ namespace EmailSender.Model
         public Letter LetterTemplate { get; set; }
 
 
-        //read mails
-        public int RederPauseInterval { get; set; }
-        public string LastReadTime { get; set; }
-        public string ReportFilePath { get; set; }
-
-
         public bool IsStartValidate { get; set; }
         public bool IsStartRead { get; set; }
+        public bool IsStartSend { get; set; }
+
     }
 
 

@@ -78,7 +78,6 @@ namespace EmailSender.Model
                 
         }
         
-        
 
         public int GetPause()
         {

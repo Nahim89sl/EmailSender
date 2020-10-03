@@ -7,7 +7,7 @@
              mc:Ignorable="d" 
              xmlns:model="clr-namespace:EmailSender.ViewModel"
              DataContext="{DynamicResource telega}"
-             d:DesignHeight="100" d:DesignWidth="200">
+             d:DesignHeight="300" d:DesignWidth="300">
     <UserControl.Resources>
         <model:TelegramViewModel x:Key="telega"/>
     </UserControl.Resources>
@@ -25,5 +25,18 @@
         <TextBox 
             Text="{Binding ReceiverId}"              
         />
+
+        <CheckBox 
+            Margin="7"
+            IsChecked="False"
+            Content="Окончание списка рассылкии" 
+            />
+
+
+        <CheckBox 
+            Margin="7"
+            IsChecked="False"
+            Content="Проблема с сервером" 
+            />
     </StackPanel>
 </UserControl>

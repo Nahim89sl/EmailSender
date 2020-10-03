@@ -8,6 +8,6 @@ namespace EmailSender.Interfaces
 {
     public interface IOurMails
     {
-        void LoadAsync(string path, ObservableCollection<Receiver> receivers);
+        ObservableCollection<Receiver> LoadAsync(string path);
     }
 }

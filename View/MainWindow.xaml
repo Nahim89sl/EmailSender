@@ -39,67 +39,68 @@
                         <RowDefinition Height="60"/>
                     </Grid.RowDefinitions>
                     <Grid.ColumnDefinitions>
-                        <ColumnDefinition/>
-                        <ColumnDefinition/>
-                        <ColumnDefinition/>
-                        <ColumnDefinition/>
-                        <ColumnDefinition/>
+                        <ColumnDefinition Width="158*"/>
+                        <ColumnDefinition Width="136*"/>
+                        <ColumnDefinition Width="23*"/>
+                        <ColumnDefinition Width="158*"/>
+                        <ColumnDefinition Width="158*"/>
+                        <ColumnDefinition Width="158*"/>
                     </Grid.ColumnDefinitions>
 
                     <Label
                             Content="Настройки аккаунта"
-                            Grid.Column="0" Grid.ColumnSpan="2"                           
+                            Grid.Column="0" Grid.ColumnSpan="4" Margin="0,0,158,26" Grid.RowSpan="2"                           
                         />
 
                     <Label
                             Content="Логин"
-                            Grid.Column="0" Grid.Row="1"                          
+                            Grid.Column="0" Grid.Row="1" Margin="0,0,0,26" Grid.RowSpan="2"                          
                         />
                     <TextBox 
                             Grid.Column="1"  
                             Grid.Row="1"  
                             Text="{Binding Akkaunt.Login}" 
-                            Width="150"
+                            Width="150" Grid.ColumnSpan="2" Margin="5,0,4,26" Grid.RowSpan="2"
                          />
 
                     <Label
                             Content="Пароль"
-                            Grid.Column="0" Grid.Row="2"                          
+                            Grid.Column="0" Grid.Row="2" Margin="0,0,0,26" Grid.RowSpan="2"                          
                         />
                     <TextBox
                             Grid.Column="1"  
                             Grid.Row="2"  
                             Text="{Binding Akkaunt.Pass}"
-                            Width="150"
+                            Width="150" Grid.ColumnSpan="2" Margin="5,0,4,26" Grid.RowSpan="2"
                          />
                     <Label
                             Content="Домен"
-                            Grid.Column="0" Grid.Row="3"                          
+                            Grid.Column="0" Grid.Row="3" Margin="0,0,0,30" Grid.RowSpan="2"                          
                         />
                     <TextBox
                             Grid.Column="1"
                             Grid.Row="3"
                             Text="{Binding Akkaunt.Domen}"
-                            Width="150"
+                            Width="150" Grid.ColumnSpan="2" Margin="5,0,4,30" Grid.RowSpan="2"
                          />
 
 
 
 
                     <Button 
-                      Grid.Column="2"
+                      Grid.Column="3"
                       Grid.Row="1"
                       Content="Проверка аккаунта"
-                      Command="{Binding CheckAkkauntCommand}"
+                      Command="{Binding CheckAkkauntCommand}" Margin="0,0,0,26" Grid.RowSpan="2"
                     />
                     <Label
                             Content="{Binding Akkaunt.Status}"
-                            Grid.Column="3" Grid.Row="2"                          
+                            Grid.Column="3" Grid.Row="2" Grid.ColumnSpan="3" Margin="158,0,158,26" Grid.RowSpan="2"                          
                         />
 
 
 
-                    <StackPanel Orientation="Horizontal" Grid.Row="4" Grid.ColumnSpan="4">
+                    <StackPanel Orientation="Horizontal" Grid.Row="4" Grid.ColumnSpan="6" Margin="0,0,158,30" Grid.RowSpan="2">
                         <Label Content="{Binding CurrentReceiver.IdReceiver}"/>
                         <Label Content="из"/>
                         <Label Content="{Binding Receivers.Count}"/>
@@ -113,47 +114,47 @@
                     <ProgressBar
                         Grid.Row="5"
                         Grid.Column="0"
-                        Grid.ColumnSpan="4"
+                        Grid.ColumnSpan="6"
                         Maximum="{Binding Receivers.Count}"
                         Minimum="1"
-                        Value="{Binding CurrentReceiver.IdReceiver}"
+                        Value="{Binding CurrentReceiver.IdReceiver}" Margin="0,0,158,30" Grid.RowSpan="2"
                         />
 
                     <Button 
-                        Grid.Column="4"
+                        Grid.Column="5"
                         Grid.Row="6"
                         Content="Старт"
-                        Command="{Binding StartSendingCommand}"
+                        Command="{Binding StartSendingCommand}" Margin="0,0,0,30" Grid.RowSpan="2"
                     />
 
                     <Button
                        Grid.Column="3"
                        Grid.Row="6"
                        Content="Стоп"
-                       Command="{Binding StopSendingCommand}"
+                       Command="{Binding StopSendingCommand}" Grid.ColumnSpan="3" Margin="158,0,158,30" Grid.RowSpan="2"
                     />
 
                     <Label
                         Grid.Row="0"
-                        Grid.Column="4"
-                        Content="Ящик для теста отправки"
+                        Grid.Column="5"
+                        Content="Ящик для теста отправки" Margin="0,0,0,26" Grid.RowSpan="2"
                         />
 
                     <TextBox
                         Grid.Row="1"
-                        Grid.Column="4"
-                        Text="{Binding TestEmail}"
+                        Grid.Column="5"
+                        Text="{Binding TestEmail}" Margin="0,0,0,26" Grid.RowSpan="2"
                         />
                     <Button
-                       Grid.Column="4"
+                       Grid.Column="5"
                        Grid.Row="2"
                        Content="Send"
-                       Command="{Binding SendMailCommand}"
+                       Command="{Binding SendMailCommand}" Margin="0,0,0,26" Grid.RowSpan="2"
                     />
                     <Label
                         Grid.Row="3"
-                        Grid.Column="4"
-                        Content="{Binding TestEmailStatus}"
+                        Grid.Column="5"
+                        Content="{Binding TestEmailStatus}" Margin="0,0,0,30" Grid.RowSpan="2"
                         />
 
                     <CheckBox 
@@ -162,13 +163,12 @@
                         x:Name="IsValidateCheckBox" 
                         IsChecked="{Binding IsStartValidate}" 
                         Height="20"
-                        Content="Валидировать" />
+                        Content="Валидировать" Margin="0,5,0,5" />
 
                     <Button
-                       Grid.Column="1"
                        Grid.Row="7"
                        Content="Validate all list"
-                       Command="{Binding StartValidateCommand}"
+                       Command="{Binding StartValidateCommand}" Grid.ColumnSpan="4" Margin="158,0,158,30" Grid.RowSpan="2"
                     />
 
                     <CheckBox 
@@ -177,35 +177,44 @@
                         x:Name="IsStartReadCheckBox" 
                         IsChecked="{Binding IsStartRead}" 
                         Height="20"
-                        Content="Читать письма" />
+                        Content="Читать письма" Margin="0,5,0,5" />
+
+                    <CheckBox 
+                        Grid.Row="9"
+                        Grid.Column="0"
+                        x:Name="IsStartSendBox" 
+                        IsChecked="{Binding IsStartSend}"
+                        Height="20"
+                        Content="Слать письма при загрузке" Margin="0,5,0,5" />
+
+
 
                     <Button
                        Grid.Column="0"
-                       Grid.Row="9"
+                       Grid.Row="10"
                         
                        Content="Clear settings"
-                       Command="{Binding ClearSettingsCommand}"
+                       Command="{Binding ClearSettingsCommand}" Margin="0,0,0,60" Grid.RowSpan="2"
                     />
 
                     <Button
-                       Grid.Column="1"
-                       Grid.Row="9"                        
+                       Grid.Row="10"                        
                        Content="Save settings"
-                       Command="{Binding SaverSettingsCommand}"
+                       Command="{Binding SaverSettingsCommand}" Grid.ColumnSpan="4" Margin="158,0,158,60" Grid.RowSpan="2"
                     />
 
                     <Label 
                         Grid.Row="7"
-                        Grid.Column="2"
-                        Grid.ColumnSpan="2"
+                        Grid.Column="3"
+                        Grid.ColumnSpan="3"
                         Content="{Binding ValidateStatus}"    
-                        FontSize="10"
+                        FontSize="10" Margin="0,0,158,30" Grid.RowSpan="2"
                         />
 
 
 
 
-                    <ListView Grid.Row="8" HorizontalAlignment="Center" Grid.Column="2" Grid.ColumnSpan="3" Grid.RowSpan="4" ItemsSource="{Binding Receivers}">
+                    <ListView Grid.Row="8" HorizontalAlignment="Center" Grid.Column="4" Grid.RowSpan="4" ItemsSource="{Binding Receivers}">
                         <ListView.View>
                             <GridView>
                                 <GridViewColumn DisplayMemberBinding="{Binding Path=IdReceiver}">Id</GridViewColumn>
@@ -261,7 +270,7 @@
                         AcceptsReturn="True"
                         HorizontalScrollBarVisibility="Disabled"
                         VerticalScrollBarVisibility="Auto"
-                        Text="{Binding Subject}"
+                        Text="{Binding LetterTemplate.Subject}"
                         />
 
                     <Label
@@ -282,7 +291,7 @@
                         AcceptsReturn="True"
                         HorizontalScrollBarVisibility="Disabled"
                         VerticalScrollBarVisibility="Auto"
-                        Text="{Binding EmailText}"
+                        Text="{Binding LetterTemplate.Text}"
                         />
 
                     <TextBlock Grid.Column="3"
@@ -526,8 +535,8 @@
                         <ColumnDefinition Width="100*" />
                     </Grid.ColumnDefinitions>
 
-                    
-                    
+
+
                     <Label
                         HorizontalContentAlignment="Left"
                         Grid.Row="0"
@@ -720,7 +729,7 @@
                         Grid.Row="12"
                         Grid.Column="2"
                         Content="[Address]"/>
-                    
+
                     <Label
                         Grid.Row="13"
                         Grid.Column="0"
@@ -811,7 +820,7 @@
                                 <GridViewColumn DisplayMemberBinding="{Binding Path=PersonName}">PersonName</GridViewColumn>
                                 <GridViewColumn DisplayMemberBinding="{Binding Path=StatusSend}">Send</GridViewColumn>
                                 <GridViewColumn DisplayMemberBinding="{Binding Path=StatusEmailExist}">Exist</GridViewColumn>
-                                
+
                                 <GridViewColumn DisplayMemberBinding="{Binding Path=FieldInn}">ИНН</GridViewColumn>
                                 <GridViewColumn DisplayMemberBinding="{Binding Path=FieldOkvd}">ОКВЭД</GridViewColumn>
                                 <GridViewColumn DisplayMemberBinding="{Binding Path=FieldDate1}">Дата1</GridViewColumn>
@@ -1023,10 +1032,11 @@
 
                 </Grid>
             </TabItem>
-
+            
             <TabItem Name="tab6" Header="Telegram">
                 <ContentControl Content="{StaticResource Telega}"/>
             </TabItem>
+            
         </TabControl>
 
 

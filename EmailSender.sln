@@ -4,13 +4,16 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 VisualStudioVersion = 16.0.29418.71
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "EmailSender", "EmailSender.csproj", "{D66F0800-25EE-44D0-9187-AF33FDC6D920}"
+	ProjectSection(ProjectDependencies) = postProject
+		{1F677886-169B-4573-8E84-0B8DEDE99967} = {1F677886-169B-4573-8E84-0B8DEDE99967}
+	EndProjectSection
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "EmailSenderTests", "..\EmailSenderTests\EmailSenderTests.csproj", "{489E9AB8-BC1F-4D93-B646-A47D76F40209}"
 	ProjectSection(ProjectDependencies) = postProject
 		{1F677886-169B-4573-8E84-0B8DEDE99967} = {1F677886-169B-4573-8E84-0B8DEDE99967}
 	EndProjectSection
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ReaderMails", "..\ReaderMails\ReaderMails.csproj", "{1F677886-169B-4573-8E84-0B8DEDE99967}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ReaderMails", "..\ReaderMails\ReaderMails.csproj", "{1F677886-169B-4573-8E84-0B8DEDE99967}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

@@ -8,6 +8,7 @@ using System.Collections.ObjectModel;
 using System.IO;
 using System.Linq;
 using System.Net.Mail;
+using System.Runtime.InteropServices.WindowsRuntime;
 using System.Text;
 using System.Windows;
 
@@ -16,9 +17,11 @@ namespace EmailSender.Services
     public class ExelFileService : IFileService
     {
         private Logger logger;
+        private string _lib;
         public ExelFileService()
         {
             logger = LogManager.GetCurrentClassLogger();
+            _lib = "ExelFileServece";
         }
         public ObservableCollection<Receiver> Open(string filename,  FieldMapping FieldMapping)
         {
@@ -50,7 +53,10 @@ namespace EmailSender.Services
                 {
                     var recaiver = new Receiver();
                     recaiver.IdReceiver = i;
-                    recaiver.Email = worksheet?.Cells[FieldMapping.FieldEmail + i.ToString()].Value?.ToString() ?? defValue;                   
+                    recaiver.Email = worksheet?.Cells[FieldMapping.FieldEmail + i.ToString()].Value?.ToString() ?? defValue; 
+                    
+
+
                     recaiver.StatusEmailExist = worksheet?.Cells[FieldMapping.FieldValidateStatus + i.ToString()].Value?.ToString() ?? defValue;
                     recaiver.StatusSend = worksheet?.Cells[FieldMapping.FieldSendingStatus + i.ToString()].Value?.ToString() ?? defValue;                   
                     recaiver.CompanyName = worksheet?.Cells[FieldMapping.FieldOrganizationName + i.ToString()].Value?.ToString() ?? defValue;
@@ -67,14 +73,17 @@ namespace EmailSender.Services
                     recaiver.FieldRecord2 = worksheet?.Cells[FieldMapping.FieldRecord2 + i.ToString()].Value?.ToString() ?? defValue;
                     recaiver.FieldRecord3 = worksheet?.Cells[FieldMapping.FieldRecord3 + i.ToString()].Value?.ToString() ?? defValue;
                     
-                    try
-                    {
-                        recaiver.Email = new MailAddress(recaiver.Email).Address;
-                    }
-                    catch (FormatException)
+                    
+                    //validate email address
+                    var resEmail = ValidateEmailAddress(recaiver.Email);
+                    if (resEmail == "")
                     {
                         recaiver.StatusEmailExist = "Wrong Email";
                         recaiver.StatusSend = "Wrong Email";
+                    }
+                    else
+                    {
+                        recaiver.Email = resEmail;
                     }
 
                     receivers.Add(recaiver);
@@ -148,6 +157,7 @@ namespace EmailSender.Services
             {
                 logger.Error("Report file not exist " + filename);
                 CreateFile(filename);
+                logger.Error("Report created " + filename);
             }
             ExcelPackage.LicenseContext = LicenseContext.NonCommercial;
             using (ExcelPackage excelPackage = new ExcelPackage(file))
@@ -168,7 +178,6 @@ namespace EmailSender.Services
             }
         }
 
-
         private void CreateFile(string filename)
         {
             using (ExcelPackage excelPackage = new ExcelPackage())
@@ -184,5 +193,28 @@ namespace EmailSender.Services
                 excelPackage.SaveAs(fi);
             }
         }
+
+        public string ValidateEmailAddress(string emilAddress)
+        {
+            try
+            {
+                string addr = emilAddress.Replace(" ", "");
+                //check the last symbol . / \
+                var symb = addr.Substring(addr.Length - 1);
+                if ((symb == ".") || (symb == "/") || (symb == "\\"))
+                {
+                    addr = addr.Substring(0, addr.Length - 1);
+                }
+
+                addr = new MailAddress(addr).Address;
+                return addr;
+            }
+            catch (Exception ex)
+            {
+                logger.Error($"{_lib} ValidateEmailAddress {ex.Message}");
+                return "";
+            }
+        }
+
     }
 }
