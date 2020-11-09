@@ -1,0 +1,2 @@
+clientId  844493788198-kcrr94mcvpurq900opvbjc2aue34vfqc.apps.googleusercontent.com
+client secret k5wIlzXRjaEURjP6561Tkn3a

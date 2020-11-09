@@ -1,0 +1,77 @@
+﻿<UserControl x:Class="EmailSender.Views.LetterTemplateView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:local="clr-namespace:EmailSender.Views"
+             mc:Ignorable="d" 
+             xmlns:s="https://github.com/canton7/Stylet"
+             d:DesignHeight="450" d:DesignWidth="800">
+
+    <Grid ShowGridLines="false">
+        <Grid.RowDefinitions>
+            <RowDefinition />
+            <RowDefinition />
+            <RowDefinition />
+            <RowDefinition />
+            <RowDefinition />
+
+        </Grid.RowDefinitions>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="3*" />
+            <ColumnDefinition Width="7*" />
+        </Grid.ColumnDefinitions>
+
+        <StackPanel Grid.Row="0" Grid.Column="0" Grid.RowSpan="5" Orientation="Vertical">
+            <Label Content="Правила ассоциации замен в тексте" HorizontalContentAlignment="Center"/>
+            <Label Content="Email - [Email]" />
+            <Label Content="Название организации - [Company]" />
+            <Label Content="Имя руководителя - [PersonName]"/>
+            <Label Content="ИНН - [Inn]" />
+            <Label Content="ОКВЭД - [Okvd]" />
+            <Label Content="Дата 1 - [Date1]"/>
+            <Label Content="Дата 2 - [Date2]" />
+            <Label Content="Дата 3 - [Date3]"/>
+            <Label Content="Телефон - [Phone]"/>
+            <Label Content="Адрес - [Address]"/>
+            <Label Content="Сумма контракта - [ContractAmount]"/>
+            <Label Content="Номер записи 1 - [Record1]"/>
+            <Label Content="Номер записи 2 - [Record2]"/>
+            <Label Content="Номер записи 3 - [Record3]"/>
+        </StackPanel>
+
+
+        <StackPanel Margin="5"  Grid.Column="1" Grid.Row="0" Grid.RowSpan="2" Orientation="Vertical">
+            <Label Content="Заголовок"/>
+            <TextBox      
+                Height="150"
+                TextWrapping="Wrap"
+                AcceptsReturn="True"
+                HorizontalScrollBarVisibility="Disabled"
+                VerticalScrollBarVisibility="Auto"
+                Text="{Binding Subject}"
+             />
+        </StackPanel>
+
+        <StackPanel Margin="5" Grid.Column="1" Grid.Row="2" Grid.RowSpan="3" Orientation="Vertical">
+            <Label Content="Текст"/>
+            <TextBox      
+                Height="200"
+                TextWrapping="Wrap"
+                AcceptsReturn="True"
+                HorizontalScrollBarVisibility="Disabled"
+                VerticalScrollBarVisibility="Auto"
+                Text="{Binding Text}"
+             />
+        </StackPanel>
+
+    </Grid>
+
+
+
+
+
+
+
+
+</UserControl>

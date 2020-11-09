@@ -1,0 +1,32 @@
+﻿<Window x:Class="EmailSender.Views.MainView"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:EmailSender.Views"
+        mc:Ignorable="d"
+        xmlns:s="https://github.com/canton7/Stylet"
+        Title="EmailSender" Height="450" Width="800">
+    <Grid>
+        <TabControl>
+            <TabItem Header="Main">
+                <ContentControl s:View.Model="{Binding ViewSender}"/>
+            </TabItem>
+            <TabItem Header="Fields">
+                <ContentControl s:View.Model="{Binding FieldMapping}"/>
+            </TabItem>
+            <TabItem Header="Email akkaunt">
+                <ContentControl s:View.Model="{Binding ViewAccount}"/>
+            </TabItem>
+            <TabItem Header="Letter">
+                <ContentControl s:View.Model="{Binding ViewLetterTemplate}"/>
+            </TabItem>
+            <TabItem Header="Reader">
+                <ContentControl s:View.Model="{Binding ViewReader}"/>
+            </TabItem>
+            <TabItem Header="Telegram akkaunt">
+                <ContentControl s:View.Model="{Binding ViewNotification}"/>
+            </TabItem>
+        </TabControl>
+    </Grid>
+</Window>

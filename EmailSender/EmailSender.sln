@@ -1,0 +1,55 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.29418.71
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "EmailSender", "EmailSender.csproj", "{9527D7F4-4A6D-455D-A0C8-E0BBF6CD4243}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ReaderMails", "..\ReaderMails\ReaderMails\ReaderMails.csproj", "{DECA4CE7-79D5-4D2A-B3EB-5AB5D27C7149}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ReaderMailTests", "..\ReaderMails\Tests\ReaderMailTests\ReaderMailTests.csproj", "{49546C31-BF48-44EB-B83C-6823F7F39C79}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "EmailSenderWebTests", "..\EmailSenderWeb\EmailSenderWebTests\EmailSenderWebTests.csproj", "{4DE47754-78EE-4949-ACCD-6491387EE376}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "EmailSenderWeb", "..\EmailSenderWeb\EmailSenderWeb\EmailSenderWeb.csproj", "{B5D21E8D-421B-4633-B788-15DA5E84E2D7}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "EmailSenderTests", "EmailSenderTests\EmailSenderTests.csproj", "{1C59CDAF-D7CB-4B82-A9E0-79905BF3F43F}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{9527D7F4-4A6D-455D-A0C8-E0BBF6CD4243}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{9527D7F4-4A6D-455D-A0C8-E0BBF6CD4243}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{9527D7F4-4A6D-455D-A0C8-E0BBF6CD4243}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{9527D7F4-4A6D-455D-A0C8-E0BBF6CD4243}.Release|Any CPU.Build.0 = Release|Any CPU
+		{DECA4CE7-79D5-4D2A-B3EB-5AB5D27C7149}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{DECA4CE7-79D5-4D2A-B3EB-5AB5D27C7149}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{DECA4CE7-79D5-4D2A-B3EB-5AB5D27C7149}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{DECA4CE7-79D5-4D2A-B3EB-5AB5D27C7149}.Release|Any CPU.Build.0 = Release|Any CPU
+		{49546C31-BF48-44EB-B83C-6823F7F39C79}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{49546C31-BF48-44EB-B83C-6823F7F39C79}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{49546C31-BF48-44EB-B83C-6823F7F39C79}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{49546C31-BF48-44EB-B83C-6823F7F39C79}.Release|Any CPU.Build.0 = Release|Any CPU
+		{4DE47754-78EE-4949-ACCD-6491387EE376}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{4DE47754-78EE-4949-ACCD-6491387EE376}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{4DE47754-78EE-4949-ACCD-6491387EE376}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{4DE47754-78EE-4949-ACCD-6491387EE376}.Release|Any CPU.Build.0 = Release|Any CPU
+		{B5D21E8D-421B-4633-B788-15DA5E84E2D7}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B5D21E8D-421B-4633-B788-15DA5E84E2D7}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B5D21E8D-421B-4633-B788-15DA5E84E2D7}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B5D21E8D-421B-4633-B788-15DA5E84E2D7}.Release|Any CPU.Build.0 = Release|Any CPU
+		{1C59CDAF-D7CB-4B82-A9E0-79905BF3F43F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{1C59CDAF-D7CB-4B82-A9E0-79905BF3F43F}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{1C59CDAF-D7CB-4B82-A9E0-79905BF3F43F}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{1C59CDAF-D7CB-4B82-A9E0-79905BF3F43F}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {A3189D18-B2EF-4B2A-8CB4-9B761B022CE2}
+	EndGlobalSection
+EndGlobal
