@@ -381,7 +381,7 @@ namespace EmailSender.ViewModels
                             var ourReceiver = GetOurMail(receiver);
                             _logger.InfoSender($"Try send to our mail {ourReceiver.Email}");
                             textConv.LetterRandomizeText(ourReceiver, _templateLetter);
-                            await _sender.SendEmail(ourReceiver, new Receiver(), _templateLetter);
+                            await _sender.SendEmail(ourReceiver, new Receiver(), ourReceiver.Letter);
                             ourReceiver.Count++;
                             countToOurMails = 0;
                             CheckStatuses(ourReceiver);
