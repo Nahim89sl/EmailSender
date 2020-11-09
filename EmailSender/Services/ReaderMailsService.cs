@@ -55,15 +55,43 @@ namespace EmailSender.Services
             ObservableCollection<Answer> resList = new ObservableCollection<Answer>();
             foreach (var letter in mailList)
             {
+                
                 resList.Add(new Answer()
                 {
                     From = letter.From.ToString(),
                     Email = letter.From.Mailboxes.First().Address.ToLower(),
                     Subject = letter.Subject.ToString(),
-                    Text = letter.TextBody
+                    Text = GetLetterText(letter)
                 });
             }
             return resList;
+        }
+
+        private string GetLetterText(MimeMessage letter)
+        {
+            try
+            {
+                if ((letter.TextBody != null) && (letter.TextBody.Length > 5))
+                {
+                    return letter.TextBody;
+                }
+
+                if ((letter.HtmlBody != null) && (letter.HtmlBody.Length > 5))
+                {
+                    return letter.HtmlBody;
+                }
+
+                if ((letter.Body != null))
+                {
+                    return letter.GetTextBody(MimeKit.Text.TextFormat.Text);
+                }
+            }
+            catch (Exception ex)
+            {
+                logger.ErrorReader(ex.Message);
+                return "No body";
+            }            
+            return "No body";
         }
     }
 }
