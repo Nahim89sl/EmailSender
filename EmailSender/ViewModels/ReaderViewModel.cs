@@ -101,7 +101,7 @@ namespace EmailSender.ViewModels
         {
             get
             {
-                _textAnswer = _settings.AnswerLetter.Text;
+                _textAnswer = _settings?.AnswerLetter?.Text ?? string.Empty;
                 return _textAnswer;
             }
             set
@@ -116,7 +116,7 @@ namespace EmailSender.ViewModels
         {
             get
             {
-                _subjectLetter = _settings.AnswerLetter.Subject;
+                _subjectLetter = _settings?.AnswerLetter?.Subject ?? string.Empty;
                 return _subjectLetter;
             }
             set
