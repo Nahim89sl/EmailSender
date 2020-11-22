@@ -7,14 +7,7 @@ namespace EmailSender.Models
 {
     public class Receiver : PropertyChangedBase
     {
-        public string Email { get; set; }
-        public string Hidden { get; set; }
-        public string Status { get; set; }
-        public string Time { get; set; }
-        public Letter Letter { get; set; }
-
-
-        private string _statusEmailExist;
+        
         public string statusEmailExist
         {
             get
@@ -27,7 +20,7 @@ namespace EmailSender.Models
             }
         }
 
-        private string _statusSend;
+        
         public string StatusSend
         {
             get
@@ -40,10 +33,16 @@ namespace EmailSender.Models
             }
         }
 
+        private string _statusSend;
+        private string _statusEmailExist;
+        public string Email { get; set; }
+        public string Hidden { get; set; }
+        public string Status { get; set; }
+        public string Time { get; set; }
+        public Letter Letter { get; set; }
 
         public int IdReceiver { get; set; }
         public string Address { get; set; }
-        //public string StatusSend { get; set; }
         public string CompanyName { get; set; }
         public string PersonName { get; set; }
         public string CC { get; set; }

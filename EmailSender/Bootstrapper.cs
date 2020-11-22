@@ -53,7 +53,8 @@ namespace EmailSender
             builder.Bind<AppSettingsModel>().ToFactory(container => settings);
             builder.Bind<IReaderMails>().To<ReaderMailsService>().InSingletonScope();
             builder.Bind<IDialogService>().To<DefaultDialogService>();
-            builder.Bind<ILoadReceivers>().To<ReceiverLoaderExel>();
+            //builder.Bind<ILoadReceivers>().To<ReceiverLoaderExel>();
+            builder.Bind<ILoadReceivers>().To<LoadSaveReceiversSqlite>();
 
             builder.Bind<BindableCollection<Receiver>>().ToFactory(container => new BindableCollection<Receiver>()).InSingletonScope();
 

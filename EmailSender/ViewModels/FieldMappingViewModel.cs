@@ -15,47 +15,12 @@ namespace EmailSender.ViewModels
 {
     public class FieldMappingViewModel : PropertyChangedBase
     {
+        #region Private values
         private FieldMappingSettingsModel fieldSettings;
         private ILoadReceivers _loader;
         private IDialogService _dialogService;
+        private IWindowManager _windMng;
         //private ILogger _logger;
-
-        public FieldMappingViewModel(IContainer ioc)
-        {
-            var settings = ioc.Get<AppSettingsModel>();
-            _dialogService = ioc.Get<IDialogService>();
-            Receivers = ioc.Get<BindableCollection<Receiver>>();
-            _loader = ioc.Get<ILoadReceivers>();
-            //_logger = ioc.Get<ILogger>();
-            //check if the settings not set
-            if (settings.FielMappingSettings == null)
-            {
-                settings.FielMappingSettings = new FieldMappingSettingsModel();
-            }
-            fieldSettings = settings.FielMappingSettings;
-            
-            if(File.Exists(ReceiverListFilePath))
-            {
-                _loader.Load();
-                //_logger.InfoSender($"Loaded {_receivers.Count} receivers");
-                NotifyOfPropertyChange(nameof(this.Receivers));                
-            }
-        }
-
-        private BindableCollection<Receiver> _receivers;
-        public BindableCollection<Receiver> Receivers
-        {
-            get
-            {
-                
-                return _receivers;
-            }
-            set
-            {
-                SetAndNotify(ref _receivers, value);
-            }
-        }
-
         private string receiverListFilePath;
         string fieldEmail;
         string fieldOrganizationName;
@@ -73,7 +38,50 @@ namespace EmailSender.ViewModels
         string fieldRecord1;
         string fieldRecord2;
         string fieldRecord3;
+        private BindableCollection<Receiver> _receivers;
 
+        #endregion
+
+
+        #region Construector
+        public FieldMappingViewModel(IContainer ioc)
+        {
+            var settings = ioc.Get<AppSettingsModel>();
+            _dialogService = ioc.Get<IDialogService>();
+            Receivers = ioc.Get<BindableCollection<Receiver>>();
+            _loader = ioc.Get<ILoadReceivers>();
+            _windMng = ioc.Get<IWindowManager>();
+            //_logger = ioc.Get<ILogger>();
+            //check if the settings not set
+            if (settings.FielMappingSettings == null)
+            {
+                settings.FielMappingSettings = new FieldMappingSettingsModel();
+            }
+            fieldSettings = settings.FielMappingSettings;
+            
+            if(File.Exists(ReceiverListFilePath))
+            {
+                _loader.Load();
+                //_logger.InfoSender($"Loaded {_receivers.Count} receivers");
+                NotifyOfPropertyChange(nameof(this.Receivers));                
+            }
+        }
+        #endregion
+
+        #region Public props
+
+        public BindableCollection<Receiver> Receivers
+        {
+            get
+            {
+                
+                return _receivers;
+            }
+            set
+            {
+                SetAndNotify(ref _receivers, value);
+            }
+        }
         public string ReceiverListFilePath
         {
             get
@@ -103,16 +111,16 @@ namespace EmailSender.ViewModels
         }
         public string FieldOrganizationName
         {
-                get
-                {
-                    fieldOrganizationName = fieldSettings?.fieldOrganizationName ?? "";
-                    return fieldOrganizationName;
-                }
-                set
-                {
-                    SetAndNotify(ref fieldOrganizationName, value);
-                    fieldSettings.fieldOrganizationName = value;
-                }
+            get
+            {
+                fieldOrganizationName = fieldSettings?.fieldOrganizationName ?? "";
+                return fieldOrganizationName;
+            }
+            set
+            {
+                SetAndNotify(ref fieldOrganizationName, value);
+                fieldSettings.fieldOrganizationName = value;
+            }
         }
         public string FieldPersonName
         {
@@ -199,12 +207,12 @@ namespace EmailSender.ViewModels
                 fieldDate2 = fieldSettings?.fieldDate2 ?? "";
                 return fieldDate2;
             }
-            set 
+            set
             {
                 SetAndNotify(ref fieldDate2, value);
                 fieldSettings.fieldDate2 = value;
             }
-            }
+        }
         public string FieldDate3
         {
             get
@@ -296,16 +304,37 @@ namespace EmailSender.ViewModels
                 fieldSettings.fieldRecord3 = value;
             }
         }
+        #endregion
 
+
+        #region Commands
         public void LoadReseiversCommand()
         {
             if (_dialogService.OpenFileDialog() == true)
             {
                 ReceiverListFilePath = _dialogService.FilePath;
-                _loader.Load();
-                NotifyOfPropertyChange(nameof(this.ReceiverListFilePath));                
+                _loader.OpenAndLoad();
+                NotifyOfPropertyChange(nameof(this.ReceiverListFilePath));
                 //_logger.InfoSender($"Loaded {_receivers.Count} receivers");
+                _windMng.ShowMessageBox("Импорт данных в базу завершен");
             }
         }
+
+
+        public void ExportToExelCommand()
+        {
+            if (_dialogService.SaveFileDialog() == true)
+            {
+                ReceiverListFilePath = _dialogService.FilePath;
+                fieldSettings.receiverListFilePath = ReceiverListFilePath;
+                NotifyOfPropertyChange(nameof(this.ReceiverListFilePath));
+                _loader.SaveChanges(_receivers, fieldSettings);
+                _windMng.ShowMessageBox("Export данных в exel завершен");
+            }
+        }
+        #endregion
+
+
+
     }
 }

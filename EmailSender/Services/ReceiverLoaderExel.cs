@@ -2,9 +2,7 @@
 using EmailSender.Settings.Models;
 using StyletIoC;
 using System;
-using System.Collections.Generic;
 using System.Collections.ObjectModel;
-using System.Text;
 using EmailSender.Logger;
 using System.IO;
 using EmailSender.Settings;
@@ -25,6 +23,7 @@ namespace EmailSender.Services
         private ObservableCollection<Receiver> _receivers;
         private const string defValue = "no";
 
+        #region Constructor
         public ReceiverLoaderExel(IContainer ioc)
         {
             logger = ioc.Get<ILogger>();
@@ -32,6 +31,7 @@ namespace EmailSender.Services
             ExcelPackage.LicenseContext = LicenseContext.NonCommercial;
             _receivers = ioc.Get<BindableCollection<Receiver>>();
         }
+        #endregion
 
         public ObservableCollection<Receiver> Load() 
         {
@@ -41,7 +41,6 @@ namespace EmailSender.Services
             }
             return new ObservableCollection<Receiver>();
         }
-
 
         //load data to app
         public ObservableCollection<Receiver> Open( FieldMappingSettingsModel FieldMapping)
@@ -61,7 +60,6 @@ namespace EmailSender.Services
             //create a new Excel package from the file
             using (ExcelPackage excelPackage = new ExcelPackage(file))
             {
-
                 //create an instance of the the first sheet in the loaded file
                 ExcelWorksheet worksheet = excelPackage.Workbook.Worksheets.FirstOrDefault();
                 
@@ -110,7 +108,6 @@ namespace EmailSender.Services
             //logger.InfoSender($"Ready for sending {count.ToString()} receivers");
             return _receivers;
         }
-
 
         public void SaveChanges(ObservableCollection<Receiver> receivers, FieldMappingSettingsModel FieldMapping)
         {
@@ -253,7 +250,13 @@ namespace EmailSender.Services
             }
         }
 
-        public Task SaveChangesAsync(string filename, ObservableCollection<Receiver> receivers)
+
+        public void OpenAndLoad()
+        {
+            throw new NotImplementedException();
+        }
+
+        public void SaveReceiver(Receiver receivers)
         {
             throw new NotImplementedException();
         }

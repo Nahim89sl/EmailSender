@@ -20,6 +20,9 @@ namespace EmailSender.ViewModels
 {
     public class SenderViewModel : PropertyChangedBase
     {
+
+        #region  private fields
+
         private ILogger _logger;
         private ISender _sender;
         private SenderSettings _settings;
@@ -36,9 +39,36 @@ namespace EmailSender.ViewModels
         private const string StatusSended = "SENDED";
         private const string StatusServerOk = "ok";
         private int ServerErrorCount;
-        
 
 
+        private int _mailListRounds;  //period for changing interval of pause
+        int countToHidden;
+        int countToOurMails;
+        int countMailListRounds;
+        int countLettersToSave;
+
+
+        int nextDopPause;
+        int nextChangeInterval;
+
+        private int _changeIntTime;  //period for changing interval of pause
+        private PauseInterval _currentInterval;  //this interval now use sender
+        private string _intervalsFilePath;      //this if file path for txt-file with the pauses intervals
+
+        private PauseInterval _dopPauseInterval;  // interval of dop pause
+        private int _dopPauseTime;  // period for using dop pause
+        private string _ourMailsFilePath;
+        private int _sendToHidden;
+        private int _receiverId; //this show to progressbar receiver's id
+        private int _totalReceivers; //this show to progressbar total count of receivers
+        private int _sendOurMail;
+        private bool _isAutoStart;
+        private bool isSenderRun;
+
+
+        #endregion
+
+        #region Constructor
         public SenderViewModel(IContainer ioc)
         {
             _sender = ioc.Get<ISender>();
@@ -61,8 +91,10 @@ namespace EmailSender.ViewModels
                 StartSenderCommand();
             }
         }
+        #endregion
+        
+        #region  Public Props
 
-        private int _mailListRounds;  //period for changing interval of pause
         public int MailListRounds
         {
             get
@@ -77,18 +109,6 @@ namespace EmailSender.ViewModels
             }
         }
 
-        int countToHidden;
-        int countToOurMails;
-        int countMailListRounds;
-        int countLettersToSave;
-
-
-        int nextDopPause;
-        int nextChangeInterval;
-
-
-        //pauses
-        private int _changeIntTime;  //period for changing interval of pause
         public int ChangeIntTime
         {
             get
@@ -103,7 +123,6 @@ namespace EmailSender.ViewModels
             }
         }
 
-        private PauseInterval _currentInterval;
         public PauseInterval CurrentInterval
         {
             get
@@ -118,7 +137,6 @@ namespace EmailSender.ViewModels
             }
         }
 
-        private string _intervalsFilePath;
         public string IntervalsFilePath
         {
             get
@@ -133,8 +151,9 @@ namespace EmailSender.ViewModels
             }
         }
 
+
         //dop pauses
-        private int _dopPauseTime;  // period for using dop pause
+
         public int DopPauseTime
         {
             get
@@ -149,7 +168,7 @@ namespace EmailSender.ViewModels
             }
         }
 
-        private PauseInterval _dopPauseInterval;  // interval of dop pause
+        
         public PauseInterval DopPauseInterval
         {
             get
@@ -164,9 +183,8 @@ namespace EmailSender.ViewModels
             }
         }
 
-
         //our mails 
-        private string _ourMailsFilePath;
+
         public string OurMailsFilePath
         {
             get
@@ -181,7 +199,7 @@ namespace EmailSender.ViewModels
             }
         }
 
-        private int _sendToHidden;
+
         public int SendToHidden
         {
             get
@@ -196,7 +214,7 @@ namespace EmailSender.ViewModels
             }
         }
 
-        private int _receiverId; //this show to progressbar receiver's id
+
         public int ReceiverId
         {
             get
@@ -209,7 +227,7 @@ namespace EmailSender.ViewModels
             }
         }
 
-        private int _totalReceivers; //this show to progressbar total count of receivers
+
         public int TotalReceivers
         {
             get
@@ -223,7 +241,7 @@ namespace EmailSender.ViewModels
         }
 
 
-        private int _sendOurMail;
+
         public int SendOurMail
         {
             get
@@ -238,12 +256,12 @@ namespace EmailSender.ViewModels
             }
         }
 
-        
+
         public ObservableCollection<PauseInterval> PauseIntervals { get; set; }
         public ObservableCollection<Receiver> OurReceivers { get; set; }
 
 
-        private bool _isAutoStart;
+
         public bool IsAutoStart
         {
             get
@@ -258,14 +276,9 @@ namespace EmailSender.ViewModels
             }
         }
 
-        private bool isSenderRun;
+        #endregion
 
-
-
-
-        /// <summary>
-        /// COMMANDS
-        /// </summary>
+        #region Commands
 
         public void LoadIntervalsCommand()
         {
@@ -275,7 +288,6 @@ namespace EmailSender.ViewModels
                 LoadIntervals();
             }
         }
-
         public void LoadOurReceiversCommand()
         {
             if (_dialog.OpenFileDialog() == true)
@@ -309,7 +321,6 @@ namespace EmailSender.ViewModels
         {
             get { return isSenderRun; }
         }
-
 
         private void LoadIntervals()
         {
@@ -382,28 +393,26 @@ namespace EmailSender.ViewModels
                             _logger.InfoSender($"Try send to our mail {ourReceiver.Email}");
                             textConv.LetterRandomizeText(ourReceiver, _templateLetter);
                             await _sender.SendEmail(ourReceiver, new Receiver(), ourReceiver.Letter);
-                            ourReceiver.Count++;
-                            countToOurMails = 0;
                             CheckStatuses(ourReceiver);
+                            
+                            ourReceiver.Count++;
+                            countToOurMails = 0;                            
                             MakePause();
                         }
 
                         _logger.InfoSender($"Try send to {receiver.Email}");
                         textConv.LetterRandomizeText(receiver, _templateLetter);
-                        await _sender.SendEmail(receiver, GetHidden(), receiver.Letter);
+
+                        await _sender.SendEmail(receiver, GetHidden(), receiver.Letter);                     
                         CheckStatuses(receiver);
-                        MakePause();
-                        
+
+                        MakePause();                       
                         countToHidden++;
                         countToOurMails++;
 
-                        //check if we need to save changes to receivers list
-                        countLettersToSave++;
-                        if (countLettersToSave > 100)
-                        {
-                            _saver.SaveChangesAsync( _receivers, _fieldMapping);                            
-                            countLettersToSave = 0;
-                        }
+                        //add status of receiver to database
+                        //receiver.StatusSend = StatusSended;
+                        _saver.SaveReceiver(receiver);
                     }
                     else
                     {
@@ -532,7 +541,6 @@ namespace EmailSender.ViewModels
             _saver.SaveChangesAsync(_receivers, _fieldMapping);
         }
 
-
         private void CheckStatuses(Receiver receiver)
         {
             if((_acc.ServerStatus != StatusServerOk) || (_acc.AccountStatus != StatusServerOk) || (receiver.StatusSend != StatusSended))
@@ -557,5 +565,6 @@ namespace EmailSender.ViewModels
                 _logger.InfoSender($"{receiver.IdReceiver.ToString()} Mail to {receiver.Email} sended");               
             }
         }
+        #endregion
     }
 }

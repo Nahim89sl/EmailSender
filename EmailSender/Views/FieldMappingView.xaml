@@ -298,22 +298,32 @@
 
 
 
-
-        <Label
-            HorizontalContentAlignment="Right"                       
-            Content="{Binding ReceiverListFilePath}"                
-            Grid.Row="0"                     
+        <StackPanel Grid.Row="0"                     
             Grid.Column="3"                            
-            Grid.ColumnSpan="3" 
-            FontSize="10"
-            />
+            Grid.ColumnSpan="4"
+                    Orientation="Horizontal">
+            
+            <Label
+                HorizontalContentAlignment="Left"                       
+                Content="{Binding ReceiverListFilePath}"                
+                FontSize="10"
+                Width="370"
+                />
+            <Button
+                Content="Load"
+                Margin="5"
+                Command="{s:Action LoadReseiversCommand}"
+                />
+            <Button
+                Content="Export"
+                Margin="5"
+                Command="{s:Action ExportToExelCommand}"
+                />
+        </StackPanel>
+        
+        
 
-        <Button
-                        Grid.Column="6"
-                        Content="Load"
-            Margin="5"
-                        Command="{s:Action LoadReseiversCommand}"
-                        />
+        
 
         <ListView Grid.Row="1"  HorizontalAlignment="Center" Grid.Column="3" Grid.ColumnSpan="5" Grid.RowSpan="14" ItemsSource="{Binding Receivers}">
             <ListView.View>

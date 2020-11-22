@@ -27,6 +27,7 @@ namespace EmailSender.Services
         public bool SaveFileDialog()
         {
             SaveFileDialog saveFileDialog = new SaveFileDialog();
+            saveFileDialog.Filter = "exel files(.*xlsx)|*.xlsx";
             if (saveFileDialog.ShowDialog() == true)
             {
                 FilePath = saveFileDialog.FileName;
