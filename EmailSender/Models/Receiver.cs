@@ -8,6 +8,7 @@ namespace EmailSender.Models
     public class Receiver : PropertyChangedBase
     {
         
+
         public string statusEmailExist
         {
             get
@@ -20,7 +21,27 @@ namespace EmailSender.Models
             }
         }
 
-        
+        public Receiver()
+        {
+            Address = "";
+            CompanyName = "";
+            PersonName = "";
+            CC = "";
+            Bcc = "";
+            StatusEmailExist = "";
+            FieldInn = "";
+            FieldOkvd = "";
+            FieldDate1 = "";
+            FieldDate2 = "";
+            FieldDate3 = "";        
+            FieldPhone = "";
+            FieldAddress = "";
+            FieldContractAmount = "";
+            FieldRecord1 = "";
+            FieldRecord2 = "";
+            FieldRecord3 = "";
+        }
+
         public string StatusSend
         {
             get

@@ -223,23 +223,71 @@ namespace EmailSender.Services
                 {
                     var recaiver = new Receiver();
                     recaiver.IdReceiver = i;
-                    recaiver.Email = worksheet?.Cells[FieldMapping.fieldEmail + i.ToString()].Value?.ToString() ?? defValue;
 
-                    recaiver.StatusEmailExist = worksheet?.Cells[FieldMapping.fieldValidateStatus + i.ToString()].Value?.ToString() ?? defValue;
-                    recaiver.StatusSend = worksheet?.Cells[FieldMapping.fieldSendingStatus + i.ToString()].Value?.ToString() ?? defValue;
-                    recaiver.CompanyName = worksheet?.Cells[FieldMapping.fieldOrganizationName + i.ToString()].Value?.ToString() ?? defValue;
-                    recaiver.PersonName = worksheet?.Cells[FieldMapping.fieldPersonName + i.ToString()].Value?.ToString() ?? defValue;
-                    recaiver.FieldInn = worksheet?.Cells[FieldMapping.fieldInn + i.ToString()].Value?.ToString() ?? defValue;
-                    recaiver.FieldOkvd = worksheet?.Cells[FieldMapping.fieldOkvd + i.ToString()].Value?.ToString() ?? defValue;
-                    recaiver.FieldPhone = worksheet?.Cells[FieldMapping.fieldPhone + i.ToString()].Value?.ToString() ?? defValue;
-                    recaiver.FieldAddress = worksheet?.Cells[FieldMapping.fieldAddress + i.ToString()].Value?.ToString() ?? defValue;
-                    recaiver.FieldContractAmount = worksheet?.Cells[FieldMapping.fieldContractAmount + i.ToString()].Value?.ToString() ?? defValue;
-                    recaiver.FieldDate1 = worksheet?.Cells[FieldMapping.fieldDate1 + i.ToString()].Value?.ToString() ?? defValue;
-                    recaiver.FieldDate2 = worksheet?.Cells[FieldMapping.fieldDate2 + i.ToString()].Value?.ToString() ?? defValue;
-                    recaiver.FieldDate3 = worksheet?.Cells[FieldMapping.fieldDate3 + i.ToString()].Value?.ToString() ?? defValue;
-                    recaiver.FieldRecord1 = worksheet?.Cells[FieldMapping.fieldRecord1 + i.ToString()].Value?.ToString() ?? defValue;
-                    recaiver.FieldRecord2 = worksheet?.Cells[FieldMapping.fieldRecord2 + i.ToString()].Value?.ToString() ?? defValue;
-                    recaiver.FieldRecord3 = worksheet?.Cells[FieldMapping.fieldRecord3 + i.ToString()].Value?.ToString() ?? defValue;
+
+                    recaiver.Email = worksheet.Cells[FieldMapping.fieldEmail + i.ToString()].Value?.ToString() ?? defValue;
+
+                    
+                    if (FieldMapping.fieldValidateStatus != null)
+                    {
+                        recaiver.StatusEmailExist = worksheet.Cells[FieldMapping.fieldValidateStatus + i.ToString()].Value?.ToString() ?? defValue;
+                    }
+                    if (FieldMapping.fieldSendingStatus != null)
+                    {
+                        recaiver.StatusSend = worksheet.Cells[FieldMapping.fieldSendingStatus + i.ToString()].Value?.ToString() ?? defValue;
+                    }
+                    if (FieldMapping.fieldOrganizationName != null)
+                    {
+                        recaiver.CompanyName = worksheet.Cells[FieldMapping.fieldOrganizationName + i.ToString()].Value?.ToString() ?? defValue;
+                    }
+                    if (FieldMapping.fieldPersonName != null)
+                    {
+                        recaiver.PersonName = worksheet.Cells[FieldMapping.fieldPersonName + i.ToString()].Value?.ToString() ?? defValue;
+                    }
+                    if (FieldMapping.fieldInn != null)
+                    {
+                        recaiver.FieldInn = worksheet.Cells[FieldMapping.fieldInn + i.ToString()].Value?.ToString() ?? defValue;
+                    }
+                    if (FieldMapping.fieldOkvd != null)
+                    {
+                        recaiver.FieldOkvd = worksheet.Cells[FieldMapping.fieldOkvd + i.ToString()].Value?.ToString() ?? defValue;
+                    }
+                    if (FieldMapping.fieldPhone != null)
+                    {
+                        recaiver.FieldPhone = worksheet.Cells[FieldMapping.fieldPhone + i.ToString()].Value?.ToString() ?? defValue;
+                    }
+                    if (FieldMapping.fieldAddress != null)
+                    {
+                        recaiver.FieldAddress = worksheet.Cells[FieldMapping.fieldAddress + i.ToString()].Value?.ToString() ?? defValue;
+                    }
+                    if (FieldMapping.fieldContractAmount != null)
+                    {
+                        recaiver.FieldContractAmount = worksheet.Cells[FieldMapping.fieldContractAmount + i.ToString()].Value?.ToString() ?? defValue;
+                    }
+                    if (FieldMapping.fieldDate1 != null)
+                    {
+                        recaiver.FieldDate1 = worksheet.Cells[FieldMapping.fieldDate1 + i.ToString()].Value?.ToString() ?? defValue;
+                    }
+                    if (FieldMapping.fieldDate2 != null)
+                    {
+                        recaiver.FieldDate2 = worksheet.Cells[FieldMapping.fieldDate2 + i.ToString()].Value?.ToString() ?? defValue;
+                    }
+                    if (FieldMapping.fieldDate3 != null)
+                    {
+                        recaiver.FieldDate3 = worksheet.Cells[FieldMapping.fieldDate3 + i.ToString()].Value?.ToString() ?? defValue;
+                    }
+                    if (FieldMapping.fieldRecord1 != null)
+                    {
+                        recaiver.FieldRecord1 = worksheet.Cells[FieldMapping.fieldRecord1 + i.ToString()].Value?.ToString() ?? defValue;
+                    }
+                    if (FieldMapping.fieldRecord2 != null)
+                    {
+                        recaiver.FieldRecord2 = worksheet.Cells[FieldMapping.fieldRecord2 + i.ToString()].Value?.ToString() ?? defValue;
+                    }
+                    if (FieldMapping.fieldRecord3 != null)
+                    {
+                        recaiver.FieldRecord3 = worksheet.Cells[FieldMapping.fieldRecord3 + i.ToString()].Value?.ToString() ?? defValue;
+                    }
 
 
                     //validate email address
