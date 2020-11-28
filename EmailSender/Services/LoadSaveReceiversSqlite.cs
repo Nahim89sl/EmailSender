@@ -26,7 +26,6 @@ namespace EmailSender.Services
         private const string dbName = "db.sqlite";
 
 
-
         #region Constructor
         public LoadSaveReceiversSqlite(IContainer ioc)
         {
@@ -395,25 +394,34 @@ namespace EmailSender.Services
                 CreateFile(filename);
                 logger.InfoSender("Report created " + filename);
             }
-
-            using (ExcelPackage excelPackage = new ExcelPackage(file))
+            try
             {
-                ExcelWorksheet worksheet = excelPackage.Workbook.Worksheets.FirstOrDefault();
-                int rowCount = worksheet.Dimension.Rows + 1;
+                using (ExcelPackage excelPackage = new ExcelPackage(file))
+                {
+                    ExcelWorksheet worksheet = excelPackage.Workbook.Worksheets.FirstOrDefault();
+                    //when the file empty Dimension has value null
+                    int rowCount = worksheet?.Dimension?.Rows ?? 0;
+                    rowCount++;
 
-                worksheet.Cells[rowCount, 1].Value = receiver?.IdReceiver.ToString() ?? "";
-                worksheet.Cells[rowCount, 2].Value = receiver?.CompanyName ?? "";
+                    worksheet.Cells[rowCount, 1].Value = receiver?.IdReceiver.ToString() ?? "";
+                    worksheet.Cells[rowCount, 2].Value = receiver?.CompanyName ?? "";
 
-                worksheet.Cells[rowCount, 3].Value = letter.From;
-                worksheet.Cells[rowCount, 4].Value = letter.Email;
-                worksheet.Cells[rowCount, 5].Value = letter.Subject;
-                worksheet.Cells[rowCount, 6].Value = letter.Text;
+                    worksheet.Cells[rowCount, 3].Value = letter.From;
+                    worksheet.Cells[rowCount, 4].Value = letter.Email;
+                    worksheet.Cells[rowCount, 5].Value = letter.Subject;
+                    worksheet.Cells[rowCount, 6].Value = letter.Text;
 
-                //save result
-                Byte[] bin = excelPackage.GetAsByteArray();
-                File.WriteAllBytes(filename, bin);
-                //excelPackage.Save();
+                    //save result
+                    Byte[] bin = excelPackage.GetAsByteArray();
+                    File.WriteAllBytes(filename, bin);
+                    //excelPackage.Save();
+                }
             }
+            catch(Exception ex)
+            {
+                logger.ErrorReader($"AddToReport {ex.Message}");
+            }
+            
         }
 
         public void SaveChanges(ObservableCollection<Receiver> receivers, FieldMappingSettingsModel FieldMapping)

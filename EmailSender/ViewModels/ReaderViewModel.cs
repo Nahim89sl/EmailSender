@@ -16,6 +16,7 @@ namespace EmailSender.ViewModels
 {
     public class ReaderViewModel : PropertyChangedBase
     {
+        #region Private fields
         private ILogger _logger;
         private ISender _sender;
         private ReaderSettings _settings;
@@ -23,13 +24,32 @@ namespace EmailSender.ViewModels
         private INotification _notification;
         private IDialogService _dialog;
         private IReaderMails _reader;
-        private ILoadReceivers _reporter;
         private BindableCollection<Receiver> _receivers;
+        private bool _isAnswer;
+        private bool _isAutoStart;
+        private int _readInterval;
+        private string _textAnswer;
+        private string _subjectLetter;
+        private string _stopWords;
+        private string _reportFolder_1;
+        private string _reportFolder_2;
+        private string _accountState;
+        private string _serverState;
+        //times
+        private int nextTimeReadInt;
+        private string _nextTimeRead;
+        private string _lastTimeRead;
+        
+        //marker of reading process now
+        private bool isReadNow;
+        //marker of reading service work
+        private bool isReadServiceWork;
 
+        private Reporter _reporter;
+        private IWindowManager _windMng;
+        #endregion
 
-
-
-
+        #region Constructor
         public ReaderViewModel(IContainer ioc)
         {
             _sender = ioc.Get<ISender>();
@@ -39,18 +59,20 @@ namespace EmailSender.ViewModels
             _notification = ioc.Get<INotification>();
             _dialog = ioc.Get<IDialogService>();
             _reader = ioc.Get<IReaderMails>();
-            _reporter = ioc.Get<ILoadReceivers>();
             _receivers = ioc.Get<BindableCollection<Receiver>>();
+            _windMng = ioc.Get<IWindowManager>();
 
+            _reporter = new Reporter(ioc);
             //autostart reader service
             if (IsAutoStart)
             {
                 ReadService();
             }
         }
+        #endregion
 
-        //property of answering function to receivers
-        private bool _isAnswer;
+        #region Public fields
+        //property of answering function to receivers        
         public bool IsAnswer
         {
             get
@@ -65,8 +87,7 @@ namespace EmailSender.ViewModels
             }
         }
 
-        //propperty of start reading service
-        private bool _isAutoStart;
+        //property of start reading service
         public bool IsAutoStart
         {
             get
@@ -81,7 +102,7 @@ namespace EmailSender.ViewModels
             }
         }
 
-        private int _readInterval;
+        //property reading interval
         public int ReadInterval
         {
             get
@@ -96,7 +117,8 @@ namespace EmailSender.ViewModels
             }
         }
 
-        private string _textAnswer;
+        
+        //property text of answer letter
         public string TextLetter
         {
             get
@@ -111,7 +133,7 @@ namespace EmailSender.ViewModels
             }
         }
 
-        private string _subjectLetter;
+        //property subgect of answer letter
         public string SubjectLetter
         {
             get
@@ -126,7 +148,7 @@ namespace EmailSender.ViewModels
             }
         }
 
-        private string _stopWords;
+        //Stop words for filtring email reading
         public string StopWords
         {
             get
@@ -141,7 +163,7 @@ namespace EmailSender.ViewModels
             }
         }
 
-        private string _reportFolder_1;
+        //Report folder 1
         public string ReportFolder_1
         {
             get
@@ -156,7 +178,7 @@ namespace EmailSender.ViewModels
             }
         }
 
-        private string _reportFolder_2;
+        //report folder 2
         public string ReportFolder_2
         {
             get
@@ -170,10 +192,8 @@ namespace EmailSender.ViewModels
                 _settings.ReportFolder_2 = value;
             }
         }
-
-        
-
-        private string _accountState;
+     
+        //State account of reading 
         public string AccountState
         {
             get
@@ -187,8 +207,7 @@ namespace EmailSender.ViewModels
                 _account.AccountStatus = value;
             }
         }
-
-        private string _serverState;
+       
         public string ServerState
         {
             get
@@ -203,9 +222,6 @@ namespace EmailSender.ViewModels
             }
         }
 
-        //times
-        private int nextTimeReadInt;
-        private string _nextTimeRead;
         public string NextTimeRead
         {
             get
@@ -217,8 +233,7 @@ namespace EmailSender.ViewModels
                 SetAndNotify(ref this._nextTimeRead, value);
             }
         }
-
-        private string _lastTimeRead;
+       
         public string LastTimeRead
         {
             get
@@ -231,7 +246,9 @@ namespace EmailSender.ViewModels
             }
         }
         ///
+        #endregion
 
+        #region COMMANDS
 
         public void SetFolderCommand1()
         {
@@ -257,7 +274,6 @@ namespace EmailSender.ViewModels
             get { return !isReadServiceWork; }
         }
 
-
         public void StopReadServiceCommand()
         {
             isReadServiceWork = false;
@@ -267,51 +283,40 @@ namespace EmailSender.ViewModels
             get { return isReadServiceWork; }
         }
 
-        private bool isReadNow;
         public void ReadMailsCommand()
         {
+            if (!(CheckFolder(ReportFolder_1) || CheckFolder(ReportFolder_2)))
+            {
+                return;
+            }
+
             isReadNow = true;
             _logger.InfoReader("Start Read Command");
             NotifyOfPropertyChange(nameof(this.CanReadMailsCommand));
+            CheckFolder(ReportFolder_1);
+            CheckFolder(ReportFolder_2);
+
             Task.Run(() => {
-                var answers = _reader.ReadMails(StopWords);
+                //ObservableCollection<Answer> answers = _reader.ReadMails(StopWords);
+                ObservableCollection<Answer> answers = new ObservableCollection<Answer>();
+
                 _logger.InfoReader($"Finish reading, get answers {answers.Count.ToString()}");
-                foreach (var answ in answers)
-                {
-                    /////////
-                    _logger.InfoReader("Start check answers");
-                    var receiver = _receivers.Where(r => r.Email == answ.Email).FirstOrDefault();
-                    if (receiver != null)
-                    {                        
-                        _notification.AnswerGetMessage($"{answ.Email}\n {answ.Subject}");
-                    }
-                    _reporter.AddToReport(Path.Combine(ReportFolder_1, $"{_account.Server}.xlsx"), answ, receiver);
-                    _reporter.AddToReport(Path.Combine(ReportFolder_2, $"{_account.Server}.xlsx"), answ, receiver);
-                    _logger.InfoReader($"Add to report!{answ.Email}");
-                }
-                Execute.OnUIThread(()=> {
-                    isReadNow = false;
-                    NotifyOfPropertyChange(nameof(this.CanReadMailsCommand));
-                    nextTimeReadInt = TimeUnixService.Timestamp() + ReadInterval;
-                    NextTimeRead = TimeUnixService.TimeStamToStr(nextTimeReadInt);
-                    LastTimeRead = TimeUnixService.TimeStamToStr(TimeUnixService.Timestamp());
-                    NotifyOfPropertyChange(nameof(this.NextTimeRead));
-                    NotifyOfPropertyChange(nameof(this.LastTimeRead));
-                });
+
+                _reporter.WorkWithResults(answers);
+
+                //set ui elements to next time read
+                ChangeUiNextTimeRead();
                 _logger.InfoReader("Finished reading");
             });
-
-
-
-
         }
         public bool CanReadMailsCommand
         {
             get { return !isReadNow; }
         }
 
-        private bool isReadServiceWork;
+        #endregion
 
+        #region Private methods
         private void ReadService()
         {
             isReadServiceWork = true;
@@ -335,6 +340,33 @@ namespace EmailSender.ViewModels
             });
         }
 
+        private void ChangeUiNextTimeRead()
+        {
+            Execute.OnUIThread(() => {
+                isReadNow = false;
+                NotifyOfPropertyChange(nameof(this.CanReadMailsCommand));
+                nextTimeReadInt = TimeUnixService.Timestamp() + ReadInterval;
+                NextTimeRead = TimeUnixService.TimeStamToStr(nextTimeReadInt);
+                LastTimeRead = TimeUnixService.TimeStamToStr(TimeUnixService.Timestamp());
+                NotifyOfPropertyChange(nameof(this.NextTimeRead));
+                NotifyOfPropertyChange(nameof(this.LastTimeRead));
+            });
+
+        }
+
+        
+        
+        private bool CheckFolder(string folder)
+        {
+            if (!Directory.Exists(folder))
+            {
+                _windMng.ShowMessageBox($"Папки {folder} не существует!");
+                return false;
+            }
+            return true;
+        }
+
+        #endregion
 
     }
 }

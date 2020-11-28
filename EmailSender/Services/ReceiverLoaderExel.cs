@@ -198,61 +198,77 @@ namespace EmailSender.Services
 
         public void AddListToReport(string filename, ObservableCollection<Answer> letters, Receiver receiver)
         {
-            FileInfo file = new FileInfo(filename);
-            if (!file.Exists)
-            {
-                logger.InfoSender("Report file not exist " + filename);
-                CreateFile(filename);
-                logger.InfoSender("Report created " + filename);
-            }
-            ExcelPackage.LicenseContext = LicenseContext.NonCommercial;
-            using (ExcelPackage excelPackage = new ExcelPackage(file))
-            {
-                ExcelWorksheet worksheet = excelPackage.Workbook.Worksheets.FirstOrDefault();
-                int rowCount = worksheet.Dimension.Rows+1;
-                foreach (var letter in letters)
+
+            try { 
+                FileInfo file = new FileInfo(filename);
+                if (!file.Exists)
                 {
-                    worksheet.Cells[rowCount, 1].Value = receiver?.IdReceiver.ToString() ?? "";
-                    worksheet.Cells[rowCount, 2].Value = receiver?.CompanyName ?? "";
-
-                    worksheet.Cells[rowCount, 3].Value = letter.Email;
-                    worksheet.Cells[rowCount, 4].Value = letter.Subject;
-                    worksheet.Cells[rowCount, 5].Value = letter.Text;
-
-                    rowCount++;
+                    logger.InfoSender("Report file not exist " + filename);
+                    CreateFile(filename);
+                    logger.InfoSender("Report created " + filename);
+                    file = new FileInfo(filename);
                 }
-                excelPackage.Save();
+                ExcelPackage.LicenseContext = LicenseContext.NonCommercial;
+                using (ExcelPackage excelPackage = new ExcelPackage(file))
+                {
+                    ExcelWorksheet worksheet = excelPackage.Workbook.Worksheets.FirstOrDefault();
+                    int rowCount = worksheet.Dimension.Rows+1;
+                    foreach (var letter in letters)
+                    {
+                        worksheet.Cells[rowCount, 1].Value = receiver?.IdReceiver.ToString() ?? "";
+                        worksheet.Cells[rowCount, 2].Value = receiver?.CompanyName ?? "";
+
+                        worksheet.Cells[rowCount, 3].Value = letter.Email;
+                        worksheet.Cells[rowCount, 4].Value = letter.Subject;
+                        worksheet.Cells[rowCount, 5].Value = letter.Text;
+
+                        rowCount++;
+                    }
+                    excelPackage.Save();
+                }
+            }
+            catch(Exception ex)
+            {
+                logger.ErrorReader($"Error with write to report file AddListToReport: {ex.Message}");
             }
         }
 
         public void AddToReport(string filename, Answer letter, Receiver receiver)
         {
-            FileInfo file = new FileInfo(filename);
-            if (!file.Exists)
+            try
             {
-                logger.ErrorSender("Report file not exist " + filename);
-                CreateFile(filename);
-                logger.InfoSender("Report created " + filename);
+                FileInfo file = new FileInfo(filename);
+                if (!file.Exists)
+                {
+                    logger.ErrorSender("Report file not exist " + filename);
+                    CreateFile(filename);
+                    logger.InfoSender("Report created " + filename);
+                    file = new FileInfo(filename);
+                }
+
+                using (ExcelPackage excelPackage = new ExcelPackage(file))
+                {
+                    ExcelWorksheet worksheet = excelPackage.Workbook.Worksheets.FirstOrDefault();
+                    int rowCount = worksheet.Dimension.Rows + 1;
+
+                    worksheet.Cells[rowCount, 1].Value = receiver?.IdReceiver.ToString() ?? "";
+                    worksheet.Cells[rowCount, 2].Value = receiver?.CompanyName ?? "";
+
+                    worksheet.Cells[rowCount, 3].Value = letter.From;
+                    worksheet.Cells[rowCount, 4].Value = letter.Email;
+                    worksheet.Cells[rowCount, 5].Value = letter.Subject;
+                    worksheet.Cells[rowCount, 6].Value = letter.Text;
+
+                    //save result
+                    Byte[] bin = excelPackage.GetAsByteArray();
+                    File.WriteAllBytes(filename, bin);
+                    //excelPackage.Save();
+                }
+            }catch(Exception ex)
+            {
+                logger.ErrorReader($"Error with write to report file AddToReport: {ex.Message}");
             }
             
-            using (ExcelPackage excelPackage = new ExcelPackage(file))
-            {
-                ExcelWorksheet worksheet = excelPackage.Workbook.Worksheets.FirstOrDefault();
-                int rowCount = worksheet.Dimension.Rows+1;
-
-                worksheet.Cells[rowCount, 1].Value = receiver?.IdReceiver.ToString() ?? "";
-                worksheet.Cells[rowCount, 2].Value = receiver?.CompanyName ?? "";
-
-                worksheet.Cells[rowCount, 3].Value = letter.From;
-                worksheet.Cells[rowCount, 4].Value = letter.Email;
-                worksheet.Cells[rowCount, 5].Value = letter.Subject;
-                worksheet.Cells[rowCount, 6].Value = letter.Text;
-
-                //save result
-                Byte[] bin = excelPackage.GetAsByteArray();
-                File.WriteAllBytes(filename, bin);
-                //excelPackage.Save();
-            }
         }
 
         private void CreateFile(string filename)

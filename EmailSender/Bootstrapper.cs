@@ -67,9 +67,9 @@ namespace EmailSender
         {
             ioc = base.Container;
             ioc.Get<ISettings>().Save(settings);
-            var saver = ioc.Get<ILoadReceivers>();
-            var receivers = ioc.Get<BindableCollection<Receiver>>();
-            saver.SaveChanges(receivers, settings.FielMappingSettings);
+            //var saver = ioc.Get<ILoadReceivers>();
+            //var receivers = ioc.Get<BindableCollection<Receiver>>();
+            //saver.SaveChanges(receivers, settings.FielMappingSettings);
         }
         
         
