@@ -53,6 +53,7 @@ namespace EmailSender
             builder.Bind<AppSettingsModel>().ToFactory(container => settings);
             builder.Bind<IReaderMails>().To<ReaderMailsService>().InSingletonScope();
             builder.Bind<IDialogService>().To<DefaultDialogService>();
+            builder.Bind<IStatuses>().To<Statuses>();
             //builder.Bind<ILoadReceivers>().To<ReceiverLoaderExel>();
             builder.Bind<ILoadReceivers>().To<LoadSaveReceiversSqlite>();
 
@@ -77,9 +78,8 @@ namespace EmailSender
         {
             ioc = base.Container;
             ioc.Get<ISettings>().Save(settings);
-            var saver = ioc.Get<ILoadReceivers>();
-            var receivers = ioc.Get<BindableCollection<Receiver>>();
-            saver.SaveChanges(receivers, settings.FielMappingSettings);
+            var logger = ioc.Get<ILogger>();
+            logger.ErrorReader($"{e.Exception.Message}");
         }
 
     }

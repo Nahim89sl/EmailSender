@@ -41,16 +41,15 @@ namespace EmailSender.Services
         #endregion
 
         #region Public Methods
+
         public void WorkWithResults(ObservableCollection<Answer> answers)
         {
-            answers = GenerateResults();
-            _logger.InfoReader($"Finish reading, get answers {answers.Count.ToString()}");
+            //answers = GenerateResults();            
+            _logger.InfoReader("Start check answers");
             try
             {
                 foreach (var answ in answers)
-                {
-                    /////////
-                    _logger.InfoReader("Start check answers");
+                {                                      
                     var receiver = _receivers.Where(r => r.Email.Equals(answ.Email)).FirstOrDefault();
                     if (receiver != null)
                     {
@@ -68,7 +67,7 @@ namespace EmailSender.Services
                 _logger.ErrorReader($"Report error: {ex.Message}");
             }           
         }
-
+        //just for test 
         private ObservableCollection<Answer>  GenerateResults()
         {
             ObservableCollection<Answer> answers = new ObservableCollection<Answer>();
@@ -101,6 +100,7 @@ namespace EmailSender.Services
             });
             return answers;
         }
+
         #endregion
 
 

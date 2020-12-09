@@ -297,8 +297,8 @@ namespace EmailSender.ViewModels
             CheckFolder(ReportFolder_2);
 
             Task.Run(() => {
-                //ObservableCollection<Answer> answers = _reader.ReadMails(StopWords);
-                ObservableCollection<Answer> answers = new ObservableCollection<Answer>();
+                ObservableCollection<Answer> answers = _reader.ReadMails(StopWords);
+                //ObservableCollection<Answer> answers = new ObservableCollection<Answer>();
 
                 _logger.InfoReader($"Finish reading, get answers {answers.Count.ToString()}");
 

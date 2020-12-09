@@ -38,36 +38,44 @@ namespace ReaderMails
 
         public ObservableCollection<MimeMessage> ReaderMails(EmailBoxAkkaut akkaunt, string destFolderName, string trashFolderName, string stopWords)
         {
+            ObservableCollection<MimeMessage> resMessages = null;
             //try connect to server
             ConnectToServer(akkaunt);
 
             if (_imapClient.IsConnected)
             {
-                _destFolder = CheckFolderByName(destFolderName);
-                _trashFolder = CheckFolderByName(trashFolderName);
-                if (_destFolder == null)
+                try
                 {
-                    _destFolder = CreateFolder(destFolderName);
-                }
-                if (_trashFolder == null)
+                    _destFolder = CheckFolderByName(destFolderName);
+                    _trashFolder = CheckFolderByName(trashFolderName);
+                    if (_destFolder == null)
+                    {
+                        _destFolder = CreateFolder(destFolderName);
+                    }
+                    if (_trashFolder == null)
+                    {
+                        _trashFolder = CreateFolder(trashFolderName);
+                    }
+                    //check foldes values
+                    if ((_destFolder == null) || (_trashFolder == null))
+                    {
+                        _logger.Error($"ConnectToserver some problem with folders {trashFolderName} {destFolderName}");
+                        return null;
+                    }
+                    //check stop wors value
+                    if (stopWords.Length < 5)
+                    {
+                        _logger.Error($"ConnectToserver you didn't have stop words {stopWords}");
+                        return null;
+                    }
+                    _logger.Info($"{_libName} Destination folder - {_destFolder.FullName};  Trash folder - {_trashFolder.FullName}");
+                    resMessages = FilterMailsBySubject(stopWords);
+                    return resMessages;
+                }catch(Exception ex)
                 {
-                    _trashFolder = CreateFolder(trashFolderName);
-                }
-                //check foldes values
-                if ((_destFolder == null) || (_trashFolder == null))
-                {
-                    _logger.Error($"ConnectToserver some problem with folders {trashFolderName} {destFolderName}");
-                    return null;
-                }
-                //check stop wors value
-                if (stopWords.Length < 5)
-                {
-                    _logger.Error($"ConnectToserver you didn't have stop words {stopWords}");
-                    return null;
-                }
-                _logger.Info($"{_libName} Destination folder - {_destFolder.FullName};  Trash folder - {_trashFolder.FullName}");
-                var resMessages = FilterMailsBySubject(stopWords);
-                return resMessages;
+                    _logger.Error($"ReaderMails {ex.Message}");
+                    return resMessages;
+                }              
             }
             _logger.Error($"{_libName} Akkaunt status is {akkaunt.AccountStatus}");
             return null;
@@ -77,44 +85,58 @@ namespace ReaderMails
         public ObservableCollection<MimeMessage> FilterMailsBySubject(string stopWords)
         {
             ObservableCollection<MimeMessage> answerReceivers = new ObservableCollection<MimeMessage>();
-            var mailsUids = _imapClient.Inbox.Search(SearchQuery.All);
-            _logger.Info($"{_libName} Total mails in INBOX: {mailsUids.Count.ToString()}");
-            int k = 0;
-            
-            foreach (UniqueId uidMail in mailsUids)
+            try
             {
-                var tempMessage = FilterMailBySubject(uidMail, stopWords);
-                if (tempMessage!=null)
-                {
-                    answerReceivers.Add(tempMessage);
-                }
-                k++;
-                if (k > 200) { break; }
-            }
-            return answerReceivers;
-        }
+                
+                var mailsUids = _imapClient.Inbox.Search(SearchQuery.All);
+                _logger.Info($"{_libName} Total mails in INBOX: {mailsUids.Count.ToString()}");
+                int k = 0;
 
+                foreach (UniqueId uidMail in mailsUids)
+                {
+                    var tempMessage = FilterMailBySubject(uidMail, stopWords);
+                    if (tempMessage != null)
+                    {
+                        answerReceivers.Add(tempMessage);
+                    }
+                    k++;
+                    if (k > 200) { break; }
+                }
+                return answerReceivers;
+            }catch(Exception ex)
+            {
+                _logger.Error($"FilterMailsBySubject {ex.Message}");
+                return answerReceivers;
+            }           
+        }
 
         //sort mail by subject
         public MimeMessage FilterMailBySubject(UniqueId uidMail, string stopWords)
         {
-            var message = _imapClient.Inbox.GetMessage(uidMail);
-            string subject = GetEmailSubject(message);
-            //if stop words exist than return false
-            if (ExistStopWords(subject, stopWords))
+            try
             {
-                _imapClient.Inbox.MoveTo(uidMail, _trashFolder);
-                _imapClient.Inbox.AddFlags(uidMail, MessageFlags.Seen, true); //mark is read
-                _logger.Info($"{_libName} {subject} move to Trash");
+                var message = _imapClient.Inbox.GetMessage(uidMail);
+                string subject = GetEmailSubject(message);
+                //if stop words exist than return false
+                if (ExistStopWords(subject, stopWords))
+                {
+                    _imapClient.Inbox.MoveTo(uidMail, _trashFolder);
+                    _imapClient.Inbox.AddFlags(uidMail, MessageFlags.Seen, true); //mark is read
+                    _logger.Info($"{_libName} {subject} move to Trash");
+                    return null;
+                }
+                else
+                {
+                    _imapClient.Inbox.MoveTo(uidMail, _destFolder);
+                    //_imapClient.Inbox.AddFlags(uidMail, MessageFlags.Seen, true); //mark is read
+                    _logger.Info($"{_libName}  Subject: {subject}  -- move to {_destFolder.FullName}");
+                    return message;
+                }
+            }catch(Exception ex)
+            {
+                _logger.Error($"FilterMailBySubject {ex.Message}");
                 return null;
-            }
-            else
-            {
-                _imapClient.Inbox.MoveTo(uidMail, _destFolder);
-                //_imapClient.Inbox.AddFlags(uidMail, MessageFlags.Seen, true); //mark is read
-                _logger.Info($"{_libName}  Subject: {subject}  -- move to {_destFolder.FullName}");
-                return message;
-            }
+            }            
         }
         
         //connect to server
@@ -157,7 +179,7 @@ namespace ReaderMails
         {
             //get all folders from server
             IList<IMailFolder> folders = _imapClient.GetFolders(_imapClient.PersonalNamespaces[0]);
-            var findFolder = folders.Where(a => a.Name == folderName).FirstOrDefault();
+            var findFolder = folders.Where(a => a.Name.Equals(folderName)).FirstOrDefault();
             return findFolder;
         }
         
@@ -180,7 +202,7 @@ namespace ReaderMails
         //Get Subject
         public string GetEmailSubject(MimeMessage message)
         {
-            string subject = message.Subject;
+            string subject = message?.Subject ?? "";
             if (subject != null)
             {
                 return subject;

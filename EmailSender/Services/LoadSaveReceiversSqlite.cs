@@ -20,10 +20,9 @@ namespace EmailSender.Services
     {
         private ILogger logger;
         private FieldMappingSettingsModel FieldMapping;
-        private string FilePath;
         private ObservableCollection<Receiver> _receivers;
-        private const string defValue = "no";
         private const string dbName = "db.sqlite";
+        private readonly IStatuses _statuses;
 
 
         #region Constructor
@@ -33,6 +32,7 @@ namespace EmailSender.Services
             FieldMapping = ioc.Get<AppSettingsModel>()?.FielMappingSettings ?? null;
             ExcelPackage.LicenseContext = LicenseContext.NonCommercial;
             _receivers = ioc.Get<BindableCollection<Receiver>>();
+            _statuses = ioc.Get<IStatuses>();
         }
 
         #endregion
@@ -224,68 +224,68 @@ namespace EmailSender.Services
                     recaiver.IdReceiver = i;
 
 
-                    recaiver.Email = worksheet.Cells[FieldMapping.fieldEmail + i.ToString()].Value?.ToString() ?? defValue;
+                    recaiver.Email = worksheet.Cells[FieldMapping.fieldEmail + i.ToString()].Value?.ToString() ?? _statuses.defaultValue;
 
                     
                     if (FieldMapping.fieldValidateStatus != null)
                     {
-                        recaiver.StatusEmailExist = worksheet.Cells[FieldMapping.fieldValidateStatus + i.ToString()].Value?.ToString() ?? defValue;
+                        recaiver.StatusEmailExist = worksheet.Cells[FieldMapping.fieldValidateStatus + i.ToString()].Value?.ToString() ?? _statuses.defaultValue;
                     }
                     if (FieldMapping.fieldSendingStatus != null)
                     {
-                        recaiver.StatusSend = worksheet.Cells[FieldMapping.fieldSendingStatus + i.ToString()].Value?.ToString() ?? defValue;
+                        recaiver.StatusSend = worksheet.Cells[FieldMapping.fieldSendingStatus + i.ToString()].Value?.ToString() ?? _statuses.defaultValue;
                     }
                     if (FieldMapping.fieldOrganizationName != null)
                     {
-                        recaiver.CompanyName = worksheet.Cells[FieldMapping.fieldOrganizationName + i.ToString()].Value?.ToString() ?? defValue;
+                        recaiver.CompanyName = worksheet.Cells[FieldMapping.fieldOrganizationName + i.ToString()].Value?.ToString() ?? _statuses.defaultValue;
                     }
                     if (FieldMapping.fieldPersonName != null)
                     {
-                        recaiver.PersonName = worksheet.Cells[FieldMapping.fieldPersonName + i.ToString()].Value?.ToString() ?? defValue;
+                        recaiver.PersonName = worksheet.Cells[FieldMapping.fieldPersonName + i.ToString()].Value?.ToString() ?? _statuses.defaultValue;
                     }
                     if (FieldMapping.fieldInn != null)
                     {
-                        recaiver.FieldInn = worksheet.Cells[FieldMapping.fieldInn + i.ToString()].Value?.ToString() ?? defValue;
+                        recaiver.FieldInn = worksheet.Cells[FieldMapping.fieldInn + i.ToString()].Value?.ToString() ?? _statuses.defaultValue;
                     }
                     if (FieldMapping.fieldOkvd != null)
                     {
-                        recaiver.FieldOkvd = worksheet.Cells[FieldMapping.fieldOkvd + i.ToString()].Value?.ToString() ?? defValue;
+                        recaiver.FieldOkvd = worksheet.Cells[FieldMapping.fieldOkvd + i.ToString()].Value?.ToString() ?? _statuses.defaultValue;
                     }
                     if (FieldMapping.fieldPhone != null)
                     {
-                        recaiver.FieldPhone = worksheet.Cells[FieldMapping.fieldPhone + i.ToString()].Value?.ToString() ?? defValue;
+                        recaiver.FieldPhone = worksheet.Cells[FieldMapping.fieldPhone + i.ToString()].Value?.ToString() ?? _statuses.defaultValue;
                     }
                     if (FieldMapping.fieldAddress != null)
                     {
-                        recaiver.FieldAddress = worksheet.Cells[FieldMapping.fieldAddress + i.ToString()].Value?.ToString() ?? defValue;
+                        recaiver.FieldAddress = worksheet.Cells[FieldMapping.fieldAddress + i.ToString()].Value?.ToString() ?? _statuses.defaultValue;
                     }
                     if (FieldMapping.fieldContractAmount != null)
                     {
-                        recaiver.FieldContractAmount = worksheet.Cells[FieldMapping.fieldContractAmount + i.ToString()].Value?.ToString() ?? defValue;
+                        recaiver.FieldContractAmount = worksheet.Cells[FieldMapping.fieldContractAmount + i.ToString()].Value?.ToString() ?? _statuses.defaultValue;
                     }
                     if (FieldMapping.fieldDate1 != null)
                     {
-                        recaiver.FieldDate1 = worksheet.Cells[FieldMapping.fieldDate1 + i.ToString()].Value?.ToString() ?? defValue;
+                        recaiver.FieldDate1 = worksheet.Cells[FieldMapping.fieldDate1 + i.ToString()].Value?.ToString() ?? _statuses.defaultValue;
                     }
                     if (FieldMapping.fieldDate2 != null)
                     {
-                        recaiver.FieldDate2 = worksheet.Cells[FieldMapping.fieldDate2 + i.ToString()].Value?.ToString() ?? defValue;
+                        recaiver.FieldDate2 = worksheet.Cells[FieldMapping.fieldDate2 + i.ToString()].Value?.ToString() ?? _statuses.defaultValue;
                     }
                     if (FieldMapping.fieldDate3 != null)
                     {
-                        recaiver.FieldDate3 = worksheet.Cells[FieldMapping.fieldDate3 + i.ToString()].Value?.ToString() ?? defValue;
+                        recaiver.FieldDate3 = worksheet.Cells[FieldMapping.fieldDate3 + i.ToString()].Value?.ToString() ?? _statuses.defaultValue;
                     }
                     if (FieldMapping.fieldRecord1 != null)
                     {
-                        recaiver.FieldRecord1 = worksheet.Cells[FieldMapping.fieldRecord1 + i.ToString()].Value?.ToString() ?? defValue;
+                        recaiver.FieldRecord1 = worksheet.Cells[FieldMapping.fieldRecord1 + i.ToString()].Value?.ToString() ?? _statuses.defaultValue;
                     }
                     if (FieldMapping.fieldRecord2 != null)
                     {
-                        recaiver.FieldRecord2 = worksheet.Cells[FieldMapping.fieldRecord2 + i.ToString()].Value?.ToString() ?? defValue;
+                        recaiver.FieldRecord2 = worksheet.Cells[FieldMapping.fieldRecord2 + i.ToString()].Value?.ToString() ?? _statuses.defaultValue;
                     }
                     if (FieldMapping.fieldRecord3 != null)
                     {
-                        recaiver.FieldRecord3 = worksheet.Cells[FieldMapping.fieldRecord3 + i.ToString()].Value?.ToString() ?? defValue;
+                        recaiver.FieldRecord3 = worksheet.Cells[FieldMapping.fieldRecord3 + i.ToString()].Value?.ToString() ?? _statuses.defaultValue;
                     }
 
 
@@ -426,53 +426,28 @@ namespace EmailSender.Services
 
         public void SaveChanges(ObservableCollection<Receiver> receivers, FieldMappingSettingsModel FieldMapping)
         {
-            try
+            using (SQLiteConnection m_dbConnection = new SQLiteConnection($"Data Source={dbName};Version=3;"))
             {
-                logger.InfoSender("Save changes of list");
-                CreateFile(FieldMapping.receiverListFilePath);
-                FileInfo file = new FileInfo(FieldMapping.receiverListFilePath);
-                if (!file.Exists)
-                {
-                    logger.ErrorSender("Send list file not exist " + FieldMapping.receiverListFilePath);
-                    return;
-                }
-                ExcelPackage.LicenseContext = LicenseContext.NonCommercial;
-                int timeSaveStart = TimeUnixService.Timestamp();
-                using (ExcelPackage excelPackage = new ExcelPackage(file))
-                {
-                    ExcelWorksheet worksheet = excelPackage.Workbook.Worksheets.FirstOrDefault();
+                m_dbConnection.Open();
+                var sqlCommand = new SQLiteCommand(m_dbConnection);
+                sqlCommand.CommandText = "UPDATE receivers SET " +
+                    "StatusSend = @defValue, " +
+                    "WHERE StatusSend = @StatusSend";
+                
+                sqlCommand.Parameters.Clear();
+                sqlCommand.Parameters.AddWithValue("@defValue", _statuses.mailNotSend);
+                sqlCommand.Parameters.AddWithValue("@StatusSend", _statuses.mailSended);
 
-                    foreach (var receiver in receivers)
-                    {
-                        string index = receiver.IdReceiver.ToString();
-                        worksheet.Cells[FieldMapping.fieldValidateStatus + index].Value = receiver.StatusEmailExist;
-                        worksheet.Cells[FieldMapping.fieldSendingStatus + index].Value = receiver.StatusSend;
-                        worksheet.Cells[FieldMapping.fieldEmail + index].Value = receiver.Email;
-                        worksheet.Cells[FieldMapping.fieldOrganizationName + index].Value = receiver.CompanyName;
-                        worksheet.Cells[FieldMapping.fieldPersonName + index].Value = receiver.PersonName;
-                        worksheet.Cells[FieldMapping.fieldInn + index].Value = receiver.FieldInn;
-                        worksheet.Cells[FieldMapping.fieldOkvd + index].Value = receiver.FieldOkvd;
-                        worksheet.Cells[FieldMapping.fieldPhone + index].Value = receiver.FieldPhone;
-                        worksheet.Cells[FieldMapping.fieldAddress + index].Value = receiver.FieldAddress;
-                        worksheet.Cells[FieldMapping.fieldContractAmount + index].Value = receiver.FieldContractAmount;
-                        worksheet.Cells[FieldMapping.fieldDate1 + index].Value = receiver.FieldDate1;
-                        worksheet.Cells[FieldMapping.fieldDate2 + index].Value = receiver.FieldDate2;
-                        worksheet.Cells[FieldMapping.fieldDate3 + index].Value = receiver.FieldDate3;
-                        worksheet.Cells[FieldMapping.fieldRecord1 + index].Value = receiver.FieldRecord1;
-                        worksheet.Cells[FieldMapping.fieldRecord2 + index].Value = receiver.FieldRecord2;
-                        worksheet.Cells[FieldMapping.fieldRecord3 + index].Value = receiver.FieldRecord3;
-                    }
-                    //save file
-                    Byte[] bin = excelPackage.GetAsByteArray();
-                    File.WriteAllBytes(FieldMapping.receiverListFilePath, bin);
-                    //excelPackage.SaveAs(file);
+                try
+                {
+                    sqlCommand.ExecuteNonQuery();
                 }
-                int res = TimeUnixService.Timestamp() - timeSaveStart;
-                logger.InfoSender($"save process take {res.ToString()} sec");
-            }
-            catch (Exception ex)
-            {
-                logger.ErrorSender($"Save process get error {ex.Message}");
+                catch (Exception ex)
+                {
+                    logger.ErrorSender(ex.Message);
+                }
+
+                m_dbConnection.Close();
             }
         }
 

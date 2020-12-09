@@ -545,7 +545,12 @@ namespace EmailSender.ViewModels
         {
             if((_acc.ServerStatus != StatusServerOk) || (_acc.AccountStatus != StatusServerOk) || (receiver.StatusSend != StatusSended))
             {
-                if (ServerErrorCount > 10)
+                if((ServerErrorCount > 100)&&(ServerErrorCount % 10 == 0))
+                {
+                    _notification.ServerErrorMessage($"Сервер {_acc.Server} выдал ошибку: {_acc.ServerStatus}\n устраните сбой работы сервера");
+                }
+                
+                if (ServerErrorCount > 100000)
                 {
                     Execute.OnUIThread(() => {                        
                         isSenderRun = false;
