@@ -293,6 +293,7 @@ namespace EmailSender.ViewModels
             if (_dialog.OpenFileDialog() == true)
             {
                 OurMailsFilePath = _dialog.FilePath;
+
                 LoadOurReceivers();
             }
         }
@@ -315,7 +316,6 @@ namespace EmailSender.ViewModels
             _logger.InfoSender("STOP sending messages");
             isSenderRun = false;
             NotifyOfPropertyChange(nameof(this.CanStopSenderCommand));
-            _saver.SaveChangesAsync(_receivers, _fieldMapping);
         }
         public bool CanStopSenderCommand
         {
@@ -351,8 +351,16 @@ namespace EmailSender.ViewModels
         {
             if (File.Exists(OurMailsFilePath))
             {
-                var lines = File.ReadAllLines(OurMailsFilePath);
-                OurReceivers = new ObservableCollection<Receiver>();
+                if (OurReceivers != null)
+                {
+                    OurReceivers.Clear();
+                }
+                else
+                {
+                    OurReceivers = new ObservableCollection<Receiver>();
+                }               
+                
+                var lines = File.ReadAllLines(OurMailsFilePath);               
                 foreach (var line in lines)
                 {
                     OurReceivers.Add(new Receiver()
@@ -411,7 +419,7 @@ namespace EmailSender.ViewModels
                         countToOurMails++;
 
                         //add status of receiver to database
-                        //receiver.StatusSend = StatusSended;
+                        receiver.StatusSend = StatusSended;
                         _saver.SaveReceiver(receiver);
                     }
                     else

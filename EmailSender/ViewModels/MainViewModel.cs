@@ -15,15 +15,13 @@ namespace EmailSender.ViewModels
         public MainViewModel(IContainer ioc)
         {
             var logger = ioc.Get<ILogger>();
-            logger.InfoSender("Start app 2.0");
-
-            ViewSender = new SenderViewModel(ioc);
-            ViewAccount = new AccountViewModel(ioc);
-            ViewReader = new ReaderViewModel(ioc);
+            logger.InfoSender("Start app 2.0");           
+            ViewAccount = new AccountViewModel(ioc);           
             ViewNotification = new NotificationViewModel(ioc);
             FieldMapping = new FieldMappingViewModel(ioc);
             ViewLetterTemplate = new LetterTemplateViewModel(ioc);
-            
+            ViewSender = new SenderViewModel(ioc);
+            ViewReader = new ReaderViewModel(ioc);
         }
         public SenderViewModel ViewSender { set; get; }
         public AccountViewModel ViewAccount { get; set; }

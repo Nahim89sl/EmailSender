@@ -353,9 +353,7 @@ namespace EmailSender.ViewModels
             });
 
         }
-
-        
-        
+               
         private bool CheckFolder(string folder)
         {
             if (!Directory.Exists(folder))

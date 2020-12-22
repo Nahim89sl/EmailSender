@@ -26,11 +26,19 @@ namespace EmailSender.Services
 
         public ObservableCollection<Answer> ReadMails(string stopWords)
         {
-            ConvertMainAccToBoxAcc();
-            var service = new MailKitReader(LogManager.GetLogger("Reader")); 
-            var res = service.ReaderMails(emailBoxAkkaut,"Read","Trash", stopWords);
-            ConvertBoxAccToMainAcc();
-            return ConvetResults(res);
+            try
+            {
+                ConvertMainAccToBoxAcc();
+                var service = new MailKitReader(LogManager.GetLogger("Reader"));
+                var res = service.ReaderMails(emailBoxAkkaut, "Read", "Trash", stopWords);
+                ConvertBoxAccToMainAcc();
+                return ConvetResults(res);
+            }
+            catch(Exception ex)
+            {
+                logger.ErrorReader($"ReaderMailsService {ex.Message}");
+                return new ObservableCollection<Answer>();
+            }            
         }
 
         private void ConvertMainAccToBoxAcc()
