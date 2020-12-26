@@ -23,9 +23,12 @@ namespace EmailSender.Services
         private ObservableCollection<Receiver> _receivers;
         private const string dbName = "db.sqlite";
         private readonly IStatuses _statuses;
+        private IExcelWorker _excel;
+
 
 
         #region Constructor
+
         public LoadSaveReceiversSqlite(IContainer ioc)
         {
             logger = ioc.Get<ILogger>();
@@ -33,6 +36,7 @@ namespace EmailSender.Services
             ExcelPackage.LicenseContext = LicenseContext.NonCommercial;
             _receivers = ioc.Get<BindableCollection<Receiver>>();
             _statuses = ioc.Get<IStatuses>();
+            _excel = ioc.Get<IExcelWorker>();
         }
 
         #endregion
@@ -41,8 +45,10 @@ namespace EmailSender.Services
         //convertation from exel to database
         public void OpenAndLoad() 
         {
-            LoadReceiversFromExel(FieldMapping);
-            
+            //LoadReceiversFromExel(FieldMapping);
+
+            _excel.LoadReceivers(_receivers, FieldMapping);
+
             if (File.Exists(dbName))
             {
                 File.Delete(dbName);
@@ -196,116 +202,6 @@ namespace EmailSender.Services
 
         }
 
-        private void LoadReceiversFromExel(FieldMappingSettingsModel FieldMapping)
-        {
-            //create a fileinfo object of an excel file on the disk
-            FileInfo file = new FileInfo(FieldMapping.receiverListFilePath);
-
-            if (!file.Exists)
-            {
-                logger.ErrorSender("Send list file not exist " + FieldMapping.receiverListFilePath);
-                return;
-            }
-
-            ExcelPackage.LicenseContext = LicenseContext.NonCommercial;
-            _receivers.Clear();
-
-            //create a new Excel package from the file
-            using (ExcelPackage excelPackage = new ExcelPackage(file))
-            {
-                //create an instance of the the first sheet in the loaded file
-                ExcelWorksheet worksheet = excelPackage.Workbook.Worksheets.FirstOrDefault();
-
-                //count of rows in file
-                int rowCount = worksheet.Dimension.Rows;
-                for (int i = 1; i < rowCount; i++)
-                {
-                    var recaiver = new Receiver();
-                    recaiver.IdReceiver = i;
-
-
-                    recaiver.Email = worksheet.Cells[FieldMapping.fieldEmail + i.ToString()].Value?.ToString() ?? _statuses.defaultValue;
-
-                    
-                    if (FieldMapping.fieldValidateStatus != null)
-                    {
-                        recaiver.StatusEmailExist = worksheet.Cells[FieldMapping.fieldValidateStatus + i.ToString()].Value?.ToString() ?? _statuses.defaultValue;
-                    }
-                    if (FieldMapping.fieldSendingStatus != null)
-                    {
-                        recaiver.StatusSend = worksheet.Cells[FieldMapping.fieldSendingStatus + i.ToString()].Value?.ToString() ?? _statuses.defaultValue;
-                    }
-                    if (FieldMapping.fieldOrganizationName != null)
-                    {
-                        recaiver.CompanyName = worksheet.Cells[FieldMapping.fieldOrganizationName + i.ToString()].Value?.ToString() ?? string.Empty;
-                    }
-                    if (FieldMapping.fieldPersonName != null)
-                    {
-                        recaiver.PersonName = worksheet.Cells[FieldMapping.fieldPersonName + i.ToString()].Value?.ToString() ?? string.Empty;
-                    }
-                    if (FieldMapping.fieldInn != null)
-                    {
-                        recaiver.FieldInn = worksheet.Cells[FieldMapping.fieldInn + i.ToString()].Value?.ToString() ?? string.Empty;
-                    }
-                    if (FieldMapping.fieldOkvd != null)
-                    {
-                        recaiver.FieldOkvd = worksheet.Cells[FieldMapping.fieldOkvd + i.ToString()].Value?.ToString() ?? string.Empty;
-                    }
-                    if (FieldMapping.fieldPhone != null)
-                    {
-                        recaiver.FieldPhone = worksheet.Cells[FieldMapping.fieldPhone + i.ToString()].Value?.ToString() ?? string.Empty;
-                    }
-                    if (FieldMapping.fieldAddress != null)
-                    {
-                        recaiver.FieldAddress = worksheet.Cells[FieldMapping.fieldAddress + i.ToString()].Value?.ToString() ?? string.Empty;
-                    }
-                    if (FieldMapping.fieldContractAmount != null)
-                    {
-                        recaiver.FieldContractAmount = worksheet.Cells[FieldMapping.fieldContractAmount + i.ToString()].Value?.ToString() ?? string.Empty;
-                    }
-                    if (FieldMapping.fieldDate1 != null)
-                    {
-                        recaiver.FieldDate1 = worksheet.Cells[FieldMapping.fieldDate1 + i.ToString()].Value?.ToString() ?? string.Empty;
-                    }
-                    if (FieldMapping.fieldDate2 != null)
-                    {
-                        recaiver.FieldDate2 = worksheet.Cells[FieldMapping.fieldDate2 + i.ToString()].Value?.ToString() ?? string.Empty;
-                    }
-                    if (FieldMapping.fieldDate3 != null)
-                    {
-                        recaiver.FieldDate3 = worksheet.Cells[FieldMapping.fieldDate3 + i.ToString()].Value?.ToString() ?? string.Empty;
-                    }
-                    if (FieldMapping.fieldRecord1 != null)
-                    {
-                        recaiver.FieldRecord1 = worksheet.Cells[FieldMapping.fieldRecord1 + i.ToString()].Value?.ToString() ?? string.Empty;
-                    }
-                    if (FieldMapping.fieldRecord2 != null)
-                    {
-                        recaiver.FieldRecord2 = worksheet.Cells[FieldMapping.fieldRecord2 + i.ToString()].Value?.ToString() ?? string.Empty;
-                    }
-                    if (FieldMapping.fieldRecord3 != null)
-                    {
-                        recaiver.FieldRecord3 = worksheet.Cells[FieldMapping.fieldRecord3 + i.ToString()].Value?.ToString() ?? string.Empty;
-                    }
-
-
-                    //validate email address
-                    var resEmail = ValidateEmailAddress(recaiver.Email);
-                    if (resEmail == "")
-                    {
-                        recaiver.StatusEmailExist = "Wrong Email";
-                        recaiver.StatusSend = "Wrong Email";
-                    }
-                    else
-                    {
-                        recaiver.Email = resEmail;
-                    }
-                    _receivers.Add(recaiver);
-                }
-            }
-
-            logger.InfoSender($"Loaded {_receivers.Count.ToString()} receivers");
-        }
 
         private void CreateFile(string filename)
         {
@@ -456,29 +352,6 @@ namespace EmailSender.Services
             return Task.Run(() => {
                 SaveChanges(receivers, FieldMapping);
             });
-        }
-
-
-        public string ValidateEmailAddress(string emilAddress)
-        {
-            try
-            {
-                string addr = emilAddress.Replace(" ", "");
-                //check the last symbol . / \
-                var symb = addr.Substring(addr.Length - 1);
-                if ((symb == ".") || (symb == "/") || (symb == "\\"))
-                {
-                    addr = addr.Substring(0, addr.Length - 1);
-                }
-
-                addr = new MailAddress(addr).Address;
-                return addr.ToLower();
-            }
-            catch (Exception ex)
-            {
-                logger.ErrorSender($"ValidateEmailAddress {ex.Message}");
-                return "";
-            }
         }
 
     }

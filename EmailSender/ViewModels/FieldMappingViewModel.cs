@@ -1,20 +1,16 @@
 ﻿using Stylet;
-using System;
-using System.Collections.Generic;
-using System.Text;
 using EmailSender.Interfaces;
 using EmailSender.Models;
 using StyletIoC;
 using EmailSender.Settings;
 using EmailSender.Settings.Models;
-using System.Collections.ObjectModel;
 using System.IO;
-using EmailSender.Logger;
 
 namespace EmailSender.ViewModels
 {
     public class FieldMappingViewModel : PropertyChangedBase
     {
+        
         #region Private values
         private FieldMappingSettingsModel fieldSettings;
         private ILoadReceivers _loader;
@@ -42,8 +38,8 @@ namespace EmailSender.ViewModels
 
         #endregion
 
-
         #region Construector
+
         public FieldMappingViewModel(IContainer ioc)
         {
             var settings = ioc.Get<AppSettingsModel>();
@@ -66,6 +62,7 @@ namespace EmailSender.ViewModels
                 NotifyOfPropertyChange(nameof(this.Receivers));                
             }
         }
+
         #endregion
 
         #region Public props
@@ -306,8 +303,8 @@ namespace EmailSender.ViewModels
         }
         #endregion
 
-
         #region Commands
+
         public void LoadReseiversCommand()
         {
             if (_dialogService.OpenFileDialog() == true)
@@ -332,9 +329,8 @@ namespace EmailSender.ViewModels
                 _windMng.ShowMessageBox("Export данных в exel завершен");
             }
         }
+
         #endregion
-
-
 
     }
 }

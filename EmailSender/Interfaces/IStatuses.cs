@@ -13,6 +13,7 @@ namespace EmailSender.Interfaces
         string mailNotExist { get; }
         
         string defaultValue { get; }
+        string emptyField { get; }
 
         string serverOk { get; }
         string serverAuthErr { get; }
@@ -21,5 +22,7 @@ namespace EmailSender.Interfaces
         string accOk { get; }
         string accBlock { get; }
         string accAuthErr { get; }
+
+
     }
 }

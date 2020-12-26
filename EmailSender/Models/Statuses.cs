@@ -30,5 +30,7 @@ namespace EmailSender.Models
         public string accAuthErr => "ERROR";
 
         public string defaultValue => "no";
+
+        public string emptyField => string.Empty;
     }
 }

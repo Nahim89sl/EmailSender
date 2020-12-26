@@ -1,12 +1,7 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using EmailReaderWeb;
 using EmailSender.Interfaces;
-using EmailSender.Logger;
 using EmailSender.Models;
 using MimeKit;
 using NLog;
