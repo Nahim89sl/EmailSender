@@ -6,11 +6,13 @@ using EmailSender.Settings;
 using EmailSender.Settings.Models;
 using Stylet;
 using StyletIoC;
+using System;
 using System.Collections.ObjectModel;
 using System.IO;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using System.Timers;
 
 namespace EmailSender.ViewModels
 {
@@ -47,6 +49,9 @@ namespace EmailSender.ViewModels
 
         private Reporter _reporter;
         private IWindowManager _windMng;
+        //timer
+        System.Timers.Timer aTimer;
+
         #endregion
 
         #region Constructor
@@ -63,15 +68,25 @@ namespace EmailSender.ViewModels
             _windMng = ioc.Get<IWindowManager>();
 
             _reporter = new Reporter(ioc);
+            
+
+            //setting timer
+            aTimer = new System.Timers.Timer(5000);
+            aTimer.Elapsed += OnTimedEvent;
+            aTimer.AutoReset = true;
+            aTimer.Enabled = true;
+            aTimer.Stop();
+
             //autostart reader service
             if (IsAutoStart)
             {
-                ReadService();
+                aTimer.Start();
             }
         }
         #endregion
 
         #region Public fields
+
         //property of answering function to receivers        
         public bool IsAnswer
         {
@@ -267,7 +282,7 @@ namespace EmailSender.ViewModels
             isReadServiceWork = true;
             NotifyOfPropertyChange(nameof(this.CanStartReadServiceCommand));
             NotifyOfPropertyChange(nameof(this.CanStopReadServiceCommand));
-            ReadService();
+            aTimer.Start();
         }
         public bool CanStartReadServiceCommand
         {
@@ -277,6 +292,9 @@ namespace EmailSender.ViewModels
         public void StopReadServiceCommand()
         {
             isReadServiceWork = false;
+            NotifyOfPropertyChange(nameof(this.CanStartReadServiceCommand));
+            NotifyOfPropertyChange(nameof(this.CanStopReadServiceCommand));
+            aTimer.Stop();
         }
         public bool CanStopReadServiceCommand
         {
@@ -317,6 +335,7 @@ namespace EmailSender.ViewModels
         #endregion
 
         #region Private methods
+
         private void ReadService()
         {
             isReadServiceWork = true;
@@ -362,6 +381,17 @@ namespace EmailSender.ViewModels
                 return false;
             }
             return true;
+        }
+
+        private void OnTimedEvent(Object source, ElapsedEventArgs e)
+        {
+            if (nextTimeReadInt < TimeUnixService.Timestamp())
+            {
+                if (!isReadNow)
+                {
+                    ReadMailsCommand();
+                }
+            }
         }
 
         #endregion

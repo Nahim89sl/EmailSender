@@ -7,14 +7,11 @@ using EmailSender.Settings.Models;
 using Stylet;
 using StyletIoC;
 using System;
-using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.IO;
 using System.Linq;
-using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
-using System.Windows.Documents;
 
 namespace EmailSender.ViewModels
 {
@@ -64,11 +61,13 @@ namespace EmailSender.ViewModels
         private int _sendOurMail;
         private bool _isAutoStart;
         private bool isSenderRun;
+        private IOurReceiversWorker _ourReceiversWorker;
 
 
         #endregion
 
         #region Constructor
+
         public SenderViewModel(IContainer ioc)
         {
             _sender = ioc.Get<ISender>();
@@ -81,7 +80,8 @@ namespace EmailSender.ViewModels
             _notification = ioc.Get<INotification>();
             _acc = ioc.Get<MainAccount>();
             _saver = ioc.Get<ILoadReceivers>();
-            _fieldMapping = ioc.Get<AppSettingsModel>().FielMappingSettings;            
+            _fieldMapping = ioc.Get<AppSettingsModel>().FielMappingSettings;
+            _ourReceiversWorker = ioc.Get<IOurReceiversWorker>();
             textConv = new TextRundomizer();
             LoadIntervals();
             LoadOurReceivers();           
@@ -91,6 +91,7 @@ namespace EmailSender.ViewModels
                 StartSenderCommand();
             }
         }
+        
         #endregion
         
         #region  Public Props
@@ -258,7 +259,7 @@ namespace EmailSender.ViewModels
 
 
         public ObservableCollection<PauseInterval> PauseIntervals { get; set; }
-        public ObservableCollection<Receiver> OurReceivers { get; set; }
+        public BindableCollection<Receiver> OurReceivers { get; set; }
 
 
 
@@ -322,6 +323,10 @@ namespace EmailSender.ViewModels
             get { return isSenderRun; }
         }
 
+        #endregion
+
+        #region Private Methods
+
         private void LoadIntervals()
         {
             if (File.Exists(IntervalsFilePath))
@@ -349,26 +354,14 @@ namespace EmailSender.ViewModels
 
         private void LoadOurReceivers()
         {
-            if (File.Exists(OurMailsFilePath))
+            if (OurReceivers == null)
             {
-                if (OurReceivers != null)
-                {
-                    OurReceivers.Clear();
-                }
-                else
-                {
-                    OurReceivers = new ObservableCollection<Receiver>();
-                }               
-                
-                var lines = File.ReadAllLines(OurMailsFilePath);               
-                foreach (var line in lines)
-                {
-                    OurReceivers.Add(new Receiver()
-                    {
-                        Email = line,
-                        Count = 0
-                    });
-                }
+                OurReceivers = new BindableCollection<Receiver>();
+            }            
+            OurReceivers?.Clear();
+            if (File.Exists(OurMailsFilePath))
+            {         
+                _ourReceiversWorker.Load(OurReceivers, OurMailsFilePath);
                 NotifyOfPropertyChange(nameof(this.OurReceivers));
             }            
         }
@@ -465,7 +458,7 @@ namespace EmailSender.ViewModels
                 //change interval
                 if (nextChangeInterval < TimeUnixService.Timestamp())
                 {
-                    var inter = PauseIntervals.Where(a => a.Start > CurrentInterval.Start).OrderByDescending(st => st.Start).FirstOrDefault();
+                    var inter = PauseIntervals.Where(a => a.Start < CurrentInterval.Start).OrderByDescending(st => st.Start).FirstOrDefault();
                     if (inter != null)
                     {
                         CurrentInterval = inter;
@@ -494,33 +487,18 @@ namespace EmailSender.ViewModels
             {
                 _logger.ErrorSender($"Block MakePause error {ex.Message}");
                 throw ex;
-            }
-            
+            }           
         }
 
         private Receiver GetOurMail(Receiver receiver)
         {
-            var ourReceiver = OurReceivers.OrderBy(a => a.Count).FirstOrDefault();
-            if (ourReceiver != null)
+            var ourReceiver = _ourReceiversWorker.GetReadyReceiverForSend(OurReceivers, receiver, OurMailsFilePath);
+            if (ourReceiver == null)
             {
-                ourReceiver.Bcc = receiver.Bcc;
-                ourReceiver.CC = receiver.CC;
-                ourReceiver.CompanyName = receiver.CompanyName;
-                ourReceiver.FieldAddress = receiver.FieldAddress;
-                ourReceiver.FieldContractAmount = receiver.FieldContractAmount;
-                ourReceiver.FieldDate1 = receiver.FieldDate1;
-                ourReceiver.FieldDate2 = receiver.FieldDate2;
-                ourReceiver.FieldDate3 = receiver.FieldDate3;
-                ourReceiver.FieldInn = receiver.FieldInn;
-                ourReceiver.FieldOkvd = receiver.FieldOkvd;
-                ourReceiver.FieldPhone = receiver.FieldPhone;
-                ourReceiver.FieldRecord1 = receiver.FieldRecord1;
-                ourReceiver.FieldRecord2 = receiver.FieldRecord2;
-                ourReceiver.FieldRecord3 = receiver.FieldRecord3;
-                ourReceiver.Letter = receiver.Letter;
-                ourReceiver.PersonName = receiver.PersonName;
-                ourReceiver.Time = receiver.Time;
+                _logger.ErrorSender($"Не можем получить ативный аккаунт из базы Имитатора для отправки");
             }
+            _logger.InfoSender($"Отправили на свой ящик {ourReceiver?.Email}");
+            countToHidden = 0;
             return ourReceiver;
         }
 
@@ -529,9 +507,13 @@ namespace EmailSender.ViewModels
             if(countToHidden < SendToHidden)
             {
                 return new Receiver();
-            }            
-            var ourReceiver = OurReceivers.OrderBy(a => a.Count).FirstOrDefault();
-            _logger.InfoSender($"Hidden send to {ourReceiver.Email}");
+            }
+            var ourReceiver = _ourReceiversWorker.GetReadyReceiverForSend(OurReceivers,new Receiver(), OurMailsFilePath);
+            if (ourReceiver == null)
+            {
+                _logger.ErrorSender($"Не можем получить ативный аккаунт из базы Имитатора для отправки скрытой копии");
+            }
+            _logger.InfoSender($"Взяли ящик для скрытой копии {ourReceiver?.Email}");
             countToHidden = 0;
             return ourReceiver;
         }
@@ -578,6 +560,7 @@ namespace EmailSender.ViewModels
                 _logger.InfoSender($"{receiver.IdReceiver.ToString()} Mail to {receiver.Email} sended");               
             }
         }
+
         #endregion
     }
 }

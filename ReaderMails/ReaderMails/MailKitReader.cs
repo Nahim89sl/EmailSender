@@ -202,7 +202,7 @@ namespace ReaderMails
         //Get Subject
         public string GetEmailSubject(MimeMessage message)
         {
-            string subject = message?.Subject ?? "";
+            string subject = message?.Subject ?? "No_subject";
             if (subject != null)
             {
                 return subject;

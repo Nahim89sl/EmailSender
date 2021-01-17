@@ -59,7 +59,6 @@ namespace EmailSender.Services
             ImportDataToDb();
         }
 
-
         public ObservableCollection<Receiver> Load()
         {
             if (File.Exists(dbName))
@@ -103,6 +102,54 @@ namespace EmailSender.Services
                 }              
             }
             return _receivers;
+        }
+
+        public BindableCollection<Receiver> LoadOurReceivers(string dbPath)
+        {
+            BindableCollection<Receiver> receivers = new BindableCollection<Receiver>();
+            if (File.Exists(dbPath))
+            {
+                using (SQLiteConnection m_dbConnection = new SQLiteConnection($"Data Source={dbPath};Version=3;"))
+                {
+                    m_dbConnection.Open();
+                    var sqlCommand = new SQLiteCommand(m_dbConnection);
+                    sqlCommand.CommandText = "SELECT Id,Email FROM Akkaunts WHERE AkkState = 'ok'";
+                    var reader = sqlCommand.ExecuteReader();
+                    while (reader.Read())
+                    {
+                        var reseiver = new Receiver()
+                        {
+                            IdReceiver = int.Parse(reader["Id"].ToString()),
+                            Email = reader["Email"].ToString(),
+                        };
+                        receivers.Add(reseiver);
+                    }
+                }
+            }
+            return receivers;
+        }
+
+        public bool CheckStatusOfOurReceiver(Receiver receiver, string dbPath)
+        {
+            if (File.Exists(dbPath))
+            {
+                using (SQLiteConnection m_dbConnection = new SQLiteConnection($"Data Source={dbPath};Version=3;"))
+                {
+                    bool res = false;
+                    m_dbConnection.Open();
+                    var sqlCommand = new SQLiteCommand(m_dbConnection);
+                    sqlCommand.CommandText = $"SELECT AkkState FROM Akkaunts WHERE Id = {receiver.IdReceiver.ToString()}";
+                    var reader = sqlCommand.ExecuteReader();
+                    while (reader.Read())
+                    {
+                        if(reader["AkkState"].ToString() == "ok")
+                        {
+                            res = true;
+                        }
+                    }
+                }
+            }
+            return true;
         }
 
 

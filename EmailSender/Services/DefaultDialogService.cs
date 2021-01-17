@@ -14,7 +14,7 @@ namespace EmailSender.Services
         public bool OpenFileDialog()
         {
             OpenFileDialog openFileDialog = new OpenFileDialog();
-            openFileDialog.Filter = "exel files(.*xlsx)|*.xlsx|txt files (*.txt)|*.txt|All files (*.*)|*.*";
+            openFileDialog.Filter = "files (.*xlsx;*.txt;*.sqlite;*.db)|*.xlsx;*.txt;*.sqlite;*.db|All files (*.*)|*.*";
 
             if (openFileDialog.ShowDialog() == true)
             {

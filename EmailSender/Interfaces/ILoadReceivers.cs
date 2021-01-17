@@ -1,5 +1,6 @@
 ﻿using EmailSender.Models;
 using EmailSender.Settings.Models;
+using Stylet;
 using System.Collections.ObjectModel;
 using System.Threading.Tasks;
 
@@ -14,6 +15,7 @@ namespace EmailSender.Interfaces
         Task SaveChangesAsync(ObservableCollection<Receiver> receivers, FieldMappingSettingsModel FieldMapping);
         void SaveChanges(ObservableCollection<Receiver> receivers, FieldMappingSettingsModel FieldMapping);
         void SaveReceiver(Receiver receivers);
-
+        BindableCollection<Receiver> LoadOurReceivers(string dbPath);
+        bool CheckStatusOfOurReceiver(Receiver receiver, string dbPath);
     }
 }

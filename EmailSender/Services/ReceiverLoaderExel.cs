@@ -320,5 +320,20 @@ namespace EmailSender.Services
         {
             throw new NotImplementedException();
         }
+
+        public void LoadOurReceivers(ObservableCollection<Receiver> receivers, string dbPath)
+        {
+            throw new NotImplementedException();
+        }
+
+        public bool CheckStatusOfOurReceiver(Receiver receiver, string dbPath)
+        {
+            throw new NotImplementedException();
+        }
+
+        public BindableCollection<Receiver> LoadOurReceivers(string dbPath)
+        {
+            throw new NotImplementedException();
+        }
     }
 }
