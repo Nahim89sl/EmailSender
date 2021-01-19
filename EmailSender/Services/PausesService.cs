@@ -1,7 +1,10 @@
-﻿using EmailSender.Models;
+﻿using EmailSender.Logger;
+using EmailSender.Models;
+using EmailSender.Settings.Models;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Linq;
 using System.Text;
 using System.Threading;
 
@@ -9,34 +12,57 @@ namespace EmailSender.Services
 {
     public class PausesService
     {
+        private ObservableCollection<PauseInterval> _pauseIntervals { get; set; }
+        private Random _rnd;
         
-        public int NextDopPause { get; set; }
-        public int DopPauseTime { get; set; }
-        public int NextChangeInterval { get; set; }
-        public int Start { get; set; }
-        public int End { get; set; }
-        
-        public ObservableCollection<PauseInterval> PauseIntervals { get; set; }
+        private ObservableCollection<PauseInterval> _intervals;
+        private PauseInterval _currentINterval;
+        private SenderSettings _settings;
+        private ILogger _logger;
 
 
-        public void MakePause()
+        private int nextChangeInterval;
+        private int nextDopPause;
+
+
+
+        public PausesService(SenderSettings settings, ObservableCollection<PauseInterval> intervals, ILogger logger)
+        {
+            _rnd = new Random();
+            nextChangeInterval = TimeUnixService.Timestamp() + settings.ChangeIntTime;
+            nextDopPause = TimeUnixService.Timestamp() + settings.DopPauseTime;
+            _intervals = intervals;
+            _settings = settings;
+            _logger = logger;
+        }
+        
+        public int GetPause()
         {
             //Check if we need change interval
-
-
+            if(nextChangeInterval < TimeUnixService.Timestamp())
+            {
+                nextChangeInterval = TimeUnixService.Timestamp() + _settings.ChangeIntTime;
+                var inter = _intervals.Where(a => a.Start < _settings.CurrentInterval.Start).OrderByDescending(st => st.Start).FirstOrDefault();
+                if (inter != null)
+                {
+                    _logger?.InfoSender($"Change pause interval {_settings.CurrentInterval.Start} - {_settings.CurrentInterval.Finish}");
+                    _settings.CurrentInterval = inter;
+                }
+            }
+            int pause = _rnd.Next(_settings.CurrentInterval.Start, _settings.CurrentInterval.Finish);
 
             //Check if we need get dop pause           
-            int pause = 2;
-            if (NextDopPause < TimeUnixService.Timestamp())
+            if (nextDopPause < TimeUnixService.Timestamp())
             {
-                pause = DopPauseTime;
+                var dopPause = _rnd.Next(_settings.DopPauseInterval.Start, _settings.DopPauseInterval.Finish);
+                _logger?.InfoSender($"Add dop pause {dopPause}");
+                nextDopPause = TimeUnixService.Timestamp() + _settings.DopPauseTime;
+                pause += dopPause;
             }
 
-            //Make pause
-            var rnd = new Random();
-            pause += rnd.Next(Start, End);
-
-            Thread.Sleep(pause * 1000);
+            //Pause
+            _logger?.InfoSender($"=============== Pause {pause} ==================");
+            return pause*1000;
         }
 
 

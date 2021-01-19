@@ -15,7 +15,7 @@ namespace EmailSenderTests
         public void Create_Obj_Of_Class()
         {
             var loadReceiversMock = new Mock<ILoadReceivers>(); 
-            var obj = new ReceiverWorker(loadReceiversMock.Object);
+            var obj = new OurReceiversWorker(loadReceiversMock.Object);
             Assert.IsNotNull(obj);
         }
 
@@ -36,7 +36,7 @@ namespace EmailSenderTests
             loadReceiversMock.Setup(o => o.LoadOurReceivers(It.IsAny<string>())).Returns(receiversFromDb);
             loadReceiversMock.Setup(o => o.CheckStatusOfOurReceiver(It.IsAny<Receiver>(), It.IsAny<string>())).Returns(true);
             
-            var worker = new ReceiverWorker(loadReceiversMock.Object);
+            var worker = new OurReceiversWorker(loadReceiversMock.Object);
 
             BindableCollection<Receiver> receiversStart = new BindableCollection<Receiver>();
             Receiver receiver = new Receiver();
@@ -68,7 +68,7 @@ namespace EmailSenderTests
 
             loadReceiversMock.Setup(o => o.CheckStatusOfOurReceiver(It.IsAny<Receiver>(), It.IsAny<string>())).Returns(true);
 
-            var worker = new ReceiverWorker(loadReceiversMock.Object);
+            var worker = new OurReceiversWorker(loadReceiversMock.Object);
 
             Receiver receiver = new Receiver();
 
@@ -112,7 +112,7 @@ namespace EmailSenderTests
             loadReceiversMock.Setup(o => o.CheckStatusOfOurReceiver(loadedReceiver, It.IsAny<string>())).Returns(true);
             loadReceiversMock.Setup(o => o.CheckStatusOfOurReceiver(startReceiver, It.IsAny<string>())).Returns(false);
 
-            var worker = new ReceiverWorker(loadReceiversMock.Object);
+            var worker = new OurReceiversWorker(loadReceiversMock.Object);
 
             Receiver receiver = new Receiver();
 
@@ -136,7 +136,7 @@ namespace EmailSenderTests
             loadReceiversMock.Setup(o => o.LoadOurReceivers(It.IsAny<string>())).Returns(receiversFromDb);
             loadReceiversMock.Setup(o => o.CheckStatusOfOurReceiver(It.IsAny<Receiver>(), It.IsAny<string>())).Returns(false);
 
-            var worker = new ReceiverWorker(loadReceiversMock.Object);
+            var worker = new OurReceiversWorker(loadReceiversMock.Object);
             Receiver receiver = new Receiver();
 
             // Act

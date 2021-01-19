@@ -62,6 +62,7 @@ namespace EmailSender.ViewModels
         private bool _isAutoStart;
         private bool isSenderRun;
         private IOurReceiversWorker _ourReceiversWorker;
+        PausesService Pause;
 
 
         #endregion
@@ -84,7 +85,9 @@ namespace EmailSender.ViewModels
             _ourReceiversWorker = ioc.Get<IOurReceiversWorker>();
             textConv = new TextRundomizer();
             LoadIntervals();
-            LoadOurReceivers();           
+            LoadOurReceivers();
+
+            Pause = new PausesService(_settings, PauseIntervals, _logger);
 
             if (IsAutoStart)
             {
@@ -397,8 +400,8 @@ namespace EmailSender.ViewModels
                             CheckStatuses(ourReceiver);
                             
                             ourReceiver.Count++;
-                            countToOurMails = 0;                            
-                            MakePause();
+                            countToOurMails = 0;
+                            Thread.Sleep(Pause.GetPause());
                         }
 
                         _logger.InfoSender($"Try send to {receiver.Email}");
@@ -407,7 +410,7 @@ namespace EmailSender.ViewModels
                         await _sender.SendEmail(receiver, GetHidden(), receiver.Letter);                     
                         CheckStatuses(receiver);
 
-                        MakePause();                       
+                        Thread.Sleep(Pause.GetPause());
                         countToHidden++;
                         countToOurMails++;
 
@@ -440,55 +443,6 @@ namespace EmailSender.ViewModels
             });
         }
 
-        private void MakePause()
-        {
-            try
-            {
-                Random rnd = new Random();
-                //set values at first start
-                if (nextChangeInterval == 0)
-                {
-                    nextChangeInterval = TimeUnixService.Timestamp() + ChangeIntTime;
-                }
-                if (nextDopPause == 0)
-                {
-                    nextDopPause = TimeUnixService.Timestamp() + DopPauseTime;
-                }
-
-                //change interval
-                if (nextChangeInterval < TimeUnixService.Timestamp())
-                {
-                    var inter = PauseIntervals.Where(a => a.Start < CurrentInterval.Start).OrderByDescending(st => st.Start).FirstOrDefault();
-                    if (inter != null)
-                    {
-                        CurrentInterval = inter;
-                    }
-                    _logger.InfoSender($"Change pause interval {CurrentInterval.Start} - {CurrentInterval.Finish}");
-                    nextChangeInterval = TimeUnixService.Timestamp() + ChangeIntTime;
-                }
-
-                //set pause value
-                int pause = rnd.Next(CurrentInterval.Start, CurrentInterval.Finish);
-
-                //add dop pause to main pause
-                if (nextDopPause < TimeUnixService.Timestamp())
-                {
-                    var tmp = rnd.Next(DopPauseInterval.Start, DopPauseInterval.Finish);
-                    pause += tmp;
-                    nextDopPause = TimeUnixService.Timestamp() + DopPauseTime;
-                    _logger.InfoSender($"Add dop pause {tmp}");
-                }
-                _logger.InfoSender($"Set pause {pause} sec");
-
-                //make pause
-                Thread.Sleep(pause * 1000);
-            }
-            catch(Exception ex)
-            {
-                _logger.ErrorSender($"Block MakePause error {ex.Message}");
-                throw ex;
-            }           
-        }
 
         private Receiver GetOurMail(Receiver receiver)
         {
