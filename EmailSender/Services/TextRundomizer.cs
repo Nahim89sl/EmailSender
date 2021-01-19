@@ -1,7 +1,5 @@
 ﻿using EmailSender.Models;
 using System;
-using System.Collections.Generic;
-using System.Text;
 using System.Text.RegularExpressions;
 
 namespace EmailSender.Services
@@ -49,8 +47,8 @@ namespace EmailSender.Services
             text = text.Replace("[ContractAmount]", receiver.FieldContractAmount);
             text = text.Replace("[Address]", receiver.FieldAddress);
             text = text.Replace("[Date1]", receiver.FieldDate1);
-            text = text.Replace("[Date2]", receiver.FieldDate1);
-            text = text.Replace("[Date3]", receiver.FieldDate1);
+            text = text.Replace("[Date2]", receiver.FieldDate2);
+            text = text.Replace("[Date3]", receiver.FieldDate3);
             text = text.Replace("[Record1]", receiver.FieldRecord1);
             text = text.Replace("[Record2]", receiver.FieldRecord2);
             text = text.Replace("[Record3]", receiver.FieldRecord3);

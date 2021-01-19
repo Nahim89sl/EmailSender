@@ -12,11 +12,9 @@ namespace EmailSender.Services
 {
     public class PausesService
     {
-        private ObservableCollection<PauseInterval> _pauseIntervals { get; set; }
-        private Random _rnd;
-        
+       
+        private Random _rnd;        
         private ObservableCollection<PauseInterval> _intervals;
-        private PauseInterval _currentINterval;
         private SenderSettings _settings;
         private ILogger _logger;
 
@@ -34,6 +32,7 @@ namespace EmailSender.Services
             _intervals = intervals;
             _settings = settings;
             _logger = logger;
+            CheckCurrentInterval();
         }
         
         public int GetPause()
@@ -45,8 +44,12 @@ namespace EmailSender.Services
                 var inter = _intervals.Where(a => a.Start < _settings.CurrentInterval.Start).OrderByDescending(st => st.Start).FirstOrDefault();
                 if (inter != null)
                 {
-                    _logger?.InfoSender($"Change pause interval {_settings.CurrentInterval.Start} - {_settings.CurrentInterval.Finish}");
+                    _logger?.InfoSender($"Поменяли основной интервал паузы {_settings.CurrentInterval.Start} - {_settings.CurrentInterval.Finish}");
                     _settings.CurrentInterval = inter;
+                }
+                else
+                {
+                    _logger?.InfoSender($"Оставили прежний интервал {_settings.CurrentInterval.Start} - {_settings.CurrentInterval.Finish}");
                 }
             }
             int pause = _rnd.Next(_settings.CurrentInterval.Start, _settings.CurrentInterval.Finish);
@@ -55,7 +58,7 @@ namespace EmailSender.Services
             if (nextDopPause < TimeUnixService.Timestamp())
             {
                 var dopPause = _rnd.Next(_settings.DopPauseInterval.Start, _settings.DopPauseInterval.Finish);
-                _logger?.InfoSender($"Add dop pause {dopPause}");
+                _logger?.InfoSender($"Добавили дополнительную паузу {dopPause}");
                 nextDopPause = TimeUnixService.Timestamp() + _settings.DopPauseTime;
                 pause += dopPause;
             }
@@ -64,6 +67,24 @@ namespace EmailSender.Services
             _logger?.InfoSender($"=============== Pause {pause} ==================");
             return pause*1000;
         }
+        /// <summary>
+        /// if user set interval by hand very small we need overwrite this interval to smaller interval in list
+        /// </summary>
+        private void CheckCurrentInterval()
+        {
+            var inter = _intervals.Where(a => a.Start < _settings.CurrentInterval.Start).OrderByDescending(st => st.Start).FirstOrDefault();
+            if (inter == null)
+            {
+                inter = _intervals.Where(a => a.Start >= _settings.CurrentInterval.Start).OrderBy(st => st.Start).FirstOrDefault();
+                
+                if (inter != null)
+                {
+                    _settings.CurrentInterval = inter;
+                }
+            }
+            
+        }
+
 
 
     }
