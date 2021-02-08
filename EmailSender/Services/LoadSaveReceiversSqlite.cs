@@ -131,11 +131,12 @@ namespace EmailSender.Services
 
         public bool CheckStatusOfOurReceiver(Receiver receiver, string dbPath)
         {
+            bool res = false;
             if (File.Exists(dbPath))
             {
+                
                 using (SQLiteConnection m_dbConnection = new SQLiteConnection($"Data Source={dbPath};Version=3;"))
-                {
-                    bool res = false;
+                {                   
                     m_dbConnection.Open();
                     var sqlCommand = new SQLiteCommand(m_dbConnection);
                     sqlCommand.CommandText = $"SELECT AkkState FROM Akkaunts WHERE Id = {receiver.IdReceiver.ToString()}";
@@ -149,7 +150,7 @@ namespace EmailSender.Services
                     }
                 }
             }
-            return true;
+            return res;
         }
 
 
@@ -299,7 +300,7 @@ namespace EmailSender.Services
             }
         }
 
-        public void AddListToReport(string filename, ObservableCollection<Answer> letters, Receiver receiver)
+        public void AddListToReport(string filename, ObservableCollection<Answer> letters, Receiver receiver, string serverName)
         {
             FileInfo file = new FileInfo(filename);
             if (!file.Exists)
@@ -321,6 +322,7 @@ namespace EmailSender.Services
                     worksheet.Cells[rowCount, 3].Value = letter.Email;
                     worksheet.Cells[rowCount, 4].Value = letter.Subject;
                     worksheet.Cells[rowCount, 5].Value = letter.Text;
+                    worksheet.Cells[rowCount, 6].Value = serverName;
 
                     rowCount++;
                 }
@@ -328,7 +330,7 @@ namespace EmailSender.Services
             }
         }
 
-        public void AddToReport(string filename, Answer letter, Receiver receiver)
+        public void AddToReport(string filename, Answer letter, Receiver receiver, string serverName)
         {
             FileInfo file = new FileInfo(filename);
             if (!file.Exists)
@@ -353,6 +355,7 @@ namespace EmailSender.Services
                     worksheet.Cells[rowCount, 4].Value = letter.Email;
                     worksheet.Cells[rowCount, 5].Value = letter.Subject;
                     worksheet.Cells[rowCount, 6].Value = letter.Text;
+                    worksheet.Cells[rowCount, 7].Value = serverName;
 
                     //save result
                     Byte[] bin = excelPackage.GetAsByteArray();

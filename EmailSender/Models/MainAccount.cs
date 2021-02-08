@@ -14,5 +14,6 @@ namespace EmailSender.Models
         public string AccountStatus { get; set; }
         public int Port { get; set; }
         public bool ReaderOnStart { get; set; }
+        public string ServerLabelName { get; set; } = "";
     }
 }

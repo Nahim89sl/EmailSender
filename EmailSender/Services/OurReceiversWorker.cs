@@ -12,6 +12,7 @@ namespace EmailSender.Services
     public class OurReceiversWorker : IOurReceiversWorker
     {
         private readonly ILoadReceivers _dbWorker;
+        private int iterationCounter = 0;
 
         #region Constructor
 
@@ -36,9 +37,11 @@ namespace EmailSender.Services
             int maxCount = 10;
             while (ourReceiver == null)
             {
+                iterationCounter++;
                 //if list if receivers too short than we need reload it
-                if (receivers.Count < 5)
+                if ((receivers.Count < 5)&& (iterationCounter > 150))
                 {
+                    iterationCounter = 0;
                     var newReceivers = _dbWorker.LoadOurReceivers(dbPath);
                     if (newReceivers.Count < 1)
                     {

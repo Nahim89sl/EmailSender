@@ -39,6 +39,9 @@
                 <Label Content="Status:"/>
                 <Label Content="{Binding SrvState}"/>
             </StackPanel>
+
+            <Label Content="Server label Name"/>
+            <TextBox Text="{Binding ServerLabelName}"/>
         </StackPanel>
 
         

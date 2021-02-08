@@ -196,7 +196,7 @@ namespace EmailSender.Services
             });            
         }
 
-        public void AddListToReport(string filename, ObservableCollection<Answer> letters, Receiver receiver)
+        public void AddListToReport(string filename, ObservableCollection<Answer> letters, Receiver receiver, string serverName)
         {
 
             try { 
@@ -233,7 +233,7 @@ namespace EmailSender.Services
             }
         }
 
-        public void AddToReport(string filename, Answer letter, Receiver receiver)
+        public void AddToReport(string filename, Answer letter, Receiver receiver, string serverName)
         {
             try
             {

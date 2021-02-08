@@ -57,8 +57,8 @@ namespace EmailSender.Services
                         _dbService.SaveReceiver(receiver);
                         _notification.AnswerGetMessage($"{answ.Email}\n {answ.Subject}");
                     }
-                    _reporter.AddToReport(Path.Combine(_settings.ReportFolder_1, $"{_account.Server}.xlsx"), answ, receiver);
-                    _reporter.AddToReport(Path.Combine(_settings.ReportFolder_2, $"{_account.Server}.xlsx"), answ, receiver);
+                    _reporter.AddToReport(Path.Combine(_settings.ReportFolder_1, $"{_account.Server}.xlsx"), answ, receiver, _account.ServerLabelName);
+                    _reporter.AddToReport(Path.Combine(_settings.ReportFolder_2, $"{_account.Server}.xlsx"), answ, receiver, _account.ServerLabelName);
                     _logger.InfoReader($"Add to report!{answ.Email}");
                 }
             }

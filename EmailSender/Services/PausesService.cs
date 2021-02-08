@@ -41,7 +41,7 @@ namespace EmailSender.Services
             if(nextChangeInterval < TimeUnixService.Timestamp())
             {
                 nextChangeInterval = TimeUnixService.Timestamp() + _settings.ChangeIntTime;
-                var inter = _intervals.Where(a => a.Start < _settings.CurrentInterval.Start).OrderByDescending(st => st.Start).FirstOrDefault();
+                var inter = _intervals?.Where(a => a.Start < _settings.CurrentInterval.Start).OrderByDescending(st => st.Start).FirstOrDefault();
                 if (inter != null)
                 {
                     _logger?.InfoSender($"Поменяли основной интервал паузы {_settings.CurrentInterval.Start} - {_settings.CurrentInterval.Finish}");
@@ -72,10 +72,10 @@ namespace EmailSender.Services
         /// </summary>
         private void CheckCurrentInterval()
         {
-            var inter = _intervals.Where(a => a.Start < _settings.CurrentInterval.Start).OrderByDescending(st => st.Start).FirstOrDefault();
+            PauseInterval inter = _intervals?.Where(a => a.Start < _settings.CurrentInterval.Start).OrderByDescending(st => st.Start).FirstOrDefault();
             if (inter == null)
             {
-                inter = _intervals.Where(a => a.Start >= _settings.CurrentInterval.Start).OrderBy(st => st.Start).FirstOrDefault();
+                inter = _intervals?.Where(a => a.Start >= _settings.CurrentInterval.Start).OrderBy(st => st.Start).FirstOrDefault();
                 
                 if (inter != null)
                 {

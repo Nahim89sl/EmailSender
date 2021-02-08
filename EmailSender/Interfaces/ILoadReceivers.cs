@@ -10,8 +10,8 @@ namespace EmailSender.Interfaces
     {
         ObservableCollection<Receiver> Load();
         void OpenAndLoad();
-        void AddListToReport(string filename, ObservableCollection<Answer> letters, Receiver receiver);
-        void AddToReport(string filename, Answer letter, Receiver receiver);
+        void AddListToReport(string filename, ObservableCollection<Answer> letters, Receiver receiver, string serverName);
+        void AddToReport(string filename, Answer letter, Receiver receiver, string serverName);
         Task SaveChangesAsync(ObservableCollection<Receiver> receivers, FieldMappingSettingsModel FieldMapping);
         void SaveChanges(ObservableCollection<Receiver> receivers, FieldMappingSettingsModel FieldMapping);
         void SaveReceiver(Receiver receivers);

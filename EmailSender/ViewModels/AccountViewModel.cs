@@ -103,6 +103,21 @@ namespace EmailSender.ViewModels
             }
         }
 
+        private string _serverLabelName;
+
+        public string ServerLabelName 
+        {
+            get
+            {                
+                return MainAccount.ServerLabelName;
+            }
+            set
+            {
+                SetAndNotify(ref this._serverLabelName, value);
+                MainAccount.ServerLabelName = _serverLabelName;
+            }
+        }
+
         //test receiver address
         public String ReceiverAddress { get; set; }
         public string TestSubject { get; set; }
