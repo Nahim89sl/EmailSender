@@ -277,11 +277,7 @@ namespace EmailSender.Services
             using (ExcelPackage excelPackage = new ExcelPackage())
             {
                 //Create the WorkSheet
-                ExcelWorksheet worksheet = excelPackage.Workbook.Worksheets.Add("Report");
-
-                //Add some text to cell A1
-                worksheet.Cells["A1"].Value = "Reports of answers";
-
+                ExcelWorksheet worksheet = excelPackage.Workbook.Worksheets.Add("book1");
                 //Save your file
                 FileInfo fi = new FileInfo(filename);
                 excelPackage.SaveAs(fi);

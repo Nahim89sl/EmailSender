@@ -1,4 +1,5 @@
 ﻿using EmailSender.Interfaces;
+using EmailSender.Logger;
 using EmailSender.Models;
 using Stylet;
 using System.Linq;
@@ -13,12 +14,14 @@ namespace EmailSender.Services
     {
         private readonly ILoadReceivers _dbWorker;
         private int iterationCounter = 0;
+        private ILogger _logger;
 
         #region Constructor
 
-        public OurReceiversWorker(ILoadReceivers dbWorker)
+        public OurReceiversWorker(ILoadReceivers dbWorker, ILogger logger)
         {
             _dbWorker = dbWorker;
+            _logger = logger;
         }
 
         #endregion
@@ -45,7 +48,8 @@ namespace EmailSender.Services
                     var newReceivers = _dbWorker.LoadOurReceivers(dbPath);
                     if (newReceivers.Count < 1)
                     {
-                        return null;
+                        _logger.ErrorReader($"В базе данных своих аккаунтов нет рабочих аккаунтов {dbPath}") ;
+                        return null;                       
                     }
                     else
                     {
@@ -67,12 +71,18 @@ namespace EmailSender.Services
                     {
                         //if receiver is blocked than we need to del it and take enother receiver
                         receivers.Remove(ourReceiver);
+                        _logger.ErrorSender($"Попался заблокированный аккаунт {ourReceiver.Email}");
                         ourReceiver = null;
                     }
                 }
                 if (count > maxCount)
                 {
-                    return receivers.OrderBy(a => a.Count).FirstOrDefault();
+                    ourReceiver = receivers.OrderBy(a => a.Count).FirstOrDefault();
+                    if(ourReceiver != null)
+                    {
+                        return CloneReceivcerData(ourReceiver, receiver);
+                    }
+                    _logger.ErrorReader($"Не получили свой email из базы");
                 }
                 count++;
             }
