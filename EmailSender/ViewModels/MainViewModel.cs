@@ -15,7 +15,7 @@ namespace EmailSender.ViewModels
         public MainViewModel(IContainer ioc)
         {
             var logger = ioc.Get<ILogger>();
-            logger.InfoSender("Start app 2.0");           
+            logger.InfoSender("Start app 2.0.1");           
             ViewAccount = new AccountViewModel(ioc);           
             ViewNotification = new NotificationViewModel(ioc);
             FieldMapping = new FieldMappingViewModel(ioc);

@@ -17,6 +17,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Tests", "Tests", "{D08C2409
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "EmailSenderTests", "..\EmailSenderTests\EmailSenderTests.csproj", "{14F38C17-545F-43F2-8647-8311C470563D}"
 EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AppCommon", "..\AppCommon\AppCommon.csproj", "{34E0A010-850A-4245-917A-C034DE19CD7F}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -47,6 +49,10 @@ Global
 		{14F38C17-545F-43F2-8647-8311C470563D}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{14F38C17-545F-43F2-8647-8311C470563D}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{14F38C17-545F-43F2-8647-8311C470563D}.Release|Any CPU.Build.0 = Release|Any CPU
+		{34E0A010-850A-4245-917A-C034DE19CD7F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{34E0A010-850A-4245-917A-C034DE19CD7F}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{34E0A010-850A-4245-917A-C034DE19CD7F}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{34E0A010-850A-4245-917A-C034DE19CD7F}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

@@ -12,6 +12,8 @@ using System.Runtime.CompilerServices;
 using System.Text;
 using System.Text.RegularExpressions;
 using MailKit.Search;
+using AppCommon.Interfaces;
+using AppCommon.MailObj;
 
 
 //make visible all internal methods for our test library
@@ -36,9 +38,8 @@ namespace ReaderMails
             _libName = "ReaderMail";
         }
 
-        public ObservableCollection<MimeMessage> ReaderMails(EmailBoxAkkaut akkaunt, string destFolderName, string trashFolderName, string stopWords)
+        public IList<IMailAnswer> ReaderMails(EmailBoxAkkaut akkaunt, string destFolderName, string trashFolderName, string stopWords)
         {
-            ObservableCollection<MimeMessage> resMessages = null;
             //try connect to server
             ConnectToServer(akkaunt);
 
@@ -69,12 +70,11 @@ namespace ReaderMails
                         return null;
                     }
                     _logger.Info($"{_libName} Destination folder - {_destFolder.FullName};  Trash folder - {_trashFolder.FullName}");
-                    resMessages = FilterMailsBySubject(stopWords);
-                    return resMessages;
+                    return FilterMailsBySubject(stopWords);
                 }catch(Exception ex)
                 {
                     _logger.Error($"ReaderMails {ex.Message}");
-                    return resMessages;
+                    return null;
                 }              
             }
             _logger.Error($"{_libName} Akkaunt status is {akkaunt.AccountStatus}");
@@ -82,9 +82,9 @@ namespace ReaderMails
         }
         
         //public messages by subject
-        public ObservableCollection<MimeMessage> FilterMailsBySubject(string stopWords)
+        public IList<IMailAnswer> FilterMailsBySubject(string stopWords)
         {
-            ObservableCollection<MimeMessage> answerReceivers = new ObservableCollection<MimeMessage>();
+            IList<IMailAnswer> answerReceivers = new List<IMailAnswer>();
             try
             {
                 
@@ -111,11 +111,18 @@ namespace ReaderMails
         }
 
         //sort mail by subject
-        public MimeMessage FilterMailBySubject(UniqueId uidMail, string stopWords)
+        public IMailAnswer FilterMailBySubject(UniqueId uidMail, string stopWords)
         {
             try
             {
                 var message = _imapClient.Inbox.GetMessage(uidMail);
+                if (message != null) 
+                {
+                    _logger.Error($"Can't get message from uid {uidMail}");
+                    return null; 
+                }
+                var answer = new MailAnswer() { Message = message, Status = MailStatus.Empty };
+                
                 string subject = GetEmailSubject(message);
                 //if stop words exist than return false
                 if (ExistStopWords(subject, stopWords))
@@ -123,16 +130,18 @@ namespace ReaderMails
                     _imapClient.Inbox.MoveTo(uidMail, _trashFolder);
                     _imapClient.Inbox.AddFlags(uidMail, MessageFlags.Seen, true); //mark is read
                     _logger.Info($"{_libName} {subject} move to Trash");
-                    return null;
+                    answer.Status = MailStatus.Good;
                 }
                 else
                 {
                     _imapClient.Inbox.MoveTo(uidMail, _destFolder);
                     //_imapClient.Inbox.AddFlags(uidMail, MessageFlags.Seen, true); //mark is read
                     _logger.Info($"{_libName}  Subject: {subject}  -- move to {_destFolder.FullName}");
-                    return message;
+                    answer.Status = MailStatus.Block;
                 }
-            }catch(Exception ex)
+                return answer;
+            }
+            catch(Exception ex)
             {
                 _logger.Error($"FilterMailBySubject {ex.Message}");
                 return null;

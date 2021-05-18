@@ -42,13 +42,13 @@ namespace EmailSender.Services
             {
                 iterationCounter++;
                 //if list if receivers too short than we need reload it
-                if ((receivers.Count < 5)&& (iterationCounter > 150))
+                if ((receivers.Count < 5)||(iterationCounter > 150))
                 {
                     iterationCounter = 0;
                     var newReceivers = _dbWorker.LoadOurReceivers(dbPath);
                     if (newReceivers.Count < 1)
                     {
-                        _logger.ErrorReader($"В базе данных своих аккаунтов нет рабочих аккаунтов {dbPath}") ;
+                        _logger.ErrorSender($"В базе данных своих аккаунтов нет рабочих аккаунтов {dbPath}");
                         return null;                       
                     }
                     else
@@ -58,6 +58,7 @@ namespace EmailSender.Services
                 }
                 //get receiver from list
                 ourReceiver = receivers.OrderBy(a => a.Count).FirstOrDefault();
+                _logger.InfoSender($"Взяли свой аккаунт {ourReceiver.Email}");
 
                 //check the status of this receiver in db
                 if (ourReceiver != null)
@@ -82,7 +83,7 @@ namespace EmailSender.Services
                     {
                         return CloneReceivcerData(ourReceiver, receiver);
                     }
-                    _logger.ErrorReader($"Не получили свой email из базы");
+                    _logger.ErrorSender($"Не получили свой email из базы");
                 }
                 count++;
             }
