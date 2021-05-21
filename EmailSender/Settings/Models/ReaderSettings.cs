@@ -13,6 +13,9 @@ namespace EmailSender.Settings.Models
         public string ReportFolder_2 { get; set; }
         public Letter AnswerLetter { get; set; }        
         public string StopWords { get; set; }
+        public string WordsNotExistMail { get; set; }
+        public string WordsSpamMail { get; set; }
+        public string EmailBlackList { get; set; }
 
         public bool IsAutoStart { get; set; }
         public bool IsAnswer { get; set; }

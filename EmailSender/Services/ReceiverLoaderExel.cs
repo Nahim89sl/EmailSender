@@ -12,6 +12,7 @@ using System.Net.Mail;
 using EmailSender.Interfaces;
 using System.Threading.Tasks;
 using Stylet;
+using AppCommon.Interfaces;
 
 namespace EmailSender.Services
 {
@@ -233,7 +234,7 @@ namespace EmailSender.Services
             }
         }
 
-        public void AddToReport(string filename, Answer letter, Receiver receiver, string serverName)
+        public void AddToReport(string filename, IMailAnswer letter, Receiver receiver, string serverName)
         {
             try
             {
@@ -255,9 +256,9 @@ namespace EmailSender.Services
                     worksheet.Cells[rowCount, 2].Value = receiver?.CompanyName ?? "";
 
                     worksheet.Cells[rowCount, 3].Value = letter.From;
-                    worksheet.Cells[rowCount, 4].Value = letter.Email;
-                    worksheet.Cells[rowCount, 5].Value = letter.Subject;
-                    worksheet.Cells[rowCount, 6].Value = letter.Text;
+                    worksheet.Cells[rowCount, 4].Value = letter.EmailAddress;
+                    worksheet.Cells[rowCount, 5].Value = letter.EmailSubject;
+                    worksheet.Cells[rowCount, 6].Value = letter.EmailText;
 
                     //save result
                     Byte[] bin = excelPackage.GetAsByteArray();

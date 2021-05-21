@@ -12,6 +12,7 @@ using System.IO;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using System.Windows;
 
 namespace EmailSender.ViewModels
 {
@@ -61,6 +62,9 @@ namespace EmailSender.ViewModels
         private int _sendOurMail;
         private bool _isAutoStart;
         private bool isSenderRun;
+        private ISettings settingsService;
+        private AppSettingsModel _globalSettings;
+
         private IOurReceiversWorker _ourReceiversWorker;
         PausesService Pause;
 
@@ -73,7 +77,8 @@ namespace EmailSender.ViewModels
         {
             _sender = ioc.Get<ISender>();
             _logger = ioc.Get<ILogger>();
-            _settings = ioc.Get<AppSettingsModel>().SenderSettings;
+            _globalSettings = ioc.Get<AppSettingsModel>();
+            _settings = _globalSettings.SenderSettings;
             _dialog = ioc.Get<IDialogService>();
             _receivers = ioc.Get<BindableCollection<Receiver>>();
             _templateLetter = ioc.Get<AppSettingsModel>().LetterTemplate;
@@ -83,6 +88,7 @@ namespace EmailSender.ViewModels
             _saver = ioc.Get<ILoadReceivers>();
             _fieldMapping = ioc.Get<AppSettingsModel>().FielMappingSettings;
             _ourReceiversWorker = ioc.Get<IOurReceiversWorker>();
+            settingsService = ioc.Get<ISettings>();
             textConv = new TextRundomizer();
             LoadIntervals();
             LoadOurReceivers();
@@ -292,6 +298,7 @@ namespace EmailSender.ViewModels
                 LoadIntervals();
             }
         }
+
         public void LoadOurReceiversCommand()
         {
             if (_dialog.OpenFileDialog() == true)
@@ -302,7 +309,12 @@ namespace EmailSender.ViewModels
             }
         }
 
-        
+        public void SaveSettingsCommand()
+        {
+            settingsService.Save(_globalSettings);
+            MessageBox.Show("Настройки сохранены");
+        }
+
         //Start sender
         public void StartSenderCommand()
         {

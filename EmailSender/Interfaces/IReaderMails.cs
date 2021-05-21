@@ -1,11 +1,10 @@
-﻿using EmailSender.Models;
-using System.Collections.ObjectModel;
-using System.Threading.Tasks;
+﻿using AppCommon.Interfaces;
+using System.Collections.Generic;
 
 namespace EmailSender.Interfaces
 {
     public interface IReaderMails
     {
-        ObservableCollection<Answer> ReadMails(string stopWords);
+        IList<IMailAnswer> ReadMails(string stopWords);
     }
 }

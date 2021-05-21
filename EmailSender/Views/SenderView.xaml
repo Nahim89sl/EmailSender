@@ -259,6 +259,18 @@
             
         </StackPanel>
 
+        <Button 
+            HorizontalAlignment="Center"
+            VerticalAlignment="Center"
+            Background="AliceBlue"
+            Grid.Column="5"
+            Grid.Row="4"
+            Margin="5"
+            Width="Auto"
+            Content="Сохранить настройки"
+            Command="{s:Action SaveSettingsCommand}"
+            />
+
 
     </Grid>
 </UserControl>

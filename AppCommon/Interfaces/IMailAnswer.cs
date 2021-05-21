@@ -7,5 +7,10 @@ namespace AppCommon.Interfaces
     {
         MimeMessage Message { get; set; }
         MailStatus Status { get; set; }
+
+        string From { get; }
+        string EmailAddress { get; }
+        string EmailSubject { get; }
+        string EmailText { get; }
     }
 }

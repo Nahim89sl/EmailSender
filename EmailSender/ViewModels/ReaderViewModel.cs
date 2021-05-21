@@ -1,4 +1,5 @@
-﻿using EmailSender.Interfaces;
+﻿using AppCommon.Interfaces;
+using EmailSender.Interfaces;
 using EmailSender.Logger;
 using EmailSender.Models;
 using EmailSender.Services;
@@ -7,6 +8,7 @@ using EmailSender.Settings.Models;
 using Stylet;
 using StyletIoC;
 using System;
+using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.IO;
 using System.Linq;
@@ -20,10 +22,8 @@ namespace EmailSender.ViewModels
     {
         #region Private fields
         private ILogger _logger;
-        private ISender _sender;
         private ReaderSettings _settings;
         private MainAccount _account;
-        private INotification _notification;
         private IDialogService _dialog;
         private IReaderMails _reader;
         private BindableCollection<Receiver> _receivers;
@@ -33,6 +33,7 @@ namespace EmailSender.ViewModels
         private string _textAnswer;
         private string _subjectLetter;
         private string _stopWords;
+        private string _wordsNotExistMails;
         private string _reportFolder_1;
         private string _reportFolder_2;
         private string _accountState;
@@ -55,13 +56,12 @@ namespace EmailSender.ViewModels
         #endregion
 
         #region Constructor
+
         public ReaderViewModel(IContainer ioc)
         {
-            _sender = ioc.Get<ISender>();
             _logger = ioc.Get<ILogger>();
             _settings = ioc.Get<AppSettingsModel>().ReaderSettings;
             _account = ioc.Get<AppSettingsModel>().MainAccount;
-            _notification = ioc.Get<INotification>();
             _dialog = ioc.Get<IDialogService>();
             _reader = ioc.Get<IReaderMails>();
             _receivers = ioc.Get<BindableCollection<Receiver>>();
@@ -178,6 +178,27 @@ namespace EmailSender.ViewModels
             }
         }
 
+        //Stop words for filtring unexist mails
+        public string WordsNotExistMail
+        {
+            get
+            {
+                _wordsNotExistMails = _settings.WordsNotExistMail;
+                return _wordsNotExistMails;
+            }
+            set
+            {
+                SetAndNotify(ref this._stopWords, value);
+                _settings.StopWords = value;
+            }
+        }
+
+        //Stop words for determination our mails in spam
+        public string WordsSpamMail { get; set; }
+
+        //Stop List of balck list mails
+        public string EmailBlackList { get; set; }
+        
         //Report folder 1
         public string ReportFolder_1
         {
@@ -315,7 +336,7 @@ namespace EmailSender.ViewModels
             CheckFolder(ReportFolder_2);
 
             Task.Run(() => {
-                ObservableCollection<Answer> answers = _reader.ReadMails(StopWords);
+                IList<IMailAnswer> answers = _reader.ReadMails(StopWords);
                 //ObservableCollection<Answer> answers = new ObservableCollection<Answer>();
 
                 _logger.InfoReader($"Finish reading, get answers {answers.Count.ToString()}");

@@ -11,5 +11,7 @@ namespace AppCommon.MailObj
         public string Pass { get; set; }
         public int Port { get; set; }
         public string AccountStatus { get; set; }
+        public bool ReaderOnStart { get; set; }
+        public string ServerLabelName { get; set; }
     }
 }

@@ -1,10 +1,11 @@
-﻿using System;
+﻿using AppCommon.Interfaces;
+using System;
 using System.Collections.Generic;
 using System.Text;
 
 namespace EmailSender.Models
 {
-    public class MainAccount
+    public class MainAccount : IMailAkk
     {
         public string Protocol { get; set; }
         public string Server { get; set; }

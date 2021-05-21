@@ -75,12 +75,27 @@
                 />
             </StackPanel>
 
-            <StackPanel Margin="5"   Orientation="Vertical">
-                <Label
+            <Label
                     Margin="5"
                     Content="Стоп слова писать нужно через |"                            
                 />
-                <TextBox 
+            
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition/>
+                    <ColumnDefinition/>
+                </Grid.ColumnDefinitions>
+                <Grid.RowDefinitions>
+                    <RowDefinition/>
+                    <RowDefinition/>
+                </Grid.RowDefinitions>
+
+                <StackPanel Grid.Row="0" Grid.Column="0" Margin="5"   Orientation="Vertical">
+                    <Label
+                    Margin="5"
+                    Content="Главная фильтрация"                            
+                />
+                    <TextBox 
                     Height="90"
                     Margin="5"
                     TextWrapping="Wrap"
@@ -89,7 +104,58 @@
                     VerticalScrollBarVisibility="Auto"
                     Text="{Binding StopWords}"
                 />
-            </StackPanel>
+                </StackPanel>
+
+                <StackPanel Grid.Row="0" Grid.Column="1" Margin="5"   Orientation="Vertical">
+                    <Label
+                    Margin="5"
+                    Content="Слова в тексте письма про спам"                            
+                />
+                    <TextBox 
+                    Height="90"
+                    Margin="5"
+                    TextWrapping="Wrap"
+                    AcceptsReturn="True"
+                    HorizontalScrollBarVisibility="Disabled"
+                    VerticalScrollBarVisibility="Auto"
+                    Text="{Binding WordsSpamMail}"
+                />
+                </StackPanel>
+
+                <StackPanel Grid.Row="1" Grid.Column="0" Margin="5"   Orientation="Vertical">
+                    <Label
+                    Margin="5"
+                    Content="Слова из писем про несуществующий ящик"                            
+                />
+                    <TextBox 
+                    Height="80"
+                    Margin="5"
+                    TextWrapping="Wrap"
+                    AcceptsReturn="True"
+                    HorizontalScrollBarVisibility="Disabled"
+                    VerticalScrollBarVisibility="Auto"
+                    Text="{Binding WordsNotExistMail}"
+                />
+                </StackPanel>
+
+                <StackPanel Grid.Row="1" Grid.Column="1" Margin="5"   Orientation="Vertical">
+                    <Label
+                    Margin="5"
+                    Content="Список email-ов для удаления"                            
+                />
+                    <TextBox 
+                    Height="80"
+                    Margin="5"
+                    TextWrapping="Wrap"
+                    AcceptsReturn="True"
+                    HorizontalScrollBarVisibility="Disabled"
+                    VerticalScrollBarVisibility="Auto"
+                    Text="{Binding EmailBlackList}"
+                />
+                </StackPanel>
+
+            </Grid>
+            
         </StackPanel>
         
 

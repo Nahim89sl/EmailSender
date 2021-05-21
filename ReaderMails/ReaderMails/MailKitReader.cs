@@ -1,26 +1,30 @@
 ﻿using MailKit;
 using MailKit.Net.Imap;
 using MailKit.Security;
-using MimeKit;
 using NLog;
 using System;
 using System.Collections.Generic;
-using System.Collections.ObjectModel;
-using System.IO;
 using System.Linq;
-using System.Runtime.CompilerServices;
-using System.Text;
 using System.Text.RegularExpressions;
 using MailKit.Search;
 using AppCommon.Interfaces;
 using AppCommon.MailObj;
+using AppCommon;
 
-
-//make visible all internal methods for our test library
 
 namespace ReaderMails
 {
-    public class MailKitReader
+    
+    /// <summary>
+    /// This class loggin in mail server
+    /// than read all mails in INBOX
+    /// and sort mails by stop words in subject
+    /// if mail contains stop word than mail move to TRASH
+    /// else to Our mail folder
+    /// 
+    /// class return list of all mails with diffrent statuses
+    /// </summary>
+    public class MailKitReader : IMailReaderService
     {
         private ImapClient _imapClient;
         private Logger _logger;
@@ -38,7 +42,7 @@ namespace ReaderMails
             _libName = "ReaderMail";
         }
 
-        public IList<IMailAnswer> ReaderMails(EmailBoxAkkaut akkaunt, string destFolderName, string trashFolderName, string stopWords)
+        public IList<IMailAnswer> ReaderMails(IMailAkk akkaunt, string destFolderName, string trashFolderName, string stopWords)
         {
             //try connect to server
             ConnectToServer(akkaunt);
@@ -122,8 +126,8 @@ namespace ReaderMails
                     return null; 
                 }
                 var answer = new MailAnswer() { Message = message, Status = MailStatus.Empty };
-                
-                string subject = GetEmailSubject(message);
+                string subject = answer.EmailSubject;
+
                 //if stop words exist than return false
                 if (ExistStopWords(subject, stopWords))
                 {
@@ -149,7 +153,7 @@ namespace ReaderMails
         }
         
         //connect to server
-        public void ConnectToServer(EmailBoxAkkaut account)
+        public void ConnectToServer(IMailAkk account)
         {
             //#1 try connect to server on right port and domen
             try
@@ -208,17 +212,6 @@ namespace ReaderMails
             }
         }
         
-        //Get Subject
-        public string GetEmailSubject(MimeMessage message)
-        {
-            string subject = message?.Subject ?? "No_subject";
-            if (subject != null)
-            {
-                return subject;
-            }
-            return "";
-        }
-
         //find words in text
         public bool ExistStopWords(string text, string findWords)
         {

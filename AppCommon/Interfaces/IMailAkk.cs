@@ -10,5 +10,7 @@ namespace AppCommon.Interfaces
         string Pass { get; set; }
         int Port { get; set; }
         string AccountStatus { get; set; }
+        bool ReaderOnStart { get; set; }
+        string ServerLabelName { get; set; }
     }
 }
