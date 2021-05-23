@@ -32,8 +32,7 @@ namespace EmailSender.ViewModels
         private int _readInterval;
         private string _textAnswer;
         private string _subjectLetter;
-        private string _stopWords;
-        private string _wordsNotExistMails;
+        
         private string _reportFolder_1;
         private string _reportFolder_2;
         private string _accountState;
@@ -42,7 +41,12 @@ namespace EmailSender.ViewModels
         private int nextTimeReadInt;
         private string _nextTimeRead;
         private string _lastTimeRead;
-        
+        //stop words
+        private string _stopWords;
+        private string _wordsNotExistMails;
+        private string _emailBlackList;
+        private string _wordsSpamMailget;
+
         //marker of reading process now
         private bool isReadNow;
         //marker of reading service work
@@ -131,7 +135,6 @@ namespace EmailSender.ViewModels
                 _settings.ReadInterval = value;
             }
         }
-
         
         //property text of answer letter
         public string TextLetter
@@ -188,16 +191,41 @@ namespace EmailSender.ViewModels
             }
             set
             {
-                SetAndNotify(ref this._stopWords, value);
-                _settings.StopWords = value;
+                SetAndNotify(ref this._wordsNotExistMails, value);
+                _settings.WordsNotExistMail = value;
             }
         }
 
         //Stop words for determination our mails in spam
-        public string WordsSpamMail { get; set; }
+        public string WordsSpamMailget
+        {
+            get
+            {
+                _wordsSpamMailget = _settings.WordsSpamMail;
+                return _wordsSpamMailget;
+            }
+            set
+            {
+                SetAndNotify(ref this._wordsSpamMailget, value);
+                _settings.WordsSpamMail = value;
+            }
+        }
 
         //Stop List of balck list mails
-        public string EmailBlackList { get; set; }
+        public string EmailBlackList 
+        {
+            get
+            {
+                _emailBlackList = _settings.EmailBlackList;
+                return _emailBlackList;
+            }
+            set
+            {
+                SetAndNotify(ref this._emailBlackList, value);
+                _settings.EmailBlackList = value;
+            }
+        }
+
         
         //Report folder 1
         public string ReportFolder_1

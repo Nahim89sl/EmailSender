@@ -7,6 +7,7 @@ using EmailSender.Interfaces;
 using EmailSender.Logger;
 using EmailSender.Models;
 using Stylet;
+using AppCommon.Interfaces;
 
 namespace EmailSender.ViewModels
 {
@@ -15,13 +16,13 @@ namespace EmailSender.ViewModels
         private readonly IWindowManager _windowManager;
         private ILogger _logger;
         private ISender _sender;
-        public MainAccount MainAccount { get; set; }
+        public IMailAkk MainAccount { get; set; }
 
         public AccountViewModel(IContainer ioc)
         {
             _logger = ioc.Get<ILogger>();
             _windowManager = ioc.Get<IWindowManager>();
-            MainAccount = ioc.Get<MainAccount>();
+            MainAccount = ioc.Get<IMailAkk>();
             _sender = ioc.Get<ISender>();
             _logger = ioc.Get<ILogger>();
         }

@@ -3,7 +3,6 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-        xmlns:local="clr-namespace:EmailSender.Views"
         mc:Ignorable="d"
         xmlns:s="https://github.com/canton7/Stylet"
         Title="EmailSender" Height="450" Width="800">
@@ -26,6 +25,11 @@
             </TabItem>
             <TabItem Header="Telegram akkaunt">
                 <ContentControl s:View.Model="{Binding ViewNotification}"/>
+            </TabItem>
+            <TabItem>
+                <TabItem.Header>
+                    <Button Content="Save Settings" Command="{Binding SaveSettingsCommand}"/>
+                </TabItem.Header>
             </TabItem>
         </TabControl>
     </Grid>
