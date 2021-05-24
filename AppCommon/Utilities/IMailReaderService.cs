@@ -7,7 +7,7 @@ namespace AppCommon
 {
     public interface IMailReaderService
     {
-        IList<IMailAnswer> ReaderMails(IMailAkk akkaunt, string destFolderName, string trashFolderName, string stopWords);
+        IList<IMailAnswer> ReaderMails(IMailAkk akkaunt, string destFolderName, string trashFolderName, string stopWords, string emailBlackList);
 
         void ConnectToServer(IMailAkk account);
     }

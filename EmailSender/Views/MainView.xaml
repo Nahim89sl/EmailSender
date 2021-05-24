@@ -26,9 +26,9 @@
             <TabItem Header="Telegram akkaunt">
                 <ContentControl s:View.Model="{Binding ViewNotification}"/>
             </TabItem>
-            <TabItem>
+            <TabItem IsSelected="{Binding IsSelected}">
                 <TabItem.Header>
-                    <Button Content="Save Settings" Command="{Binding SaveSettingsCommand}"/>
+                    <TextBlock Text="Save Settings" Background="CadetBlue"/>
                 </TabItem.Header>
             </TabItem>
         </TabControl>

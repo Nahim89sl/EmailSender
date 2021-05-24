@@ -364,8 +364,9 @@ namespace EmailSender.ViewModels
             CheckFolder(ReportFolder_2);
 
             Task.Run(() => {
-                IList<IMailAnswer> answers = _reader.ReadMails(StopWords);
-                //ObservableCollection<Answer> answers = new ObservableCollection<Answer>();
+                string allWords = StopWords + WordsNotExistMail + WordsSpamMailget;
+
+                IList<IMailAnswer> answers = _reader.ReadMails(allWords, EmailBlackList);
 
                 _logger.InfoReader($"Finish reading, get answers {answers.Count.ToString()}");
 
@@ -384,30 +385,6 @@ namespace EmailSender.ViewModels
         #endregion
 
         #region Private methods
-
-        private void ReadService()
-        {
-            isReadServiceWork = true;
-            _logger.InfoReader("Start read service");
-            NotifyOfPropertyChange(nameof(this.CanStartReadServiceCommand));
-            NotifyOfPropertyChange(nameof(this.CanStopReadServiceCommand));
-            Task.Run(()=> {
-                while (isReadServiceWork)
-                {
-                    if (nextTimeReadInt < TimeUnixService.Timestamp())
-                    {
-                        if (!isReadNow)
-                        {
-                            ReadMailsCommand();
-                        }                                            
-                    }
-                    Thread.Sleep(5000);
-                }
-                NotifyOfPropertyChange(nameof(this.CanStartReadServiceCommand));
-                NotifyOfPropertyChange(nameof(this.CanStopReadServiceCommand));
-            });
-        }
-
         private void ChangeUiNextTimeRead()
         {
             Execute.OnUIThread(() => {
@@ -424,12 +401,20 @@ namespace EmailSender.ViewModels
                
         private bool CheckFolder(string folder)
         {
-            if (!Directory.Exists(folder))
+            try
             {
-                _windMng.ShowMessageBox($"Папки {folder} не существует!");
+                if (!Directory.Exists(folder))
+                {
+                    _windMng.ShowMessageBox($"Папки {folder} не существует!");
+                    return false;
+                }
+                return true;
+            }
+            catch
+            {
                 return false;
             }
-            return true;
+            
         }
 
         private void OnTimedEvent(Object source, ElapsedEventArgs e)

@@ -42,7 +42,7 @@ namespace ReaderMails
             _libName = "ReaderMail";
         }
 
-        public IList<IMailAnswer> ReaderMails(IMailAkk akkaunt, string destFolderName, string trashFolderName, string stopWords)
+        public IList<IMailAnswer> ReaderMails(IMailAkk akkaunt, string destFolderName, string trashFolderName, string stopWords, string emailBlackList)
         {
             //try connect to server
             ConnectToServer(akkaunt);
@@ -70,11 +70,11 @@ namespace ReaderMails
                     //check stop wors value
                     if (stopWords.Length < 5)
                     {
-                        _logger.Error($"ConnectToserver you didn't have stop words {stopWords}");
+                        _logger.Error($"ConnectToserverr you didn't have stop words {stopWords}");
                         return null;
                     }
                     _logger.Info($"{_libName} Destination folder - {_destFolder.FullName};  Trash folder - {_trashFolder.FullName}");
-                    return FilterMailsBySubject(stopWords);
+                    return FilterMailsBySubject(stopWords, emailBlackList);
                 }catch(Exception ex)
                 {
                     _logger.Error($"ReaderMails {ex.Message}");
@@ -86,7 +86,7 @@ namespace ReaderMails
         }
         
         //public messages by subject
-        public IList<IMailAnswer> FilterMailsBySubject(string stopWords)
+        public IList<IMailAnswer> FilterMailsBySubject(string stopWords, string emailBlackList)
         {
             IList<IMailAnswer> answerReceivers = new List<IMailAnswer>();
             try
@@ -98,7 +98,7 @@ namespace ReaderMails
 
                 foreach (UniqueId uidMail in mailsUids)
                 {
-                    var tempMessage = FilterMailBySubject(uidMail, stopWords);
+                    var tempMessage = FilterMailBySubject(uidMail, stopWords, emailBlackList);
                     if (tempMessage != null)
                     {
                         answerReceivers.Add(tempMessage);
@@ -115,7 +115,7 @@ namespace ReaderMails
         }
 
         //sort mail by subject
-        public IMailAnswer FilterMailBySubject(UniqueId uidMail, string stopWords)
+        public IMailAnswer FilterMailBySubject(UniqueId uidMail, string stopWords, string emailBlackList)
         {
             try
             {
@@ -128,8 +128,10 @@ namespace ReaderMails
                 var answer = new MailAnswer() { Message = message, Status = MailStatus.Empty };
                 string subject = answer.EmailSubject;
 
+
+
                 //if stop words exist than return false
-                if (ExistStopWords(subject, stopWords))
+                if ((ExistStopWords(subject, stopWords))||(ExistStopWords(answer.EmailAddress, emailBlackList)))
                 {
                     _imapClient.Inbox.MoveTo(uidMail, _trashFolder);
                     _imapClient.Inbox.AddFlags(uidMail, MessageFlags.Seen, true); //mark is read

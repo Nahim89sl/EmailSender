@@ -5,6 +5,6 @@ namespace EmailSender.Interfaces
 {
     public interface IReaderMails
     {
-        IList<IMailAnswer> ReadMails(string stopWords);
+        IList<IMailAnswer> ReadMails(string stopWords, string emailBlackList);
     }
 }

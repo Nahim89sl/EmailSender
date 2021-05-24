@@ -29,8 +29,10 @@ namespace EmailSender.Services
         private MainAccount _account;
         private ILoadReceivers _dbService;
         private IConsts _statuses;
-        private string _notExistMailWords;
+        private string _wordsNotExistMail;
+        private string _wordsSpamMail;
         private IEmailExtractor _extractor;
+        private AppSettingsModel _settingsGlobal;
 
 
         #endregion
@@ -40,14 +42,17 @@ namespace EmailSender.Services
         public Reporter(IContainer ioc)
         {
             _logger = ioc.Get<ILogger>();
-            _settings = ioc.Get<AppSettingsModel>().ReaderSettings;
+            _settingsGlobal = ioc.Get<AppSettingsModel>();
+            _settings = _settingsGlobal.ReaderSettings;
             _notification = ioc.Get<INotification>();
             _reporter = ioc.Get<ILoadReceivers>();
             _receivers = ioc.Get<BindableCollection<Receiver>>();
-            _account = ioc.Get<AppSettingsModel>().MainAccount;
+            _account = _settingsGlobal.MainAccount;
             _dbService = ioc.Get<ILoadReceivers>();
             _statuses = ioc.Get<IConsts>();
             _extractor = ioc.Get<IEmailExtractor>();
+            _wordsNotExistMail = _settings.WordsNotExistMail;
+            _wordsSpamMail = _settings.WordsSpamMail;
         }
 
         #endregion
@@ -64,7 +69,7 @@ namespace EmailSender.Services
                 goodAnswers.ForEach(a => GoodAnswerWorker(a));
 
                 var badAnswers = answers.Where(a => a.Status == MailStatus.Block).ToList();
-                badAnswers.ForEach(a => BadAnswerWorker(a));
+                BadAnswerWorker(badAnswers);
             }
             catch(Exception ex)
             {
@@ -72,7 +77,7 @@ namespace EmailSender.Services
             }           
         }
 
-
+        //work with good answers
         private void GoodAnswerWorker(IMailAnswer answer)
         {
             var receiver = _receivers.Where(r => r.Email.Equals(answer.EmailAddress)).FirstOrDefault();
@@ -87,28 +92,56 @@ namespace EmailSender.Services
             _logger.InfoReader($"Add to report!{answer.EmailAddress}");
         }
 
-        private void BadAnswerWorker(IMailAnswer answer)
+        public void BadAnswerWorker(IList<IMailAnswer> answers)
         {
-            //determinate that this answer is about unexitsting receiver
-            if(ExistWords(answer.EmailSubject, _notExistMailWords))
+            //check unexist answers
+            var unexistList = answers.Where(x => ExistWords(x.EmailText, _wordsNotExistMail)).ToList();
+            AddUnexistStatus(unexistList);
+            //check spam answers
+            var spamList = answers.Where(x => ExistWords(x.EmailText, _wordsSpamMail)).ToList();
+            if (spamList != null)
             {
-                //find email address from answer
-                var emails = _extractor.ExtractAddress(answer.EmailText);
-
-                foreach(var emailAddress in emails)
-                {
-                    //change status in receivers list
-                    var receiver = _receivers.Where(r => r.Email.Equals(emailAddress)).FirstOrDefault();
-                    if (receiver != null)
-                    {
-                        receiver.StatusSend = _statuses.ReceiverStatusBlock;
-                        receiver.StatusEmailExist = _statuses.ReceiverMailNotExist;
-                        _dbService.SaveReceiver(receiver);
-                        _logger.InfoReader($"Mail server said that {emailAddress} - NOT EXIST");
-                    }
-                }               
+                ChangeTimeInterval(spamList);
             }
+        }
 
+
+        public void AddUnexistStatus(IList<IMailAnswer> answers)
+        {
+            //change status in receivers list       
+            foreach (var answer in answers)
+            {
+                var receiver = _receivers.Where(r => r.Email.Equals(answer?.EmailAddress)).FirstOrDefault();
+                if (receiver != null)
+                {
+                    receiver.StatusSend = _statuses.ReceiverStatusBlock;
+                    receiver.StatusEmailExist = _statuses.ReceiverMailNotExist;
+                    _dbService.SaveReceiver(receiver);
+                }
+                _logger.InfoReader($"Mail server said that {answer?.EmailAddress} - NOT EXIST");
+            }           
+        }
+
+        public void ChangeTimeInterval(IList<IMailAnswer> answers)
+        {
+            if(answers.Count>0)
+            {
+                _logger.ErrorReader($"Определили что сервер в спаме ");
+                if (File.Exists(_settingsGlobal.SenderSettings.IntervalsFilePath))
+                {
+                    var iterval = File.ReadAllLines(_settingsGlobal.SenderSettings.IntervalsFilePath).First();
+                    var arr = iterval.Trim('-');
+                    if (arr.Length == 2)
+                    {
+                        _settingsGlobal.SenderSettings.CurrentInterval = new PauseInterval()
+                        {
+                            Start = arr[0],
+                            Finish = arr[1]
+                        };
+                        _logger.ErrorReader($"Изменили интервал {iterval} так как сервер в спаме ");
+                    }
+                }
+            }
         }
 
 
@@ -160,6 +193,7 @@ namespace EmailSender.Services
             }
             return false;
         }
+        
         #endregion
 
 

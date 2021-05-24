@@ -12,12 +12,13 @@ using System.Windows;
 
 namespace EmailSender.ViewModels
 {
-    public class MainViewModel
+    public class MainViewModel : PropertyChangedBase
     {
         #region private fields 
 
         private ISettings _settingsService;
         private AppSettingsModel _globalSettings;
+        private bool _isSelected;
 
         #endregion
         public MainViewModel(IContainer ioc)
@@ -46,6 +47,19 @@ namespace EmailSender.ViewModels
         #endregion
 
         #region properties
+        public bool IsSelected
+        {   set
+            {
+                if (value) {
+                    SaveSettingsCommand();                     
+                }
+            }
+            get
+            {
+                return false;
+            } 
+        }
+
         public SenderViewModel ViewSender { set; get; }
         public AccountViewModel ViewAccount { get; set; }
         public NotificationViewModel ViewNotification { get; set; }
