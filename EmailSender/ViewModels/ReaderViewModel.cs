@@ -197,7 +197,7 @@ namespace EmailSender.ViewModels
         }
 
         //Stop words for determination our mails in spam
-        public string WordsSpamMailget
+        public string WordsSpamMail
         {
             get
             {
@@ -364,7 +364,7 @@ namespace EmailSender.ViewModels
             CheckFolder(ReportFolder_2);
 
             Task.Run(() => {
-                string allWords = StopWords + WordsNotExistMail + WordsSpamMailget;
+                string allWords = StopWords + WordsNotExistMail + WordsSpamMail;
 
                 IList<IMailAnswer> answers = _reader.ReadMails(allWords, EmailBlackList);
 
