@@ -12,14 +12,14 @@
             Content="Telegram api key"                   
         />
         <TextBox 
-            Text="{Binding ApiKey}" 
+            Text="{Binding ApiKey, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" 
         />
 
         <Label
             Content="Telegram receiver id"                       
         />
         <TextBox 
-            Text="{Binding Recaiver}"              
+            Text="{Binding Recaiver, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"              
         />
         <TextBlock Margin="5">Выберете события для оповещения:</TextBlock>
 

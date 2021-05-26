@@ -49,7 +49,7 @@
                 AcceptsReturn="True"
                 HorizontalScrollBarVisibility="Disabled"
                 VerticalScrollBarVisibility="Auto"
-                Text="{Binding Subject}"
+                Text="{Binding Subject, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
              />
         </StackPanel>
 
@@ -61,7 +61,7 @@
                 AcceptsReturn="True"
                 HorizontalScrollBarVisibility="Disabled"
                 VerticalScrollBarVisibility="Auto"
-                Text="{Binding Text}"
+                Text="{Binding Text, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
              />
         </StackPanel>
 

@@ -22,9 +22,9 @@
         <StackPanel Grid.Row="0" Grid.Column="0" Margin="5">
             <Label Content="Account" HorizontalAlignment="Center"/>
             <Label Content="Login"/>
-            <TextBox Text="{Binding Login}"/>
+            <TextBox Text="{Binding Login, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
             <Label Content="Login"/>
-            <TextBox Text="{Binding Pass}"/>
+            <TextBox Text="{Binding Pass, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
             <StackPanel Orientation="Horizontal">
                 <Label Content="Status:"/>
                 <Label Content="{Binding AccState}"/> 
@@ -33,7 +33,7 @@
         <StackPanel Grid.Column="1" Grid.Row="0" Margin="5">
             <Label Content="Server" HorizontalAlignment="Center"/>
             <Label Content="Ip address / Domen"/>
-            <TextBox Text="{Binding Server}"/>
+            <TextBox Text="{Binding Server, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
 
             <StackPanel Orientation="Horizontal">
                 <Label Content="Status:"/>
@@ -41,7 +41,7 @@
             </StackPanel>
 
             <Label Content="Server label Name"/>
-            <TextBox Text="{Binding ServerLabelName}"/>
+            <TextBox Text="{Binding ServerLabelName, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
         </StackPanel>
 
         
@@ -55,11 +55,11 @@
             <StackPanel Orientation="Vertical">
                 <Label Content="Send test letter" HorizontalAlignment="Center"/>
                 <Label Content="Receiver mail"/>
-                <TextBox Text="{Binding ReceiverAddress}" Width="auto"/>
+                <TextBox Text="{Binding ReceiverAddress, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Width="auto"/>
                 <Label Content="Subject"/>
-                <TextBox Text="{Binding TestSubject}" Width="auto"/>
+                <TextBox Text="{Binding TestSubject, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Width="auto"/>
                 <Label Content="Text"/>
-                <TextBox Text="{Binding TextLetter}" Width="auto"/>
+                <TextBox Text="{Binding TextLetter, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Width="auto"/>
                 <Button Margin="5"
                         Content="Send test mail"
                         Command="{s:Action TestSendLetterCommand}" />

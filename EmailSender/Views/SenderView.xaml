@@ -37,7 +37,7 @@
                         Grid.Column="1"
                         Height="20"
                         Width="50"
-                        Text="{Binding DopPauseTime}"
+                        Text="{Binding DopPauseTime, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
                         />
 
         <Label
@@ -50,14 +50,14 @@
                         Grid.Column="1"
                         Height="20"
                         Width="50"  
-                        Text="{Binding DopPauseInterval.Start}"
+                        Text="{Binding DopPauseInterval.Start, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
                         />
         <TextBox 
                         Grid.Row="1"
                         Grid.Column="2"
                         Height="20"
                         Width ="50"   
-                        Text="{Binding DopPauseInterval.Finish}"
+                        Text="{Binding DopPauseInterval.Finish, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
                         />
         <Label
                         Grid.Row="2"
@@ -69,7 +69,7 @@
                         Grid.Column="1"
                         Height="20"
                         Width="50" 
-                        Text="{Binding ChangeIntTime}"
+                        Text="{Binding ChangeIntTime, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
                         />
 
         <Label
@@ -82,14 +82,14 @@
             Grid.Column="1"
             Height="20"
             Width="50" 
-            Text="{Binding CurrentInterval.Start}"
+            Text="{Binding CurrentInterval.Start, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
             />
         <TextBox 
             Grid.Row="3"
             Grid.Column="2"
             Height="20"
             Width="50"   
-            Text="{Binding CurrentInterval.Finish}"
+            Text="{Binding CurrentInterval.Finish, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
             />
         
         <StackPanel 
@@ -181,7 +181,7 @@
                         Grid.Column="4"
                         Height="20"
                         Width ="50"   
-                        Text="{Binding SendOurMail}"
+                        Text="{Binding SendOurMail, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
                         />
 
         <Label
@@ -195,7 +195,7 @@
                         Grid.Column="4"
                         Height="20"
                         Width ="50"   
-                        Text="{Binding SendToHidden}"
+                        Text="{Binding SendToHidden, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
                         />
         
         <ProgressBar 
@@ -254,7 +254,7 @@
             <TextBox 
                 Height="20"
                 Width ="50"   
-                Text="{Binding MailListRounds}"
+                Text="{Binding MailListRounds, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
              />
 
         </StackPanel>
