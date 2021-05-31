@@ -7,8 +7,7 @@ namespace EmailSender.Models
 {
     public class Receiver : PropertyChangedBase
     {
-        
-
+       
         public string statusEmailExist
         {
             get

@@ -24,7 +24,6 @@ namespace EmailSender.ViewModels
             _windowManager = ioc.Get<IWindowManager>();
             MainAccount = ioc.Get<IMailAkk>();
             _sender = ioc.Get<ISender>();
-            _logger = ioc.Get<ILogger>();
         }
         
         

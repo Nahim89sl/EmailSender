@@ -120,7 +120,7 @@ namespace ReaderMails
             try
             {
                 var message = _imapClient.Inbox.GetMessage(uidMail);
-                if (message != null) 
+                if (message == null) 
                 {
                     _logger.Error($"Can't get message from uid {uidMail}");
                     return null; 
@@ -130,20 +130,20 @@ namespace ReaderMails
 
 
 
-                //if stop words exist than return false
+                //Filtration with stop words
                 if ((ExistStopWords(subject, stopWords))||(ExistStopWords(answer.EmailAddress, emailBlackList)))
                 {
                     _imapClient.Inbox.MoveTo(uidMail, _trashFolder);
                     _imapClient.Inbox.AddFlags(uidMail, MessageFlags.Seen, true); //mark is read
                     _logger.Info($"{_libName} {subject} move to Trash");
-                    answer.Status = MailStatus.Good;
+                    answer.Status = MailStatus.Block;
                 }
                 else
                 {
                     _imapClient.Inbox.MoveTo(uidMail, _destFolder);
                     //_imapClient.Inbox.AddFlags(uidMail, MessageFlags.Seen, true); //mark is read
                     _logger.Info($"{_libName}  Subject: {subject}  -- move to {_destFolder.FullName}");
-                    answer.Status = MailStatus.Block;
+                    answer.Status = MailStatus.Good;
                 }
                 return answer;
             }

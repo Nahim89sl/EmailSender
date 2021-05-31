@@ -51,11 +51,17 @@ namespace EmailSender.Services
             _dbService = ioc.Get<ILoadReceivers>();
             _statuses = ioc.Get<IConsts>();
             _extractor = ioc.Get<IEmailExtractor>();
-            _wordsNotExistMail = _settings.WordsNotExistMail;
-            _wordsSpamMail = _settings.WordsSpamMail;
         }
 
         #endregion
+
+        #region properties
+
+        public string WordsNotExistMail => _settings.WordsNotExistMail;
+        public string WordsSpamMail => _settings.WordsSpamMail;
+
+        #endregion
+
 
         #region Public Methods
 
@@ -95,30 +101,47 @@ namespace EmailSender.Services
         public void BadAnswerWorker(IList<IMailAnswer> answers)
         {
             //check unexist answers
-            var unexistList = answers.Where(x => ExistWords(x.EmailText, _wordsNotExistMail)).ToList();
+            var unexistList = answers.Where(x => ExistWords(x.EmailText, WordsNotExistMail) != string.Empty).ToList();
             AddUnexistStatus(unexistList);
             //check spam answers
-            var spamList = answers.Where(x => ExistWords(x.EmailText, _wordsSpamMail)).ToList();
+            var spamList = answers.Where(x => ExistWords(x.EmailText, WordsSpamMail) != string.Empty).ToList();
             if (spamList != null)
             {
                 ChangeTimeInterval(spamList);
             }
         }
 
-
         public void AddUnexistStatus(IList<IMailAnswer> answers)
         {
             //change status in receivers list       
             foreach (var answer in answers)
             {
-                var receiver = _receivers.Where(r => r.Email.Equals(answer?.EmailAddress)).FirstOrDefault();
-                if (receiver != null)
+                _logger.InfoReader($"******** NOT EXIST Mail:");
+                _logger.InfoReader($"Coincidence:  {ExistWords(answer.EmailText, WordsNotExistMail)}");
+                _logger.InfoReader($"{answer.EmailSubject}");
+                _logger.InfoReader($"{answer.EmailText}");
+
+                var email = ExstractEmailFromText(answer.EmailText);
+                if(email != string.Empty)
                 {
-                    receiver.StatusSend = _statuses.ReceiverStatusBlock;
-                    receiver.StatusEmailExist = _statuses.ReceiverMailNotExist;
-                    _dbService.SaveReceiver(receiver);
+                    _logger.InfoReader($"Exstract email address from letter's body {email}");
+                    var receiver = _receivers.Where(r => r.Email.Equals(email)).FirstOrDefault();
+                    if (receiver != null)
+                    {
+                        receiver.StatusSend = _statuses.ReceiverStatusBlock;
+                        receiver.StatusEmailExist = _statuses.ReceiverMailNotExist;
+                        _dbService.SaveReceiver(receiver);
+                        _logger.InfoReader($"Change receiver's status in DB for {email}");
+                    }
+                    else
+                    {
+                        _logger.InfoReader($"Did not find {email} in list of receivers");
+                    }           
                 }
-                _logger.InfoReader($"Mail server said that {answer?.EmailAddress} - NOT EXIST");
+                else
+                {
+                    _logger.InfoReader($"Did not exstract mail adress from message body");
+                }                       
             }           
         }
 
@@ -130,70 +153,60 @@ namespace EmailSender.Services
                 if (File.Exists(_settingsGlobal.SenderSettings.IntervalsFilePath))
                 {
                     var iterval = File.ReadAllLines(_settingsGlobal.SenderSettings.IntervalsFilePath).First();
-                    var arr = iterval.Trim('-');
+                    string[] arr = iterval.Split('-');
+
                     if (arr.Length == 2)
                     {
-                        _settingsGlobal.SenderSettings.CurrentInterval = new PauseInterval()
+                        int start;
+                        int finish;
+                        int.TryParse(arr.First(), out start);
+                        int.TryParse(arr.Last(), out finish);
+                        if (start>0 && finish>0)
                         {
-                            Start = arr[0],
-                            Finish = arr[1]
-                        };
-                        _logger.ErrorReader($"Изменили интервал {iterval} так как сервер в спаме ");
+                            _settingsGlobal.SenderSettings.CurrentInterval.Start = start;
+                            _settingsGlobal.SenderSettings.CurrentInterval.Finish = finish;
+                            _logger.ErrorReader($"Изменили интервал {iterval} так как сервер в спаме ");
+                        }
+                        
                     }
+                }
+                else
+                {
+                    _logger.ErrorReader($"Не найден файл интервалов");
                 }
             }
         }
 
-
-        //just for test 
-        private ObservableCollection<Answer>  GenerateResults()
-        {
-            ObservableCollection<Answer> answers = new ObservableCollection<Answer>();
-            answers.Add(new Answer() { 
-                Email = "apex.tk@mail.ru",
-                From = "Herogivi <manager@i-novus.ru>",
-                Subject = "Test Sub1",
-                Text = "Body of answer this1"
-            });
-            answers.Add(new Answer()
-            {
-                Email = "trmsar@mail.ru",
-                From = "trmsar <trmsar@mail.ru>",
-                Subject = "Test Sub 2",
-                Text = "Body of answer 2222"
-            });
-            answers.Add(new Answer()
-            {
-                Email = "kskgrupp2@bk.ru",
-                From = "kskgrupp2 <kskgrupp2@bk.ru>",
-                Subject = "Test Sub333",
-                Text = "Body of answer this333"
-            });
-            answers.Add(new Answer()
-            {
-                Email = "zyf-92333@mail.ru",
-                From = "Herogivi <zyf-92333@mail.ru>",
-                Subject = "Test Sub 4444",
-                Text = "Body of answer this 444"
-            });
-            return answers;
-        }
-
-
         /// <summary>
         /// Find in text some words from our list. List conatains words in format word1|word2|...
         /// </summary>
-        public bool ExistWords(string text, string findWords)
+        public string ExistWords(string text, string findWords)
         {
             Regex rgx = new Regex(findWords);
             var match = rgx.Match(text);
             if (match.Success)
             {
-                return true;
+                return match.Value;
             }
-            return false;
+            return string.Empty;
+        }       
+
+        /// <summary>
+        /// Exstract  emal address from text 
+        /// </summary>
+        /// <param name="text"></param>
+        /// <returns>email address or empty string</returns>
+        public string ExstractEmailFromText(string text)
+        {
+            var exstractor = new Regex(@"[a-zA-Z0-9+._-]+@[a-zA-Z0-9._-]+\.[a-zA-Z0-9_-]+");
+            var match = exstractor.Match(text);
+            if (match.Success)
+            {
+                return match.Value;
+            }
+            return string.Empty;
         }
-        
+
         #endregion
 
 

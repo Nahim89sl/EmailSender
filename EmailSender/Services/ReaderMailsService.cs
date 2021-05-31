@@ -19,8 +19,9 @@ namespace EmailSender.Services
         {
             try
             {
-                var service = new MailKitReader(LogManager.GetLogger("Reader"));
-                var res = service.ReaderMails(MainAccount, Consts.ReadFolder, Consts.TrashFolder, stopWords, emailBlackList);
+                var readerLogger = LogManager.GetLogger("Reader");
+                var mailReader = new MailKitReader(readerLogger);
+                var res = mailReader.ReaderMails(MainAccount, Consts.ReadFolder, Consts.TrashFolder, stopWords, emailBlackList);
                 return res;
             }
             catch(Exception ex)

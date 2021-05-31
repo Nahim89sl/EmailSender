@@ -26,7 +26,7 @@ namespace EmailSender.ViewModels
         private MainAccount _account;
         private IDialogService _dialog;
         private IReaderMails _reader;
-        private BindableCollection<Receiver> _receivers;
+
         private bool _isAnswer;
         private bool _isAutoStart;
         private int _readInterval;
@@ -68,7 +68,6 @@ namespace EmailSender.ViewModels
             _account = ioc.Get<AppSettingsModel>().MainAccount;
             _dialog = ioc.Get<IDialogService>();
             _reader = ioc.Get<IReaderMails>();
-            _receivers = ioc.Get<BindableCollection<Receiver>>();
             _windMng = ioc.Get<IWindowManager>();
 
             _reporter = new Reporter(ioc);
@@ -364,7 +363,7 @@ namespace EmailSender.ViewModels
             CheckFolder(ReportFolder_2);
 
             Task.Run(() => {
-                string allWords = StopWords + WordsNotExistMail + WordsSpamMail;
+                string allWords = $"{StopWords}|{WordsNotExistMail}|{WordsSpamMail}";
 
                 IList<IMailAnswer> answers = _reader.ReadMails(allWords, EmailBlackList);
 
