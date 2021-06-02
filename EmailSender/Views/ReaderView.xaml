@@ -6,7 +6,16 @@
              xmlns:s="https://github.com/canton7/Stylet"
              mc:Ignorable="d" 
              d:DesignHeight="450" d:DesignWidth="800">
-    
+    <UserControl.Resources>
+        <Style TargetType="TextBox" x:Key="StopBlockText">
+            <Setter Property="Height" Value="90"/>
+            <Setter Property="Margin" Value="0,2,2,0"/>
+            <Setter Property="TextWrapping" Value="Wrap"/>
+            <Setter Property="TextWrapping" Value="Wrap"/>
+            <Setter Property="HorizontalScrollBarVisibility" Value="Disabled"/>
+            <Setter Property="VerticalScrollBarVisibility" Value="Auto"/>
+        </Style>
+    </UserControl.Resources>   
     
     <Grid ShowGridLines="false">
         <Grid.ColumnDefinitions>
@@ -80,80 +89,72 @@
                     Content="Стоп слова писать нужно через |"                            
                 />
             
-            <Grid>
+            <Grid x:Name="ListGrid" >
                 <Grid.ColumnDefinitions>
-                    <ColumnDefinition/>
-                    <ColumnDefinition/>
+                    <ColumnDefinition Width="1*"/>
+                    <ColumnDefinition Width="1*"/>
                 </Grid.ColumnDefinitions>
                 <Grid.RowDefinitions>
                     <RowDefinition/>
                     <RowDefinition/>
                 </Grid.RowDefinitions>
+                
+                <Border Background="Azure" Grid.ColumnSpan="2" />
 
                 <StackPanel Grid.Row="0" Grid.Column="0" Margin="5"   Orientation="Vertical">
-                    <Label
-                    Margin="5"
-                    Content="Главная фильтрация"                            
-                />
+                    <Label Content="Не существующий 1"/>                            
                     <TextBox 
-                    Height="90"
-                    Margin="5"
-                    TextWrapping="Wrap"
-                    AcceptsReturn="True"
-                    HorizontalScrollBarVisibility="Disabled"
-                    VerticalScrollBarVisibility="Auto"
-                    Text="{Binding StopWords, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
-                />
+                        Style="{StaticResource StopBlockText}"
+                        Text="{Binding NotExistList_1, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                    />
                 </StackPanel>
 
                 <StackPanel Grid.Row="0" Grid.Column="1" Margin="5"   Orientation="Vertical">
-                    <Label
-                    Margin="5"
-                    Content="Слова в тексте письма про спам"                            
-                />
+                    <Label Content="Не существующий 2" />
                     <TextBox 
-                    Height="90"
-                    Margin="5"
-                    TextWrapping="Wrap"
-                    AcceptsReturn="True"
-                    HorizontalScrollBarVisibility="Disabled"
-                    VerticalScrollBarVisibility="Auto"
-                    Text="{Binding WordsSpamMail, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
-                />
+                        Style="{StaticResource StopBlockText}"
+                        Text="{Binding NotExistList_2, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                    />
                 </StackPanel>
 
-                <StackPanel Grid.Row="1" Grid.Column="0" Margin="5"   Orientation="Vertical">
-                    <Label
-                    Margin="5"
-                    Content="Слова из писем про несуществующий ящик"                            
-                />
-                    <TextBox 
-                    Height="80"
-                    Margin="5"
-                    TextWrapping="Wrap"
-                    AcceptsReturn="True"
-                    HorizontalScrollBarVisibility="Disabled"
-                    VerticalScrollBarVisibility="Auto"
-                    Text="{Binding WordsNotExistMail, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
-                />
-                </StackPanel>
+                <Grid Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="2">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="1*"/>
+                        <ColumnDefinition Width="1*"/>
+                        <ColumnDefinition Width="1*"/>
+                    </Grid.ColumnDefinitions>
+                    <Grid.RowDefinitions>
+                        <RowDefinition/>
+                    </Grid.RowDefinitions>
 
-                <StackPanel Grid.Row="1" Grid.Column="1" Margin="5"   Orientation="Vertical">
-                    <Label
-                    Margin="5"
-                    Content="Список email-ов для удаления"                            
-                />
-                    <TextBox 
-                    Height="80"
-                    Margin="5"
-                    TextWrapping="Wrap"
-                    AcceptsReturn="True"
-                    HorizontalScrollBarVisibility="Disabled"
-                    VerticalScrollBarVisibility="Auto"
-                    Text="{Binding EmailBlackList, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
-                />
-                </StackPanel>
+                    <StackPanel Grid.Column="0">
+                        <Label
+                            Content="Общий"                            
+                            />
+                        <TextBox Style="{StaticResource StopBlockText}" 
+                            Text="{Binding StopWords, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                        />
+                    </StackPanel>
 
+                    <StackPanel Grid.Column="1">
+                        <Label
+                            Content="Email black list"                            
+                            />
+                        <TextBox 
+                                Style="{StaticResource StopBlockText}"                    
+                                Text="{Binding EmailBlackList, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                            />
+                    </StackPanel>
+
+                    <StackPanel Grid.Column="2">
+                        <Label Content="Спам"/>
+                        <TextBox 
+                                Style="{StaticResource StopBlockText}"
+                                Text="{Binding SpamList, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                            />
+                    </StackPanel>
+
+                </Grid>
             </Grid>
             
         </StackPanel>

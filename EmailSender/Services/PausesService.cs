@@ -34,7 +34,8 @@ namespace EmailSender.Services
             _logger = logger;
             CheckCurrentInterval();
         }
-        
+
+
         public int GetPause()
         {
             //Check if we need change interval

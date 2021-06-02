@@ -57,7 +57,8 @@ namespace EmailSender.Services
 
         #region properties
 
-        public string WordsNotExistMail => _settings.WordsNotExistMail;
+        public string NotExistList_1 => _settings.NotExistList_1;
+        public string NotExistList_2 => _settings.NotExistList_2;
         public string WordsSpamMail => _settings.WordsSpamMail;
 
         #endregion
@@ -101,8 +102,8 @@ namespace EmailSender.Services
         public void BadAnswerWorker(IList<IMailAnswer> answers)
         {
             //check unexist answers
-            var unexistList = answers.Where(x => ExistWords(x.EmailText, WordsNotExistMail) != string.Empty).ToList();
-            AddUnexistStatus(unexistList);
+            AddUnexistStatus(answers);
+
             //check spam answers
             var spamList = answers.Where(x => ExistWords(x.EmailText, WordsSpamMail) != string.Empty).ToList();
             if (spamList != null)
@@ -116,11 +117,17 @@ namespace EmailSender.Services
             //change status in receivers list       
             foreach (var answer in answers)
             {
+                //chek list 1
+                var inList1 = ExistWords(answer.EmailText, NotExistList_1);
+                var inList2 = ExistWords(answer.EmailText, NotExistList_2);
+               
                 _logger.InfoReader($"******** NOT EXIST Mail:");
-                _logger.InfoReader($"Coincidence:  {ExistWords(answer.EmailText, WordsNotExistMail)}");
+                _logger.InfoReader($"Coincidence list 1:  {inList1}");
+                _logger.InfoReader($"Coincidence list 2:  {inList2}");
                 _logger.InfoReader($"{answer.EmailSubject}");
                 _logger.InfoReader($"{answer.EmailText}");
 
+                
                 var email = ExstractEmailFromText(answer.EmailText);
                 if(email != string.Empty)
                 {
@@ -128,14 +135,21 @@ namespace EmailSender.Services
                     var receiver = _receivers.Where(r => r.Email.Equals(email)).FirstOrDefault();
                     if (receiver != null)
                     {
-                        receiver.StatusSend = _statuses.ReceiverStatusBlock;
-                        receiver.StatusEmailExist = _statuses.ReceiverMailNotExist;
+                        if ((inList1 != string.Empty)&&(inList2 != string.Empty))
+                        {
+                            receiver.StatusSend = _statuses.ReceiverStatusBlock;
+                            receiver.StatusEmailExist = _statuses.ReceiverStatusNotExist;
+                        }
+                        if ((inList1 != string.Empty) && (inList2 == string.Empty))
+                        {
+                            receiver.StatusSend = _statuses.ReceiverStatusWariant;
+                        }
                         _dbService.SaveReceiver(receiver);
                         _logger.InfoReader($"Change receiver's status in DB for {email}");
                     }
                     else
                     {
-                        _logger.InfoReader($"Did not find {email} in list of receivers");
+                        _logger.InfoReader($"Did not find {email} in receivers");
                     }           
                 }
                 else

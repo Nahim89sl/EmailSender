@@ -10,36 +10,20 @@ namespace AppCommon.Constants
         public string ReceiverStatusAnswered { get; set; } = "ANSWERED";
         public string ReceiverStatusBlock { get; set; } = "BLOCK";
         public string ReceiverStatusSpam { get; set; } = "SPAM";
-        public string ReceiverStatusNotExist { get; set; } = "SPAM";
+        public string ReceiverStatusNotExist { get; set; } = "NOT EXIST";
+        public string ReceiverStatusWariant { get; set; } = "WARIANT";
+        public string ReceiverStatusSended { get; set; } = "SENDED";
+        public string ReceiverStatusNotSend { get; set; } = "no";
+        public string ReceiverStatusWrongEmail { get; set; } = "Wrong email";
 
-        public string ReceiverMailNotExist { get; set; } = "NOT EXIST";
+        public string ServerStatusOk { get; set; } = "ok";
+        public string ServerStatusAuthErr { get; set; } = "Auth error";
+        public string ServerStatusTimeOutErr { get; set; } = "Time out";
 
-        public string mailSended => "SENDED";
+        public string AkkStatusOk { get; set; } = "ok";
+        public string AkkStatusAuthErr { get; set; } = "Auth error";
+        public string AkkStatusBlock { get; set; } = "BLOCK";
 
-        public string mailAnswer => "ANSWER";
-
-        public string mailNotSend => "no";
-
-        public string mailWrongFormat => "Wrong email";
-
-        public string mailNotExist => "NOT EXIST";
-
-        public string serverOk => "ok";
-
-        public string serverAuthErr => "Auth error";
-
-        public string serverTimeOutErr => "Time out";
-
-        public string accOk => "ok";
-
-        public string accBlock => "BLOCK";
-
-        public string accAuthErr => "ERROR";
-
-        public string defaultValue => "no";
-
-        public string emptyField => string.Empty;
-
-
+        public string DefaultStatusValue { get; set; } = "no";
     }
 }

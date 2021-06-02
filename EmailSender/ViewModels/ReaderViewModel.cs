@@ -43,7 +43,8 @@ namespace EmailSender.ViewModels
         private string _lastTimeRead;
         //stop words
         private string _stopWords;
-        private string _wordsNotExistMails;
+        private string _notExistList_1;
+        private string _notExistList_2;
         private string _emailBlackList;
         private string _wordsSpamMailget;
 
@@ -181,22 +182,36 @@ namespace EmailSender.ViewModels
         }
 
         //Stop words for filtring unexist mails
-        public string WordsNotExistMail
+        public string NotExistList_1
         {
             get
             {
-                _wordsNotExistMails = _settings.WordsNotExistMail;
-                return _wordsNotExistMails;
+                _notExistList_1 = _settings.NotExistList_1;
+                return _notExistList_1;
             }
             set
             {
-                SetAndNotify(ref this._wordsNotExistMails, value);
-                _settings.WordsNotExistMail = value;
+                SetAndNotify(ref this._notExistList_1, value);
+                _settings.NotExistList_1 = value;
+            }
+        }
+
+        public string NotExistList_2
+        {
+            get
+            {
+                _notExistList_2 = _settings.NotExistList_2;
+                return _notExistList_2;
+            }
+            set
+            {
+                SetAndNotify(ref this._notExistList_2, value);
+                _settings.NotExistList_2 = value;
             }
         }
 
         //Stop words for determination our mails in spam
-        public string WordsSpamMail
+        public string SpamList
         {
             get
             {
@@ -363,9 +378,8 @@ namespace EmailSender.ViewModels
             CheckFolder(ReportFolder_2);
 
             Task.Run(() => {
-                string allWords = $"{StopWords}|{WordsNotExistMail}|{WordsSpamMail}";
-
-                IList<IMailAnswer> answers = _reader.ReadMails(allWords, EmailBlackList);
+                
+                IList<IMailAnswer> answers = _reader.ReadMails(StopWords, BodyStopWords(), EmailBlackList);
 
                 _logger.InfoReader($"Finish reading, get answers {answers.Count.ToString()}");
 
@@ -427,7 +441,38 @@ namespace EmailSender.ViewModels
             }
         }
 
+        private string BodyStopWords()
+        {
+            string resultList = string.Empty;
+            if (NotExistList_1.Length > 3)
+                resultList = NotExistList_1;
+
+            if (NotExistList_2.Length > 3)
+            {
+                if (resultList == string.Empty)
+                {
+                    resultList = NotExistList_2;
+                }
+                else
+                {
+                    resultList = $"{resultList}|{NotExistList_2}";
+                }
+            }
+            if (SpamList.Length > 3)
+            {
+                if (resultList == string.Empty)
+                {
+                    resultList = SpamList;
+                }
+                else
+                {
+                    resultList = $"{resultList}|{SpamList}";
+                }
+            }
+
+            return resultList;
+        }
         #endregion
 
-    }
+        }
 }

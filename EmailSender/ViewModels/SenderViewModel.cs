@@ -1,4 +1,5 @@
-﻿using EmailSender.Interfaces;
+﻿using AppCommon.Interfaces;
+using EmailSender.Interfaces;
 using EmailSender.Logger;
 using EmailSender.Models;
 using EmailSender.Services;
@@ -33,10 +34,8 @@ namespace EmailSender.ViewModels
         private MainAccount _acc;
         private ILoadReceivers _saver;
         private FieldMappingSettingsModel _fieldMapping;
-        private const string StatusNotSend = "no";
-        private const string StatusSended = "SENDED";
-        private const string StatusServerOk = "ok";
         private int ServerErrorCount;
+        private IConsts _consts;
 
 
         private int _mailListRounds;  //period for changing interval of pause
@@ -92,6 +91,7 @@ namespace EmailSender.ViewModels
             textConv = new TextRundomizer();
             LoadIntervals();
             LoadOurReceivers();
+            _consts = ioc.Get<IConsts>();
 
             Pause = new PausesService(_settings, PauseIntervals, _logger);
 
@@ -393,7 +393,7 @@ namespace EmailSender.ViewModels
                 while (isSenderRun)
                 {
                     //take redy Receiver for send message
-                    var receiver = _receivers.Where(a => a.StatusSend == StatusNotSend).FirstOrDefault();
+                    var receiver = _receivers.Where(a => ((a.StatusSend == _consts.ReceiverStatusNotSend)||(a.StatusSend == _consts.ReceiverStatusWariant))).FirstOrDefault();
                     if (receiver != null)
                     {
                         //change prop ReceiverId for progress bar visibility
@@ -427,7 +427,7 @@ namespace EmailSender.ViewModels
                         countToOurMails++;
 
                         //add status of receiver to database
-                        receiver.StatusSend = StatusSended;
+                        receiver.StatusSend = _consts.ReceiverStatusSended;
                         _saver.SaveReceiver(receiver);
                     }
                     else
@@ -490,7 +490,10 @@ namespace EmailSender.ViewModels
             Execute.OnUIThread(()=> {
                 foreach(var reseiver in _receivers)
                 {
-                    if(reseiver.StatusSend == StatusSended) { reseiver.StatusSend = StatusNotSend; }
+                    if(reseiver.StatusSend == _consts.ReceiverStatusSended) 
+                    { 
+                        reseiver.StatusSend = _consts.ReceiverStatusNotSend; 
+                    }
                 }
                 NotifyOfPropertyChange(nameof(_receivers));
             });
@@ -499,7 +502,7 @@ namespace EmailSender.ViewModels
 
         private void CheckStatuses(Receiver receiver)
         {
-            if((_acc.ServerStatus != StatusServerOk) || (_acc.AccountStatus != StatusServerOk) || (receiver.StatusSend != StatusSended))
+            if((_acc.ServerStatus != _consts.ServerStatusOk) || (_acc.AccountStatus != _consts.AkkStatusOk) || (receiver.StatusSend != _consts.ReceiverStatusSended))
             {
                 if((ServerErrorCount > 100)&&(ServerErrorCount % 10 == 0))
                 {

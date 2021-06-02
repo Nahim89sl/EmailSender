@@ -15,13 +15,13 @@ namespace EmailSender.Services
         [Inject] private Logger.ILogger logger;
         [Inject] private  IConsts Consts;
 
-        public IList<IMailAnswer> ReadMails(string stopWords, string emailBlackList)
+        public IList<IMailAnswer> ReadMails(string SubjectStopWords, string BodyStopWords, string emailBlackList)
         {
             try
             {
                 var readerLogger = LogManager.GetLogger("Reader");
-                var mailReader = new MailKitReader(readerLogger);
-                var res = mailReader.ReaderMails(MainAccount, Consts.ReadFolder, Consts.TrashFolder, stopWords, emailBlackList);
+                var mailReader = new MailKitReader(readerLogger, Consts);
+                var res = mailReader.ReaderMails(MainAccount, Consts.ReadFolder, Consts.TrashFolder, SubjectStopWords, BodyStopWords, emailBlackList);
                 return res;
             }
             catch(Exception ex)
