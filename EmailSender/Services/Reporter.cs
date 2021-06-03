@@ -121,7 +121,7 @@ namespace EmailSender.Services
                 var inList1 = ExistWords(answer.EmailText, NotExistList_1);
                 var inList2 = ExistWords(answer.EmailText, NotExistList_2);
                
-                _logger.InfoReader($"******** NOT EXIST Mail:");
+                _logger.InfoReader($"******** NOT EXIST Mail:**********************");
                 _logger.InfoReader($"Coincidence list 1:  {inList1}");
                 _logger.InfoReader($"Coincidence list 2:  {inList2}");
                 _logger.InfoReader($"{answer.EmailSubject}");
@@ -137,15 +137,15 @@ namespace EmailSender.Services
                     {
                         if ((inList1 != string.Empty)&&(inList2 != string.Empty))
                         {
-                            receiver.StatusSend = _statuses.ReceiverStatusBlock;
-                            receiver.StatusEmailExist = _statuses.ReceiverStatusNotExist;
+                            receiver.StatusSend = _statuses.ReceiverStatusWariant;                            
                         }
                         if ((inList1 != string.Empty) && (inList2 == string.Empty))
                         {
-                            receiver.StatusSend = _statuses.ReceiverStatusWariant;
+                            receiver.StatusSend = _statuses.ReceiverStatusBlock;
+                            receiver.StatusEmailExist = _statuses.ReceiverStatusNotExist;
                         }
                         _dbService.SaveReceiver(receiver);
-                        _logger.InfoReader($"Change receiver's status in DB for {email}");
+                        _logger.InfoReader($"Change receiver's status in DB for {email} {receiver.StatusSend}");
                     }
                     else
                     {
@@ -155,7 +155,8 @@ namespace EmailSender.Services
                 else
                 {
                     _logger.InfoReader($"Did not exstract mail adress from message body");
-                }                       
+                }
+                _logger.InfoReader($"******************************\n");
             }           
         }
 

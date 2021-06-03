@@ -15,11 +15,9 @@ using ILogger = EmailSender.Logger.ILogger;
 using System.Windows;
 using EmailSender.Settings;
 using EmailSender.Settings.Models;
-using System.Collections.ObjectModel;
 using System.Windows.Threading;
 using AppCommon.Interfaces;
 using AppCommon.Constants;
-using AppCommon.MailObj;
 using AppCommon.Utilities;
 using EmailSender.Utilities;
 
@@ -80,7 +78,7 @@ namespace EmailSender
         protected override void OnExit(ExitEventArgs e)
         {
             ioc = base.Container;
-            //ioc.Get<ISettings>().Save(settings);
+            ioc.Get<ISettings>().Save(settings);
             //var saver = ioc.Get<ILoadReceivers>();
             //var receivers = ioc.Get<BindableCollection<Receiver>>();
             //saver.SaveChanges(receivers, settings.FielMappingSettings);
