@@ -41,13 +41,14 @@ namespace EmailSender
             //get settings service
             builder.Bind<ISettings>().To<AppSettingService>().InSingletonScope();
             builder.Bind<ILogger>().To<NLogLogger>().InSingletonScope();
+            builder.Bind<IConsts>().ToFactory(container => new Consts());
             //load settings
             ioc = builder.BuildContainer();
             settings = ioc.Get<ISettings>().Load();
             //
             //bind logger service
 
-            builder.Bind<IConsts>().ToFactory(container => new Consts());
+            
 
 
             //bind Notification service with account settings value

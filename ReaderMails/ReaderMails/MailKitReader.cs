@@ -27,18 +27,17 @@ namespace ReaderMails
     public class MailKitReader : IMailReaderService
     {
         private ImapClient _imapClient;
-        private Logger _logger;
+        private ILogger _logger;
         private IMailFolder _destFolder;
         private IMailFolder _trashFolder;
         private string _libName;
         private IConsts _consts;
 
 
-        public MailKitReader(Logger logger, IConsts consts)
+        public MailKitReader(ILogger logger, IConsts consts)
         {
             _logger = logger;
             _consts = consts;
-            //logger = LogManager.GetCurrentClassLogger();
             _logger.Info($"{_libName} Load app MailReader");
             _libName = "ReaderMail";
         }
@@ -76,7 +75,7 @@ namespace ReaderMails
                 }              
             }
             _logger.Error($"{_libName} Akkaunt status is {akkaunt.AccountStatus}");
-            return null;
+            return new List<IMailAnswer>();
         }
         
         //public messages by subject
@@ -165,6 +164,7 @@ namespace ReaderMails
             {
                 _logger.Error(ex.Message);
                 account.ServerStatus = ex.Message;
+                _imapClient.Dispose();
                 return;
             }
             //#2 try authenticate on server

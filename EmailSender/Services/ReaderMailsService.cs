@@ -1,10 +1,12 @@
-﻿using System;
-using System.Collections.Generic;
+﻿
+
 using AppCommon.Interfaces;
 using EmailSender.Interfaces;
 using NLog;
 using ReaderMails;
 using StyletIoC;
+using System;
+using System.Collections.Generic;
 
 namespace EmailSender.Services
 {
@@ -12,21 +14,35 @@ namespace EmailSender.Services
     {
         
         [Inject] public  IMailAkk MainAccount;
-        [Inject] private Logger.ILogger logger;
         [Inject] private  IConsts Consts;
+
+        private MailKitReader kitReader;
+        private ILogger readerLogger;
+
+        #region Constructor
+
+        public ReaderMailsService()
+        {
+            readerLogger = LogManager.GetLogger("Reader");
+        }
+
+        #endregion
 
         public IList<IMailAnswer> ReadMails(string SubjectStopWords, string BodyStopWords, string emailBlackList)
         {
+                       
             try
             {
-                var readerLogger = LogManager.GetLogger("Reader");
-                var mailReader = new MailKitReader(readerLogger, Consts);
-                var res = mailReader.ReaderMails(MainAccount, Consts.ReadFolder, Consts.TrashFolder, SubjectStopWords, BodyStopWords, emailBlackList);
+                if(kitReader == null)
+                {
+                    kitReader = new MailKitReader(readerLogger, Consts);
+                }                
+                var res = kitReader.ReaderMails(MainAccount, Consts.ReadFolder, Consts.TrashFolder, SubjectStopWords, BodyStopWords, emailBlackList);
                 return res;
             }
             catch(Exception ex)
             {
-                logger.ErrorReader($"ReaderMailsService {ex.Message}");
+                readerLogger.Error($"ReaderMailsService {ex.Message}");
                 return new List<IMailAnswer>();
             }            
         }

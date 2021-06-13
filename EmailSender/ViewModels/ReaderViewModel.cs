@@ -32,7 +32,7 @@ namespace EmailSender.ViewModels
         private int _readInterval;
         private string _textAnswer;
         private string _subjectLetter;
-        
+
         private string _reportFolder_1;
         private string _reportFolder_2;
         private string _accountState;
@@ -52,7 +52,7 @@ namespace EmailSender.ViewModels
         private bool isReadNow;
         //marker of reading service work
         private bool isReadServiceWork;
-
+        private IContainer _ioc;
         private Reporter _reporter;
         private IWindowManager _windMng;
         //timer
@@ -64,6 +64,7 @@ namespace EmailSender.ViewModels
 
         public ReaderViewModel(IContainer ioc)
         {
+            _ioc = ioc;
             _logger = ioc.Get<ILogger>();
             _settings = ioc.Get<AppSettingsModel>().ReaderSettings;
             _account = ioc.Get<AppSettingsModel>().MainAccount;
@@ -72,7 +73,7 @@ namespace EmailSender.ViewModels
             _windMng = ioc.Get<IWindowManager>();
 
             _reporter = new Reporter(ioc);
-            
+
 
             //setting timer
             aTimer = new System.Timers.Timer(5000);
@@ -135,7 +136,7 @@ namespace EmailSender.ViewModels
                 _settings.ReadInterval = value;
             }
         }
-        
+
         //property text of answer letter
         public string TextLetter
         {
@@ -226,7 +227,7 @@ namespace EmailSender.ViewModels
         }
 
         //Stop List of balck list mails
-        public string EmailBlackList 
+        public string EmailBlackList
         {
             get
             {
@@ -240,7 +241,7 @@ namespace EmailSender.ViewModels
             }
         }
 
-        
+
         //Report folder 1
         public string ReportFolder_1
         {
@@ -270,7 +271,7 @@ namespace EmailSender.ViewModels
                 _settings.ReportFolder_2 = value;
             }
         }
-     
+
         //State account of reading 
         public string AccountState
         {
@@ -285,7 +286,7 @@ namespace EmailSender.ViewModels
                 _account.AccountStatus = value;
             }
         }
-       
+
         public string ServerState
         {
             get
@@ -311,7 +312,7 @@ namespace EmailSender.ViewModels
                 SetAndNotify(ref this._nextTimeRead, value);
             }
         }
-       
+
         public string LastTimeRead
         {
             get
@@ -336,10 +337,10 @@ namespace EmailSender.ViewModels
         }
         public void SetFolderCommand2()
         {
-            ReportFolder_2 = _dialog.OpenFolder(); 
+            ReportFolder_2 = _dialog.OpenFolder();
             NotifyOfPropertyChange(nameof(this.ReportFolder_2));
         }
-        
+
         public void StartReadServiceCommand()
         {
             isReadServiceWork = true;
@@ -374,20 +375,9 @@ namespace EmailSender.ViewModels
             isReadNow = true;
             _logger.InfoReader("Start Read Command");
             NotifyOfPropertyChange(nameof(this.CanReadMailsCommand));
-            CheckFolder(ReportFolder_1);
-            CheckFolder(ReportFolder_2);
 
             Task.Run(() => {
-                
-                IList<IMailAnswer> answers = _reader.ReadMails(StopWords, BodyStopWords(), EmailBlackList);
-
-                _logger.InfoReader($"Finish reading, get answers {answers.Count.ToString()}");
-
-                _reporter.WorkWithResults(answers);
-
-                //set ui elements to next time read
-                ChangeUiNextTimeRead();
-                _logger.InfoReader("Finished reading");
+                ReadMails();
             });
         }
         public bool CanReadMailsCommand
@@ -398,6 +388,40 @@ namespace EmailSender.ViewModels
         #endregion
 
         #region Private methods
+
+        public IReaderMails Reader {
+            get
+            {
+                if(_reader == null)
+                {
+                    _logger.ErrorReader($"Null value of _reader");
+                    _reader = _ioc.Get<IReaderMails>();
+                }
+                return _reader;
+            }
+        }
+
+        private void ReadMails()
+        {
+            _logger.InfoReader("Start task");
+            try
+            {
+                IList<IMailAnswer> answers = Reader.ReadMails(StopWords, BodyStopWords(), EmailBlackList);
+                _logger.InfoReader($"Finish reading, get answers {answers.Count.ToString()}");
+                _reporter.WorkWithResults(answers);
+            }
+            catch(Exception ex)
+            {
+                _logger.ErrorReader($"ReadMails error {ex.Message}");
+            }
+            finally
+            {
+                //set ui elements to next time read
+                ChangeUiNextTimeRead();
+                _logger.InfoReader("Finished reading");
+            }            
+        }
+
         private void ChangeUiNextTimeRead()
         {
             Execute.OnUIThread(() => {
@@ -432,12 +456,9 @@ namespace EmailSender.ViewModels
 
         private void OnTimedEvent(Object source, ElapsedEventArgs e)
         {
-            if (nextTimeReadInt < TimeUnixService.Timestamp())
+            if (nextTimeReadInt < TimeUnixService.Timestamp()&&(!isReadNow))
             {
-                if (!isReadNow)
-                {
-                    ReadMailsCommand();
-                }
+                ReadMailsCommand();
             }
         }
 
@@ -472,6 +493,7 @@ namespace EmailSender.ViewModels
 
             return resultList;
         }
+
         #endregion
 
         }
