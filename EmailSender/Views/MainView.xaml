@@ -23,6 +23,9 @@
             <TabItem Header="Reader">
                 <ContentControl s:View.Model="{Binding ViewReader}"/>
             </TabItem>
+            <TabItem Header="Автоответ">
+                <ContentControl s:View.Model="{Binding ViewAutoAnswer}"/>
+            </TabItem>
             <TabItem Header="Telegram akkaunt">
                 <ContentControl s:View.Model="{Binding ViewNotification}"/>
             </TabItem>

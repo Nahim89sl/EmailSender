@@ -24,13 +24,14 @@ namespace EmailSender.ViewModels
         public MainViewModel(IContainer ioc)
         {
             var logger = ioc.Get<ILogger>();
-            logger.InfoSender("Start app 2.0.1");           
+            logger.InfoSender("Start app 2.0.2");           
             ViewAccount = new AccountViewModel(ioc);           
             ViewNotification = new NotificationViewModel(ioc);
             FieldMapping = new FieldMappingViewModel(ioc);
             ViewLetterTemplate = new LetterTemplateViewModel(ioc);
             ViewSender = new SenderViewModel(ioc);
             ViewReader = new ReaderViewModel(ioc);
+            ViewAutoAnswer = new AutoAnswerViewModel(ioc);
 
             _globalSettings = ioc.Get<AppSettingsModel>();
             _settingsService = ioc.Get<ISettings>();
@@ -66,6 +67,7 @@ namespace EmailSender.ViewModels
         public ReaderViewModel ViewReader { get; set; }
         public FieldMappingViewModel FieldMapping { get; set; }
         public LetterTemplateViewModel ViewLetterTemplate { get; set; }
+        public AutoAnswerViewModel ViewAutoAnswer { get; set; }
 
         #endregion
 

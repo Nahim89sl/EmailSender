@@ -126,6 +126,7 @@ namespace ReaderMails
                     ||(ExistStopWords(answer.EmailAddress, emailBlackList))
                     ||(ExistStopWords(answer.EmailText, bodyStopWords)))
                 {
+                    
                     _imapClient.Inbox.MoveTo(uidMail, _trashFolder);
                     _imapClient.Inbox.AddFlags(uidMail, MessageFlags.Seen, true); //mark is read
                     _logger.Info($"{_libName} Move to: {_consts.TrashFolder} - {subject}");
@@ -142,7 +143,7 @@ namespace ReaderMails
             }
             catch(Exception ex)
             {
-                _logger.Error($"FilterMailBySubject {ex.Message}");
+                _logger.Error($"FilterMailBySubject {ex.Message} \n ");
                 return null;
             }            
         }
@@ -211,12 +212,19 @@ namespace ReaderMails
         //find words in text
         public bool ExistStopWords(string text, string findWords)
         {
-            Regex rgx = new Regex(findWords);
-            var match = rgx.Match(text);
-            if (match.Success)
+            try
             {
-                return true;
+                Regex rgx = new Regex(findWords);
+                var match = rgx.Match(text);
+                if (match.Success)
+                {
+                    return true;
+                }
             }
+            catch (Exception ex)
+            {
+                _logger.Error($"ExistStopWords {ex.Message}\n         text {text}\n     findwords{findWords}");
+            }           
             return false;
         }
 

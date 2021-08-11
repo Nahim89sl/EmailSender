@@ -12,7 +12,12 @@ namespace AppCommon.MailObj
 
         public string From => Message?.From.ToString();
         public string EmailAddress => Message?.From.Mailboxes.First().Address.ToLower();
-        public string EmailSubject => Message?.Subject.ToString();
+        public string EmailSubject {
+            get
+            {
+                return Message?.Subject.ToString() ?? string.Empty;
+            }
+        }
         public string EmailText => GetLetterText(Message);
 
         private string GetLetterText(MimeMessage letter)

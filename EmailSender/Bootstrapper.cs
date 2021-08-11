@@ -46,10 +46,7 @@ namespace EmailSender
             ioc = builder.BuildContainer();
             settings = ioc.Get<ISettings>().Load();
             //
-            //bind logger service
-
-            
-
+            //bind logger service          
 
             //bind Notification service with account settings value
             builder.Bind<INotification>().ToFactory(container => new NotificationTelegramService(settings.NotificationAccount, container.Get<ILogger>()));

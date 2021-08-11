@@ -412,7 +412,7 @@ namespace EmailSender.ViewModels
             }
             catch(Exception ex)
             {
-                _logger.ErrorReader($"ReadMails error {ex.Message}");
+                _logger.ErrorReader($"ReadMails {ex.Message}");
             }
             finally
             {
@@ -465,32 +465,39 @@ namespace EmailSender.ViewModels
         private string BodyStopWords()
         {
             string resultList = string.Empty;
-            if (NotExistList_1.Length > 3)
-                resultList = NotExistList_1;
-
-            if (NotExistList_2.Length > 3)
+            try
             {
-                if (resultList == string.Empty)
+                if (NotExistList_1.Length > 3)
+                    resultList = NotExistList_1;
+
+                if (NotExistList_2.Length > 3)
                 {
-                    resultList = NotExistList_2;
+                    if (resultList == string.Empty)
+                    {
+                        resultList = NotExistList_2;
+                    }
+                    else
+                    {
+                        resultList = $"{resultList}|{NotExistList_2}";
+                    }
                 }
-                else
+                if (SpamList.Length > 3)
                 {
-                    resultList = $"{resultList}|{NotExistList_2}";
+                    if (resultList == string.Empty)
+                    {
+                        resultList = SpamList;
+                    }
+                    else
+                    {
+                        resultList = $"{resultList}|{SpamList}";
+                    }
                 }
             }
-            if (SpamList.Length > 3)
+            catch(Exception ex)
             {
-                if (resultList == string.Empty)
-                {
-                    resultList = SpamList;
-                }
-                else
-                {
-                    resultList = $"{resultList}|{SpamList}";
-                }
+                _logger.InfoReader($"BodyStopWords {ex.Message}\n NotExistList_1 {NotExistList_1} NotExistList_2 {NotExistList_2} SpamList{SpamList}");
             }
-
+                       
             return resultList;
         }
 

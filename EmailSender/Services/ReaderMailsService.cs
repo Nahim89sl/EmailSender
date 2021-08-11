@@ -35,6 +35,7 @@ namespace EmailSender.Services
             {
                 if(kitReader == null)
                 {
+                    readerLogger.Info($"Reader created 1.0.0");
                     kitReader = new MailKitReader(readerLogger, Consts);
                 }                
                 var res = kitReader.ReaderMails(MainAccount, Consts.ReadFolder, Consts.TrashFolder, SubjectStopWords, BodyStopWords, emailBlackList);
