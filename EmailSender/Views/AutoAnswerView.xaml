@@ -18,7 +18,7 @@
             <Style x:Key="BigTextBoxStyle" TargetType="TextBox">
                 <Setter Property="Background" Value="LightGray"/>
                 <Setter Property="Padding" Value="5"/>
-                <Setter Property="Width" Value="{Binding RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type StackPanel}}, Path=ActualWidth}"/>
+                <Setter Property="Width" Value="300"/>
                 <Setter Property="HorizontalAlignment" Value="Center"/>
                 <Setter Property="Margin" Value="5"/>
                 <Setter Property="Height" Value="100"/>
@@ -32,9 +32,9 @@
     </UserControl.Resources>
     <Grid>
         <Grid.ColumnDefinitions>
-            <ColumnDefinition/>
-            <ColumnDefinition/>
-            <ColumnDefinition/>
+            <ColumnDefinition Width="*"/>
+            <ColumnDefinition Width="*"/>
+            <ColumnDefinition Width="auto"/>
         </Grid.ColumnDefinitions>
         
         <Grid.RowDefinitions>
@@ -43,41 +43,46 @@
         </Grid.RowDefinitions>
 
 
-        <StackPanel Orientation="Vertical" Margin="5" Grid.RowSpan="2">
-            <CheckBox Margin="7,30,0,0" x:Name="checkBox2" IsChecked="{Binding IsAnswer}" Height="20" Content="Отвечать" />
-            <TextBlock 
+        <StackPanel Orientation="Horizontal"  Grid.ColumnSpan="2">
+            <StackPanel>
+                <TextBlock 
                 Style="{StaticResource MiddleTitleStyle}" 
-                Text="Заголовок ответа"/>
-            <TextBox 
-                Style="{StaticResource BigTextBoxStyle}"/>
-
-            <TextBlock 
-                Style="{StaticResource MiddleTitleStyle}"
-                Text="Текст письма ответа" />
-            <TextBox 
-                    Style="{StaticResource BigTextBoxStyle}"/>
-        </StackPanel>
-
-
-        <StackPanel Grid.Column="1">
-            <TextBlock
+                Text="Заголовок ответа"               
+                />
+                <TextBox 
+                x:Name="answTitlesTextBox"
+                Style="{StaticResource BigTextBoxStyle}" 
+                />
+            </StackPanel>
+            <StackPanel>
+                <TextBlock
                 Style="{StaticResource MiddleTitleStyle}"
                 Text="Фильтр заголовка"/>
-            <TextBox 
-                Width="{Binding RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type StackPanel}}, Path=ActualWidth}"
+                <TextBox 
+                x:Name="filterTitleTextBox"
                 Style="{StaticResource BigTextBoxStyle}"/>
+            </StackPanel>
         </StackPanel>
 
-        <StackPanel Grid.Column="1" Grid.Row="1">
-            <TextBlock
+        <StackPanel Orientation="Horizontal" Grid.Row="1"  Grid.ColumnSpan="2">
+            <StackPanel>
+                <TextBlock 
+                Style="{StaticResource MiddleTitleStyle}"
+                Text="Текст письма ответа" />
+                <TextBox
+                x:Name="answBodyTextBox"
+                Style="{StaticResource BigTextBoxStyle}"/>
+            </StackPanel>
+
+            <StackPanel>
+                <TextBlock
                 Style="{StaticResource MiddleTitleStyle}"          
                 Text="Фильтр тела письма"/>
-            <TextBox 
+                <TextBox 
+                x:Name="filterBodyTextBox"
                 Style="{StaticResource BigTextBoxStyle}"/>
+            </StackPanel>
         </StackPanel>
-
-
-        
-
+   
     </Grid>
 </UserControl>
