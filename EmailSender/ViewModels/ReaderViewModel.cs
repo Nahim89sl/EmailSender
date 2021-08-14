@@ -241,7 +241,6 @@ namespace EmailSender.ViewModels
             }
         }
 
-
         //Report folder 1
         public string ReportFolder_1
         {

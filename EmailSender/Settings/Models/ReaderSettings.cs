@@ -17,6 +17,8 @@ namespace EmailSender.Settings.Models
         public string NotExistList_2 { get; set; }
         public string WordsSpamMail { get; set; }
         public string EmailBlackList { get; set; }
+        public string AnswerTitleList { get; set; }
+        public string AnswerBodyList { get; set; }
 
         public bool IsAutoStart { get; set; }
         public bool IsAnswer { get; set; }

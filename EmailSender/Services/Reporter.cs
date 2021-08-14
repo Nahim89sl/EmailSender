@@ -29,10 +29,8 @@ namespace EmailSender.Services
         private MainAccount _account;
         private ILoadReceivers _dbService;
         private IConsts _statuses;
-        private string _wordsNotExistMail;
-        private string _wordsSpamMail;
-        private IEmailExtractor _extractor;
         private AppSettingsModel _settingsGlobal;
+        private IAutoAnswerService _autoAnswerService;
 
 
         #endregion
@@ -50,7 +48,7 @@ namespace EmailSender.Services
             _account = _settingsGlobal.MainAccount;
             _dbService = ioc.Get<ILoadReceivers>();
             _statuses = ioc.Get<IConsts>();
-            _extractor = ioc.Get<IEmailExtractor>();
+            _autoAnswerService = ioc.Get<IAutoAnswerService>();
         }
 
         #endregion
@@ -60,6 +58,8 @@ namespace EmailSender.Services
         public string NotExistList_1 => _settings.NotExistList_1;
         public string NotExistList_2 => _settings.NotExistList_2;
         public string WordsSpamMail => _settings.WordsSpamMail;
+        public string AnswerBodyFilter => _settings.AnswerBodyList;
+
 
         #endregion
 
@@ -73,7 +73,14 @@ namespace EmailSender.Services
             try
             {
                 var goodAnswers = answers.Where(a => a.Status == MailStatus.Good).ToList();
+                
                 goodAnswers.ForEach(a => GoodAnswerWorker(a));
+
+                if(_settingsGlobal.ReaderSettings.IsAnswer)//Auto answer work
+                {
+                    var needAnswersList = goodAnswers.Where(x => ExistWords(x.EmailText, AnswerBodyFilter) != string.Empty).ToList();
+                    _autoAnswerService.SendAnswersAsync(needAnswersList);
+                }
 
                 var badAnswers = answers.Where(a => a.Status == MailStatus.Block).ToList();
                 BadAnswerWorker(badAnswers);
@@ -91,9 +98,11 @@ namespace EmailSender.Services
             if (receiver != null)
             {
                 receiver.StatusSend = _statuses.ReceiverStatusAnswered;
+                //change status in db
                 _dbService.SaveReceiver(receiver);
                 _notification.AnswerGetMessage($"{answer.EmailAddress}\n {answer.EmailSubject}");
             }
+            //add record to report files
             _reporter.AddToReport(Path.Combine(_settings.ReportFolder_1, $"{_account.Server}.xlsx"), answer, receiver, _account.ServerLabelName);
             _reporter.AddToReport(Path.Combine(_settings.ReportFolder_2, $"{_account.Server}.xlsx"), answer, receiver, _account.ServerLabelName);
             _logger.InfoReader($"Add to report!{answer.EmailAddress}");
@@ -191,6 +200,8 @@ namespace EmailSender.Services
                 }
             }
         }
+
+
 
         /// <summary>
         /// Find in text some words from our list. List conatains words in format word1|word2|...

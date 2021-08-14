@@ -62,7 +62,8 @@ namespace EmailSender
             builder.Bind<ILoadReceivers>().To<LoadSaveReceiversSqlite>();
             builder.Bind<IExcelWorker>().To<ExcelWorker>();
             builder.Bind<IOurReceiversWorker>().To<OurReceiversWorker>();
-            
+            builder.Bind<IAutoAnswerService>().To<AutoAnswer>();
+
             builder.Bind<BindableCollection<Receiver>>().ToFactory(container => new BindableCollection<Receiver>()).InSingletonScope();
 
             //Utils

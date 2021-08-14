@@ -47,40 +47,40 @@
             <StackPanel>
                 <TextBlock 
                 Style="{StaticResource MiddleTitleStyle}" 
-                Text="Заголовок ответа"               
+                Text="Заголовки ответа"               
                 />
-                <TextBox 
-                x:Name="answTitlesTextBox"
-                Style="{StaticResource BigTextBoxStyle}" 
+                <TextBox x:Name="answTitlesTextBox"
+                    Text="{Binding AnswerLetterTitle, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                    Style="{StaticResource BigTextBoxStyle}" 
                 />
             </StackPanel>
             <StackPanel>
                 <TextBlock
                 Style="{StaticResource MiddleTitleStyle}"
                 Text="Фильтр заголовка"/>
-                <TextBox 
-                x:Name="filterTitleTextBox"
-                Style="{StaticResource BigTextBoxStyle}"/>
+                <TextBox x:Name="filterTitleTextBox"
+                    Text="{Binding AnswerTitleFilter, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"               
+                    Style="{StaticResource BigTextBoxStyle}"/>
             </StackPanel>
         </StackPanel>
 
         <StackPanel Orientation="Horizontal" Grid.Row="1"  Grid.ColumnSpan="2">
             <StackPanel>
                 <TextBlock 
-                Style="{StaticResource MiddleTitleStyle}"
-                Text="Текст письма ответа" />
-                <TextBox
-                x:Name="answBodyTextBox"
-                Style="{StaticResource BigTextBoxStyle}"/>
+                    Text="Текст письма ответа"
+                    Style="{StaticResource MiddleTitleStyle}"/>
+                <TextBox x:Name="answBodyTextBox" 
+                    Text="{Binding AnswerLetterBody, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                    Style="{StaticResource BigTextBoxStyle}"/>
             </StackPanel>
 
             <StackPanel>
                 <TextBlock
-                Style="{StaticResource MiddleTitleStyle}"          
-                Text="Фильтр тела письма"/>
-                <TextBox 
-                x:Name="filterBodyTextBox"
-                Style="{StaticResource BigTextBoxStyle}"/>
+                    Style="{StaticResource MiddleTitleStyle}"          
+                    Text="Фильтр тела письма"/>
+                <TextBox x:Name="filterBodyTextBox"                
+                    Text="{Binding AnswerBodyFilter, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                    Style="{StaticResource BigTextBoxStyle}"/>
             </StackPanel>
         </StackPanel>
    
