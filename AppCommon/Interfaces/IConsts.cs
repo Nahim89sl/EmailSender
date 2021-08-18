@@ -6,6 +6,7 @@ namespace AppCommon.Interfaces
         string TrashFolder { get; set; }
         string ReadFolder { get; set; }
 
+        string ReceiverStatusAutoanswered { get; set; }
         string ReceiverStatusAnswered { get; set; }
         string ReceiverStatusBlock { get; set; }
         string ReceiverStatusSpam { get; set; }

@@ -10,10 +10,7 @@ namespace EmailSender.ViewModels
     {
         #region Private fields
 
-        private IContainer _ioc;
-        ReaderSettings _settings;
-
-
+        private ReaderSettings _settings;
         private string _answerTitleFilter;
         private string _answerBodyFilter;
         private string _answerLetterTitle;
@@ -27,10 +24,13 @@ namespace EmailSender.ViewModels
 
         public AutoAnswerViewModel(IContainer ioc)
         {
-            _ioc = ioc;
             _settings = ioc.Get<AppSettingsModel>().ReaderSettings;
             if (_settings.AnswerLetter == null) _settings.AnswerLetter = new Letter();
         }
+
+        #endregion
+
+        #region Properties       
 
         public string AnswerTitleFilter
         {

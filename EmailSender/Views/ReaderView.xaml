@@ -194,26 +194,10 @@
                 />
             </StackPanel>
             <CheckBox Margin="7,30,0,0"  IsChecked="{Binding IsAutoStart}" Height="20" Content="Запускать чтение при старте" />
-            <StackPanel Orientation="Vertical" Margin="5">
-                <CheckBox Margin="7,30,0,0" x:Name="checkBox2" IsChecked="{Binding IsAnswer}" Height="20" Content="Отвечать" />
-                <Label Margin="5" Content="Заголовок ответа"/>
-                <TextBox 
-                    Height="20" 
-                    TextWrapping="Wrap"
-                    AcceptsReturn="True"
-                    HorizontalScrollBarVisibility="Disabled"
-                    VerticalScrollBarVisibility="Auto"
-                    Text="{Binding SubjectLetter, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"                         
-                />
-                <Label Content="Текст письма ответа" />
-                <TextBox 
-                    Height="100"
-                    TextWrapping="Wrap"
-                    AcceptsReturn="True"
-                    HorizontalScrollBarVisibility="Disabled"
-                    VerticalScrollBarVisibility="Auto"
-                    Text="{Binding TextLetter, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
-            </StackPanel>
+            <CheckBox Margin="7,30,0,0" 
+                      IsChecked="{Binding IsAnswer}" 
+                      Height="20"                      
+                      Content="Активировать автоответ" />
         </StackPanel>
     </Grid>
 </UserControl>

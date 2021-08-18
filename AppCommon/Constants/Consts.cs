@@ -7,6 +7,7 @@ namespace AppCommon.Constants
         public string TrashFolder { get; set; } = "Trash";
         public string ReadFolder { get; set; } = "Read";
 
+        public string ReceiverStatusAutoanswered { get; set; } = "AUTOANSWERED";
         public string ReceiverStatusAnswered { get; set; } = "ANSWERED";
         public string ReceiverStatusBlock { get; set; } = "BLOCK";
         public string ReceiverStatusSpam { get; set; } = "SPAM";

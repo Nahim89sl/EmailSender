@@ -36,14 +36,15 @@
             <ColumnDefinition Width="*"/>
             <ColumnDefinition Width="auto"/>
         </Grid.ColumnDefinitions>
-        
+
         <Grid.RowDefinitions>
+            <RowDefinition Height="auto"/>
             <RowDefinition/>
             <RowDefinition/>
         </Grid.RowDefinitions>
 
-
-        <StackPanel Orientation="Horizontal"  Grid.ColumnSpan="2">
+        <StackPanel Grid.Row="1" Grid.ColumnSpan="2"
+            Orientation="Horizontal">
             <StackPanel>
                 <TextBlock 
                 Style="{StaticResource MiddleTitleStyle}" 
@@ -59,12 +60,14 @@
                 Style="{StaticResource MiddleTitleStyle}"
                 Text="Фильтр заголовка"/>
                 <TextBox x:Name="filterTitleTextBox"
+                    Background="BlanchedAlmond"
                     Text="{Binding AnswerTitleFilter, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"               
                     Style="{StaticResource BigTextBoxStyle}"/>
             </StackPanel>
         </StackPanel>
 
-        <StackPanel Orientation="Horizontal" Grid.Row="1"  Grid.ColumnSpan="2">
+        <StackPanel Grid.Row="2" Grid.ColumnSpan="2"
+            Orientation="Horizontal">
             <StackPanel>
                 <TextBlock 
                     Text="Текст письма ответа"
@@ -80,6 +83,7 @@
                     Text="Фильтр тела письма"/>
                 <TextBox x:Name="filterBodyTextBox"                
                     Text="{Binding AnswerBodyFilter, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                    Background="BlanchedAlmond"
                     Style="{StaticResource BigTextBoxStyle}"/>
             </StackPanel>
         </StackPanel>
