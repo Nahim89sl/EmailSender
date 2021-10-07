@@ -1,6 +1,6 @@
-﻿using AppCommon.Interfaces;
-using EmailSender.Models;
+﻿using EmailSender.Models;
 using EmailSender.Settings.Models;
+using ReaderMails.Interfaces;
 using Stylet;
 using System.Collections.ObjectModel;
 using System.Threading.Tasks;

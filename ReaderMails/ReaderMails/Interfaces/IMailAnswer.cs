@@ -1,10 +1,12 @@
-﻿using AppCommon.MailObj;
+﻿using MailKit;
 using MimeKit;
+using ReaderMails.Enums;
 
-namespace AppCommon.Interfaces
+namespace ReaderMails.Interfaces
 {
     public interface IMailAnswer
     {
+        UniqueId Id { get; set; }
         MimeMessage Message { get; set; }
         MailStatus Status { get; set; }
 

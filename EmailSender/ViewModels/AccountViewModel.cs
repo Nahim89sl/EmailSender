@@ -7,7 +7,7 @@ using EmailSender.Interfaces;
 using EmailSender.Logger;
 using EmailSender.Models;
 using Stylet;
-using AppCommon.Interfaces;
+using ReaderMails.Interfaces;
 
 namespace EmailSender.ViewModels
 {

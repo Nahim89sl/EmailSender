@@ -20,6 +20,7 @@ using AppCommon.Interfaces;
 using AppCommon.Constants;
 using AppCommon.Utilities;
 using EmailSender.Utilities;
+using ReaderMails.Interfaces;
 
 namespace EmailSender
 {

@@ -1,18 +1,18 @@
 ﻿using AppCommon.Interfaces;
+using EmailSender.Extentions;
 using EmailSender.Interfaces;
 using EmailSender.Logger;
 using EmailSender.Models;
 using EmailSender.Services;
 using EmailSender.Settings;
 using EmailSender.Settings.Models;
+using ReaderMails;
+using ReaderMails.Interfaces;
 using Stylet;
 using StyletIoC;
 using System;
 using System.Collections.Generic;
-using System.Collections.ObjectModel;
 using System.IO;
-using System.Linq;
-using System.Threading;
 using System.Threading.Tasks;
 using System.Timers;
 
@@ -76,7 +76,7 @@ namespace EmailSender.ViewModels
 
 
             //setting timer
-            aTimer = new System.Timers.Timer(5000);
+            aTimer = new Timer(5000);
             aTimer.Elapsed += OnTimedEvent;
             aTimer.AutoReset = true;
             aTimer.Enabled = true;
@@ -332,12 +332,17 @@ namespace EmailSender.ViewModels
         {
             ReportFolder_1 = _dialog.OpenFolder();
             NotifyOfPropertyChange(nameof(this.ReportFolder_1));
-
         }
         public void SetFolderCommand2()
         {
             ReportFolder_2 = _dialog.OpenFolder();
             NotifyOfPropertyChange(nameof(this.ReportFolder_2));
+        }
+        
+        //метод для тестов
+        public void CheckAnswers()
+        {
+            var answers = AnsverGenerator.GetAnswers("hello| no |Glad to see you",2,"responce|answer",0,"",0,"",0);
         }
 
         public void StartReadServiceCommand()
@@ -405,9 +410,13 @@ namespace EmailSender.ViewModels
             _logger.InfoReader("Start task");
             try
             {
-                IList<IMailAnswer> answers = Reader.ReadMails(StopWords, BodyStopWords(), EmailBlackList);
-                _logger.InfoReader($"Finish reading, get answers {answers.Count.ToString()}");
-                _reporter.WorkWithResults(answers);
+                var filtrator = new EmailFiltrator(StopWords, StopWords,
+                                                    SpamList, SpamList, NotExistList_1, NotExistList_1,
+                                                    NotExistList_2, NotExistList_2,
+                                                    _settings.AnswerTitleList, _settings.AnswerBodyList, EmailBlackList);
+                
+                Reader.ReadMails(filtrator);
+                _reporter.WorkWithResults(filtrator);
             }
             catch(Exception ex)
             {
@@ -494,7 +503,7 @@ namespace EmailSender.ViewModels
             }
             catch(Exception ex)
             {
-                _logger.InfoReader($"BodyStopWords {ex.Message}\n NotExistList_1 {NotExistList_1} NotExistList_2 {NotExistList_2} SpamList{SpamList}");
+                _logger.ErrorReader($"BodyStopWords {ex.Message}\n NotExistList_1: {NotExistList_1}\n NotExistList_2: {NotExistList_2}\nSpamList:{SpamList}\nResult Filter:{resultList}");
             }
                        
             return resultList;

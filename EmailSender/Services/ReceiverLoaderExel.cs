@@ -13,6 +13,7 @@ using EmailSender.Interfaces;
 using System.Threading.Tasks;
 using Stylet;
 using AppCommon.Interfaces;
+using ReaderMails.Interfaces;
 
 namespace EmailSender.Services
 {

@@ -1,4 +1,5 @@
-﻿using EmailSender.Models;
+﻿using EmailSender.Extentions;
+using EmailSender.Models;
 using EmailSender.Settings;
 using EmailSender.Settings.Models;
 using Stylet;
@@ -87,6 +88,12 @@ namespace EmailSender.ViewModels
                 _settings.AnswerLetter.Text = value;
             }
         }
+
+        #endregion
+
+        #region Commands
+
+        
 
         #endregion
     }

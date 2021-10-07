@@ -1,7 +1,4 @@
-﻿using AppCommon.Interfaces;
-using System;
-using System.Collections.Generic;
-using System.Text;
+﻿using ReaderMails.Interfaces;
 
 namespace EmailSender.Models
 {

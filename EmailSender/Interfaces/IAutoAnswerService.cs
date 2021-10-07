@@ -1,5 +1,5 @@
 ﻿
-using AppCommon.Interfaces;
+using ReaderMails.Interfaces;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
@@ -7,6 +7,6 @@ namespace EmailSender.Interfaces
 {
     public interface IAutoAnswerService
     {
-        Task<bool> SendAnswersAsync(List<IMailAnswer> mailAnswers);
+        Task<bool> SendAnswersAsync(IEnumerable<IMailAnswer> mailAnswers);
     }
 }

@@ -14,6 +14,7 @@ using System.Threading.Tasks;
 using Stylet;
 using System.Data.SQLite;
 using AppCommon.Interfaces;
+using ReaderMails.Interfaces;
 
 namespace EmailSender.Services
 {

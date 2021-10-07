@@ -5,10 +5,10 @@ using EmailSender.Settings;
 using StyletIoC;
 using System.Collections.Generic;
 using System.Threading.Tasks;
-using System.Windows;
 using EmailSender.Models;
 using Stylet;
 using System.Linq;
+using ReaderMails.Interfaces;
 
 namespace EmailSender.Services
 {
@@ -46,9 +46,9 @@ namespace EmailSender.Services
 
         #region Public methods
 
-        public async Task<bool> SendAnswersAsync(List<IMailAnswer> mailAnswers)
+        public async Task<bool> SendAnswersAsync(IEnumerable<IMailAnswer> mailAnswers)
         {
-            _logger.InfoReader("Получили письма для автоответа");
+            _logger.InfoReader("Старт работы автоответчика");
             foreach(var answer in mailAnswers)
             {
                 //Create object of receiver
@@ -56,7 +56,7 @@ namespace EmailSender.Services
                 if(receiver == null)
                 {
                     _logger.ErrorReader($"Не нашли {answer.EmailAddress} в нашем списке");
-                    receiver = new Receiver() { Address = answer.EmailAddress, Letter = _answerLettrer };
+                    receiver = new Receiver() { Email = answer.From, Letter = _answerLettrer };
                 }
                 
                 //Randomize text of letter
@@ -66,18 +66,14 @@ namespace EmailSender.Services
                 await _sender.SendEmail(receiver, new Receiver(), receiver.Letter);
                 _logger.InfoReader($"Отправили автоответ {receiver.Address}");
 
-                //change status of receiver 
-
-                if (receiver != null)
-                {
-                    receiver.StatusSend = _statuses.ReceiverStatusAutoanswered;
-                    
-                    //change status in db
-                    _dbService.SaveReceiver(receiver);
-                    
-                    //notify to telegram
-                    _notification.AnswerGetMessage($"Отправили автоответ {receiver.Address}");
-                }
+                //change status of receiver                    
+                receiver.StatusSend = _statuses.ReceiverStatusAutoanswered;
+                                       
+                //change status in db                    
+                _dbService.SaveReceiver(receiver);
+                                       
+                //notify to telegram
+                _notification.AnswerGetMessage($"Отправили автоответ {receiver.Address}");                
             }
             return true;
         }

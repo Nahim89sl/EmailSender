@@ -1,19 +1,18 @@
 ﻿using AppCommon.Interfaces;
-using AppCommon.MailObj;
-using AppCommon.Utilities;
+using EmailSender.Extentions;
 using EmailSender.Interfaces;
 using EmailSender.Logger;
 using EmailSender.Models;
 using EmailSender.Settings;
 using EmailSender.Settings.Models;
+using ReaderMails;
+using ReaderMails.Interfaces;
 using Stylet;
 using StyletIoC;
 using System;
 using System.Collections.Generic;
-using System.Collections.ObjectModel;
 using System.IO;
 using System.Linq;
-using System.Text.RegularExpressions;
 
 namespace EmailSender.Services
 {
@@ -31,7 +30,6 @@ namespace EmailSender.Services
         private IConsts _statuses;
         private AppSettingsModel _settingsGlobal;
         private IAutoAnswerService _autoAnswerService;
-
 
         #endregion
 
@@ -60,38 +58,47 @@ namespace EmailSender.Services
         public string WordsSpamMail => _settings.WordsSpamMail;
         public string AnswerBodyFilter => _settings.AnswerBodyList;
 
-
         #endregion
-
 
         #region Public Methods
 
-        public void WorkWithResults(IList<IMailAnswer> answers)
-        {
-            //answers = GenerateResults();            
-            _logger.InfoReader("Start check answers");
-            try
+        public void WorkWithResults(EmailFiltrator results)
+        {                       
+            //good answer
+            //There we marked all good answers in our db and exel
+            if (results.GetMailsForSave == null)
+                return;
+            foreach(var answer in results.GetMailsForSave)
             {
-                var goodAnswers = answers.Where(a => a.Status == MailStatus.Good).ToList();
-                
-                goodAnswers.ForEach(a => GoodAnswerWorker(a));
-
-                if(_settingsGlobal.ReaderSettings.IsAnswer)//Auto answer work
-                {
-                    var needAnswersList = goodAnswers.Where(x => ExistWords(x.EmailText, AnswerBodyFilter) != string.Empty).ToList();
-                    _autoAnswerService.SendAnswersAsync(needAnswersList);
-                }
-
-                var badAnswers = answers.Where(a => a.Status == MailStatus.Block).ToList();
-                BadAnswerWorker(badAnswers);
+                GoodAnswerWorker(answer);
             }
-            catch(Exception ex)
+
+            //auto responce action
+            //GetAnswerMails - it is inversion filter for making autoanswer
+            if (_settingsGlobal.ReaderSettings.IsAnswer)//Auto answer work
             {
-                _logger.ErrorReader($"Report error: {ex.Message}");
-            }           
+                var autoAnswers = GetMailsForAutoAnswer(results.GetMailsForSave.ToList(), results.GetAnswerMails.ToList());
+                _logger.InfoReader($"Писем для автоответа: {autoAnswers.Count}");
+                if(autoAnswers.Any())
+                    _autoAnswerService.SendAnswersAsync(autoAnswers);
+            }
+
+            //span action
+            if (results.GetSpamMails.Any())
+            {
+                ChangeTimeInterval();
+            }
+
+            //unexist actions
+            List<IMailAnswer> unxistList = new List<IMailAnswer>();
+            if(results.GetUnexist1Mails.Any() || results.GetUnexist2Mails.Any())
+            {
+                unxistList.AddRange(results.GetUnexist1Mails);
+                unxistList.AddRange(results.GetUnexist2Mails);
+                AddUnexistStatus(unxistList);
+            }
         }
 
-        //work with good answers
         private void GoodAnswerWorker(IMailAnswer answer)
         {
             var receiver = _receivers.Where(r => r.Email.Equals(answer.EmailAddress)).FirstOrDefault();
@@ -105,20 +112,7 @@ namespace EmailSender.Services
             //add record to report files
             _reporter.AddToReport(Path.Combine(_settings.ReportFolder_1, $"{_account.Server}.xlsx"), answer, receiver, _account.ServerLabelName);
             _reporter.AddToReport(Path.Combine(_settings.ReportFolder_2, $"{_account.Server}.xlsx"), answer, receiver, _account.ServerLabelName);
-            _logger.InfoReader($"Add to report!{answer.EmailAddress}");
-        }
-
-        public void BadAnswerWorker(IList<IMailAnswer> answers)
-        {
-            //check unexist answers
-            AddUnexistStatus(answers);
-
-            //check spam answers
-            var spamList = answers.Where(x => ExistWords(x.EmailText, WordsSpamMail) != string.Empty).ToList();
-            if (spamList != null)
-            {
-                ChangeTimeInterval(spamList);
-            }
+            _logger.InfoReader($"Add to report: {answer.EmailAddress}");
         }
 
         public void AddUnexistStatus(IList<IMailAnswer> answers)
@@ -127,8 +121,8 @@ namespace EmailSender.Services
             foreach (var answer in answers)
             {
                 //chek list 1
-                var inList1 = ExistWords(answer.EmailText, NotExistList_1);
-                var inList2 = ExistWords(answer.EmailText, NotExistList_2);
+                var inList1 = answer.EmailText.ExistWords(NotExistList_1);
+                var inList2 = answer.EmailText.ExistWords(NotExistList_2);
                
                 _logger.InfoReader($"******** NOT EXIST Mail:**********************");
                 _logger.InfoReader($"Coincidence list 1:  {inList1}");
@@ -137,7 +131,7 @@ namespace EmailSender.Services
                 _logger.InfoReader($"{answer.EmailText}");
 
                 
-                var email = ExstractEmailFromText(answer.EmailText);
+                var email = answer.EmailText.ExstractEmailFromText();
                 if(email != string.Empty)
                 {
                     _logger.InfoReader($"Exstract email address from letter's body {email}");
@@ -169,12 +163,10 @@ namespace EmailSender.Services
             }           
         }
 
-        public void ChangeTimeInterval(IList<IMailAnswer> answers)
+        public void ChangeTimeInterval()
         {
-            if(answers.Count>0)
-            {
-                _logger.ErrorReader($"Определили что сервер в спаме ");
-                if (File.Exists(_settingsGlobal.SenderSettings.IntervalsFilePath))
+            _logger.ErrorReader($"Определили что сервер в спаме ");
+            if (File.Exists(_settingsGlobal.SenderSettings.IntervalsFilePath))
                 {
                     var iterval = File.ReadAllLines(_settingsGlobal.SenderSettings.IntervalsFilePath).First();
                     string[] arr = iterval.Split('-');
@@ -194,48 +186,34 @@ namespace EmailSender.Services
                         
                     }
                 }
-                else
-                {
-                    _logger.ErrorReader($"Не найден файл интервалов");
-                }
+            else
+            {
+              _logger.ErrorReader($"Не найден файл интервалов");
             }
+            
         }
 
-
-
-        /// <summary>
-        /// Find in text some words from our list. List conatains words in format word1|word2|...
-        /// </summary>
-        public string ExistWords(string text, string findWords)
+        private IList<IMailAnswer> GetMailsForAutoAnswer(IList<IMailAnswer> goodAnswers, IList<IMailAnswer> deleteAnswers)
         {
-            Regex rgx = new Regex(findWords);
-            var match = rgx.Match(text);
-            if (match.Success)
+            var resList = new List<IMailAnswer>();
+            if (goodAnswers != null)
             {
-                return match.Value;
-            }
-            return string.Empty;
-        }       
+                if (deleteAnswers.Count < 1)
+                    return goodAnswers;
 
-        /// <summary>
-        /// Exstract  emal address from text 
-        /// </summary>
-        /// <param name="text"></param>
-        /// <returns>email address or empty string</returns>
-        public string ExstractEmailFromText(string text)
-        {
-            var exstractor = new Regex(@"[a-zA-Z0-9+._-]+@[a-zA-Z0-9._-]+\.[a-zA-Z0-9_-]+");
-            var match = exstractor.Match(text);
-            if (match.Success)
-            {
-                return match.Value;
+                foreach (var answer in goodAnswers)
+                {
+                    if(!deleteAnswers.Any(x => x.Id == answer.Id))
+                    {
+                        //if (_receivers.Any(x => x.Email == answer.EmailAddress))
+                        resList.Add(answer);
+                    }
+                }
             }
-            return string.Empty;
+            return resList;
         }
 
         #endregion
-
-
 
     }
 }

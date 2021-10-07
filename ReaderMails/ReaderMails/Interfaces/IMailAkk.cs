@@ -1,5 +1,5 @@
 ﻿
-namespace AppCommon.Interfaces
+namespace ReaderMails.Interfaces
 {
     public interface IMailAkk
     {

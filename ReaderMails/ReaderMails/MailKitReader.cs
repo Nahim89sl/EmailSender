@@ -5,12 +5,9 @@ using NLog;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text.RegularExpressions;
 using MailKit.Search;
-using AppCommon.Interfaces;
-using AppCommon.MailObj;
-using AppCommon;
-
+using ReaderMails.Models;
+using ReaderMails.Interfaces;
 
 namespace ReaderMails
 {
@@ -24,128 +21,58 @@ namespace ReaderMails
     /// 
     /// class return list of all mails with diffrent statuses
     /// </summary>
-    public class MailKitReader : IMailReaderService
+    public class MailKitReader
     {
         private ImapClient _imapClient;
         private ILogger _logger;
         private IMailFolder _destFolder;
         private IMailFolder _trashFolder;
+        private string _trashFolderName;
+        private string _destFolderName;
         private string _libName;
-        private IConsts _consts;
 
+        private readonly ServerStatus SrvState;
 
-        public MailKitReader(ILogger logger, IConsts consts)
+        public MailKitReader(ILogger logger, string destFolder, string trashFolder)
         {
             _logger = logger;
-            _consts = consts;
+            _trashFolderName = trashFolder;
+            _destFolderName = destFolder;
             _logger.Info($"{_libName} Load app MailReader");
             _libName = "ReaderMail";
+            SrvState = new ServerStatus();
         }
 
-        public IList<IMailAnswer> ReaderMails(
-            IMailAkk akkaunt, 
-            string destFolderName, 
-            string trashFolderName, 
-            string subjectStopWords, 
-            string bodyStopWords, 
-            string emailBlackList)
+        public bool ReadMails(IMailAkk akkaunt, EmailFiltrator filtrator)
         {
-            //check stop words value
-            if ((subjectStopWords.Length < 5)||(bodyStopWords.Length < 5))
-            {
-                _logger.Error($"ConnectToserverr you didn't have stop words {subjectStopWords}");
-                return null;
-            }
-
-
-            //try connect to server
-            ConnectToServer(akkaunt);
-
-            if (_imapClient.IsConnected)
-            {
-                try
-                {
-                    CheckFolders(_consts.ReadFolder, _consts.TrashFolder);                   
-                    return FilterMails(subjectStopWords, bodyStopWords, emailBlackList);
-                
-                }catch(Exception ex)
-                {
-                    _logger.Error($"ReaderMails {ex.Message}");
-                    return null;
-                }              
-            }
-            _logger.Error($"{_libName} Akkaunt status is {akkaunt.AccountStatus}");
-            return new List<IMailAnswer>();
-        }
-        
-        //public messages by subject
-        public IList<IMailAnswer> FilterMails(string subjectStopWords, string bodyStopWords, string emailBlackList)
-        {
-            IList<IMailAnswer> answerReceivers = new List<IMailAnswer>();
             try
             {
-                
-                var mailsUids = _imapClient.Inbox.Search(SearchQuery.All);
-                _logger.Info($"{_libName} Total mails in INBOX: {mailsUids.Count.ToString()}");
-                int k = 0;
-
-                foreach (UniqueId uidMail in mailsUids)
+                ConnectToServer(akkaunt);
+                if (_imapClient.IsConnected)
                 {
-                    var tempMessage = FilterMail(uidMail, subjectStopWords, bodyStopWords, emailBlackList);
-                    if (tempMessage != null)
+                    CheckFolders(_destFolderName, _trashFolderName);
+                    var mails = LoadAllMails();
+                    _logger.Info($"Downloaded {mails.Count()} mails from Inbox");
+                    if (mails.Any())
                     {
-                        answerReceivers.Add(tempMessage);
-                    }
-                    k++;
-                    if (k > 200) { break; }
-                }
-                return answerReceivers;
-            }catch(Exception ex)
-            {
-                _logger.Error($"FilterMailsBySubject {ex.Message}");
-                return answerReceivers;
-            }           
-        }
-
-        //sort mail 
-        public IMailAnswer FilterMail(UniqueId uidMail, string subjectStopWords, string bodyStopWords, string emailBlackList)
-        {
-            try
-            {
-                var message = _imapClient.Inbox.GetMessage(uidMail);
-                if (message == null) 
-                {
-                    _logger.Error($"Can't get message from uid {uidMail}");
-                    return null; 
-                }
-                var answer = new MailAnswer() { Message = message, Status = MailStatus.Empty };
-                string subject = answer.EmailSubject;
-
-                //Filtration with stop words
-                if ((ExistStopWords(subject, subjectStopWords))
-                    ||(ExistStopWords(answer.EmailAddress, emailBlackList))
-                    ||(ExistStopWords(answer.EmailText, bodyStopWords)))
-                {
-                    
-                    _imapClient.Inbox.MoveTo(uidMail, _trashFolder);
-                    _imapClient.Inbox.AddFlags(uidMail, MessageFlags.Seen, true); //mark is read
-                    _logger.Info($"{_libName} Move to: {_consts.TrashFolder} - {subject}");
-                    answer.Status = MailStatus.Block;
+                        filtrator.Filter(mails);
+                        MoveToTresh(filtrator.GetMailsForDelete);
+                        MoveToRead(filtrator.GetMailsForSave);
+                        _logger.Info($"Reading and filtration finished: Move to treash {filtrator.GetMailsForDelete.Count()} Move to Read {filtrator.GetMailsForSave.Count()}");
+                    }                   
                 }
                 else
                 {
-                    _imapClient.Inbox.MoveTo(uidMail, _destFolder);
-                    //_imapClient.Inbox.AddFlags(uidMail, MessageFlags.Seen, true); //mark is read
-                    _logger.Info($"{_libName} Move to: {_consts.ReadFolder} Subject: {subject}");
-                    answer.Status = MailStatus.Good;
+                    _logger.Error($"{_libName} Akkaunt status is {akkaunt.AccountStatus}");
+                    return false;
                 }
-                return answer;
             }
             catch(Exception ex)
             {
-                _logger.Error($"FilterMailBySubject {ex.Message} \n ");
-                return null;
-            }            
+                _logger.Error($"{_libName} Method - ReadMails:{ex.Message}");
+                return false;
+            }                       
+            return true;
         }
         
         //connect to server
@@ -159,7 +86,7 @@ namespace ReaderMails
                 _logger.Info($"{_libName} try connnect to server");
                 _imapClient.Connect(account.Server, account.Port, SecureSocketOptions.None);
                 _logger.Info($"{_libName} Connected to server");
-                account.ServerStatus = _consts.ServerStatusOk;
+                account.ServerStatus = SrvState.OK;
             }
             catch (Exception ex)
             {
@@ -174,7 +101,7 @@ namespace ReaderMails
                 _logger.Info($"{_libName} Try auth to server");
                 _imapClient.Inbox.Open(FolderAccess.ReadWrite);
                 _logger.Info($"{_libName} Authenticated");
-                account.AccountStatus = _consts.ServerStatusOk;
+                account.AccountStatus = SrvState.OK;
             }
             catch (Exception ex)
             {
@@ -209,25 +136,6 @@ namespace ReaderMails
             }
         }
         
-        //find words in text
-        public bool ExistStopWords(string text, string findWords)
-        {
-            try
-            {
-                Regex rgx = new Regex(findWords);
-                var match = rgx.Match(text);
-                if (match.Success)
-                {
-                    return true;
-                }
-            }
-            catch (Exception ex)
-            {
-                _logger.Error($"ExistStopWords {ex.Message}\n         text {text}\n     findwords{findWords}");
-            }           
-            return false;
-        }
-
         private void CheckFolders(string destFolder, string trashFolder)
         {
             _destFolder = CheckFolderByName(destFolder);
@@ -248,5 +156,44 @@ namespace ReaderMails
             _logger.Info($"{_libName} Destination folder - {_destFolder.FullName};  Trash folder - {_trashFolder.FullName}");
         }
 
+        #region private Methods
+
+        private IEnumerable<IMailAnswer> LoadAllMails()
+        {
+            var resList = new List<IMailAnswer>();
+
+            var mailsUids = _imapClient.Inbox.Search(SearchQuery.All);
+            foreach(var uid in mailsUids)
+            {
+                var message = _imapClient.Inbox.GetMessage(uid);
+                if(message != null)
+                {
+                    var mail = new MailAnswer(message);
+                    mail.Id = uid;
+                    resList.Add(mail);
+                }
+            }           
+            return resList;
+        }
+
+        private void MoveToTresh(IEnumerable<IMailAnswer> badmails)
+        {
+            foreach(var mail in badmails)
+            {
+                _imapClient.Inbox.MoveTo(mail.Id, _trashFolder);
+                _imapClient.Inbox.AddFlags(mail.Id, MessageFlags.Seen, true); //mark is read
+            }
+        }
+
+        private void MoveToRead(IEnumerable<IMailAnswer> goodmails)
+        {
+            foreach (var mail in goodmails)
+            {
+                _imapClient.Inbox.MoveTo(mail.Id, _destFolder);
+                _imapClient.Inbox.AddFlags(mail.Id, MessageFlags.Seen, true); //mark is read
+            }
+        }
+
+        #endregion
     }
 }

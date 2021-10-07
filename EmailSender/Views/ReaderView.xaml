@@ -198,6 +198,10 @@
                       IsChecked="{Binding IsAnswer}" 
                       Height="20"                      
                       Content="Активировать автоответ" />
+            <Button 
+                Content="Test" 
+                Command="{s:Action CheckAnswers}"
+                Visibility="Hidden"/>
         </StackPanel>
     </Grid>
 </UserControl>

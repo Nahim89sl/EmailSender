@@ -1,10 +1,10 @@
-﻿using AppCommon.Interfaces;
-using System.Collections.Generic;
+﻿using ReaderMails;
+
 
 namespace EmailSender.Interfaces
 {
     public interface IReaderMails
     {
-        IList<IMailAnswer> ReadMails(string SubjectStopWords, string BodyStopWords, string emailBlackList);
+        void ReadMails(EmailFiltrator filtrator);
     }
 }
