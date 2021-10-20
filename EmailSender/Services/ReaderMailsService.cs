@@ -13,6 +13,7 @@ namespace EmailSender.Services
         
         [Inject] public  IMailAkk MainAccount;
         [Inject] private  IConsts Consts;
+        [Inject] private INotification Notification;
 
         private MailKitReader kitReader;
         private ILogger readerLogger;
@@ -37,6 +38,11 @@ namespace EmailSender.Services
                     kitReader = new MailKitReader(readerLogger, Consts.ReadFolder, Consts.TrashFolder);
                 }                
                 kitReader.ReadMails(MainAccount, filtrator);
+
+                if(MainAccount.AccountStatus != Consts.AkkStatusOk)
+                {
+                    Notification.AccountErrorMessage($"Статус аккаунта {MainAccount.Login} изменился: {MainAccount.AccountStatus}");
+                }
             }
             catch(Exception ex)
             {

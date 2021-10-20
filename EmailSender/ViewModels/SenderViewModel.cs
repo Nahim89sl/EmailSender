@@ -21,6 +21,7 @@ namespace EmailSender.ViewModels
     {
 
         #region  private fields
+        [Inject] private IConsts Consts;
 
         private ILogger _logger;
         private ISender _sender;
@@ -508,7 +509,12 @@ namespace EmailSender.ViewModels
                 {
                     _notification.ServerErrorMessage($"Сервер {_acc.Server} выдал ошибку: {_acc.ServerStatus}\n устраните сбой работы сервера");
                 }
-                
+
+                if (_acc.AccountStatus != Consts.AkkStatusOk)
+                {
+                    _notification.AccountErrorMessage($"Статус аккаунта {_acc.Login} изменился: {_acc.AccountStatus}");
+                }
+
                 if (ServerErrorCount > 100000)
                 {
                     Execute.OnUIThread(() => {                        
@@ -526,7 +532,7 @@ namespace EmailSender.ViewModels
             }
             else
             {
-                _logger.InfoSender($"{receiver.IdReceiver.ToString()} Mail to {receiver.Email} sended");               
+                _logger.InfoSender($"{receiver.IdReceiver.ToString()} Mail to {receiver.Email} sended");             
             }
         }
 

@@ -8,5 +8,6 @@
         void AnswerGetMessage(string info);
         void FinishSendMessage(string info);
         void ServerErrorMessage(string info);
+        void AccountErrorMessage(string info);
     }
 }

@@ -23,7 +23,7 @@
             <Label Content="Account" HorizontalAlignment="Center"/>
             <Label Content="Login"/>
             <TextBox Text="{Binding Login, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
-            <Label Content="Login"/>
+            <Label Content="Password"/>
             <TextBox Text="{Binding Pass, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
             <StackPanel Orientation="Horizontal">
                 <Label Content="Status:"/>

@@ -31,6 +31,12 @@
 
         <CheckBox 
             Margin="7"
+            IsChecked="{Binding AccountErrorNotify}"
+            Content="Проблемы с аккаунтом" 
+        />
+
+        <CheckBox 
+            Margin="7"
             IsChecked="{Binding ServerErrorNotify}"
             Content="Проблема с сервером" 
         />

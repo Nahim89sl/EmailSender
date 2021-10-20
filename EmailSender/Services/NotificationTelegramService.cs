@@ -1,10 +1,7 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Text;
 using System.Threading.Tasks;
 using EmailSender.Interfaces;
 using EmailSender.Logger;
-using EmailSender.Models;
 using EmailSender.Settings.Models;
 using Telegram.Bot;
 
@@ -123,6 +120,19 @@ namespace EmailSender.Services
         public void ServerErrorMessage(string info)
         {
             if ((botik != null) && (_accountTg.ServerErrorNotify))
+            {
+                info = $"\u26d4 ERROR: {info}";
+                var result = Task.Run(() => SendMessage(info));
+            }
+            else
+            {
+                _logger.ErrorSender($"Problem with telegram account");
+            }
+        }
+
+        public void AccountErrorMessage(string info)
+        {
+            if ((botik != null) && (_accountTg.AccountErrorNotify))
             {
                 info = $"\u26d4 ERROR: {info}";
                 var result = Task.Run(() => SendMessage(info));

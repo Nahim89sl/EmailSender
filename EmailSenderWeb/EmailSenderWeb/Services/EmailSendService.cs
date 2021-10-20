@@ -10,6 +10,7 @@ namespace EmailReaderWeb
 {
     public class EmailSendService
     {
+
         private readonly HttpClient client;
         CookieContainer cookie;
         HttpClientHandler handler;

@@ -17,5 +17,6 @@ namespace EmailSender.Settings.Models
         public bool ServerErrorNotify { get; set; }
         public bool AnswerGetNotify { get; set; }
         public bool FinishSendNotify { get; set; }
+        public bool AccountErrorNotify { get; set; }
     }
 }

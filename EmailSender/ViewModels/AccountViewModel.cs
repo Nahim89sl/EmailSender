@@ -1,8 +1,5 @@
 ﻿using StyletIoC;
 using System;
-using System.Collections.Generic;
-using System.Text;
-using System.Threading.Tasks;
 using EmailSender.Interfaces;
 using EmailSender.Logger;
 using EmailSender.Models;

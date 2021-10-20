@@ -98,7 +98,20 @@ namespace EmailSender.ViewModels
             }
         }
 
-
+        private bool _accountErrorNotify;
+        public bool AccountErrorNotify
+        {
+            get
+            {
+                _accountErrorNotify = Account.AccountErrorNotify;
+                return _accountErrorNotify;
+            }
+            set
+            {
+                SetAndNotify(ref _accountErrorNotify, value);
+                Account.AccountErrorNotify = value;
+            }
+        }
 
         public void TestNotificationCommand()
         {

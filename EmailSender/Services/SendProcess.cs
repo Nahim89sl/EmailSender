@@ -1,18 +1,12 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
-using System.Windows.Documents;
 using EmailSender.Interfaces;
 using EmailSender.Models;
 
 namespace EmailSender.Services
 {
-    
-    
-
     public class SendProcess
     {
         private ObservableCollection<Receiver> receivers;
