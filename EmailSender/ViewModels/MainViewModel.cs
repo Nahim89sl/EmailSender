@@ -1,12 +1,7 @@
 ﻿using EmailSender.Logger;
 using StyletIoC;
-using System;
-using System.Collections.Generic;
-using System.Text;
 using EmailSender.Interfaces;
-using EmailSender.Models;
 using Stylet;
-using EmailSender.Settings.Models;
 using EmailSender.Settings;
 using System.Windows;
 

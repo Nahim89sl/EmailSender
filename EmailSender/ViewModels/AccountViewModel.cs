@@ -22,8 +22,7 @@ namespace EmailSender.ViewModels
             MainAccount = ioc.Get<IMailAkk>();
             _sender = ioc.Get<ISender>();
         }
-        
-        
+
         //login
         private string _login;
         public string Login
@@ -128,7 +127,7 @@ namespace EmailSender.ViewModels
                  await _sender.CheckAccount();
                  NotifyOfPropertyChange(nameof(this.AccState));
                  NotifyOfPropertyChange(nameof(this.SrvState));
-                 _windowManager.ShowMessageBox("Account tested");
+                 _windowManager.ShowMessageBox($"Account status: {AccState}  Setver state: {SrvState}") ;
              });
         }
 

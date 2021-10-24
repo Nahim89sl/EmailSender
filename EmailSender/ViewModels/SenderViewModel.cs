@@ -21,7 +21,7 @@ namespace EmailSender.ViewModels
     {
 
         #region  private fields
-        [Inject] private IConsts Consts;
+        private IConsts _consts;
 
         private ILogger _logger;
         private ISender _sender;
@@ -36,7 +36,6 @@ namespace EmailSender.ViewModels
         private ILoadReceivers _saver;
         private FieldMappingSettingsModel _fieldMapping;
         private int ServerErrorCount;
-        private IConsts _consts;
 
 
         private int _mailListRounds;  //period for changing interval of pause
@@ -84,7 +83,7 @@ namespace EmailSender.ViewModels
             _templateLetter = ioc.Get<AppSettingsModel>().LetterTemplate;
             _windMng = ioc.Get<IWindowManager>();
             _notification = ioc.Get<INotification>();
-            _acc = ioc.Get<MainAccount>();
+            _acc = _globalSettings.MainAccount;
             _saver = ioc.Get<ILoadReceivers>();
             _fieldMapping = ioc.Get<AppSettingsModel>().FielMappingSettings;
             _ourReceiversWorker = ioc.Get<IOurReceiversWorker>();
@@ -510,7 +509,7 @@ namespace EmailSender.ViewModels
                     _notification.ServerErrorMessage($"Сервер {_acc.Server} выдал ошибку: {_acc.ServerStatus}\n устраните сбой работы сервера");
                 }
 
-                if (_acc.AccountStatus != Consts.AkkStatusOk)
+                if (_acc.AccountStatus != _consts.AkkStatusOk)
                 {
                     _notification.AccountErrorMessage($"Статус аккаунта {_acc.Login} изменился: {_acc.AccountStatus}");
                 }

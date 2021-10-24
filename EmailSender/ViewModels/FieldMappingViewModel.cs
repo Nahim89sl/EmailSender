@@ -55,7 +55,7 @@ namespace EmailSender.ViewModels
             }
             fieldSettings = settings.FielMappingSettings;
             
-            if(File.Exists(ReceiverListFilePath))
+            //if(File.Exists(ReceiverListFilePath))
             {
                 _loader.Load();
                 //_logger.InfoSender($"Loaded {_receivers.Count} receivers");
