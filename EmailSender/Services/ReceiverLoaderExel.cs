@@ -21,7 +21,6 @@ namespace EmailSender.Services
     {
         private ILogger logger;
         private FieldMappingSettingsModel FieldMapping;
-        private string FilePath;
         private ObservableCollection<Receiver> _receivers;
         private const string defValue = "no";
 

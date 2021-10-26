@@ -60,7 +60,7 @@ namespace EmailSender.Services
                         }
 
                     }
-                    catch (Exception ex)
+                    catch
                     {
                         //write to log
                         break;

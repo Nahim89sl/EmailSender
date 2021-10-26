@@ -1,5 +1,4 @@
-﻿using AppCommon.Interfaces;
-using EmailSender.Extentions;
+﻿using EmailSender.Extentions;
 using EmailSender.Interfaces;
 using EmailSender.Logger;
 using EmailSender.Models;
@@ -7,11 +6,9 @@ using EmailSender.Services;
 using EmailSender.Settings;
 using EmailSender.Settings.Models;
 using ReaderMails;
-using ReaderMails.Interfaces;
 using Stylet;
 using StyletIoC;
 using System;
-using System.Collections.Generic;
 using System.IO;
 using System.Threading.Tasks;
 using System.Timers;
@@ -451,6 +448,7 @@ namespace EmailSender.ViewModels
                 if (!Directory.Exists(folder))
                 {
                     _windMng.ShowMessageBox($"Папки {folder} не существует!");
+                    _logger.ErrorReader("Пользователь пытался неправильно запустить чтение");
                     return false;
                 }
                 return true;

@@ -129,7 +129,7 @@
                         Grid.Row="4"
                         Grid.Column="1"
                         Grid.ColumnSpan="3"
-                        Content="{Binding Pauses.RangePath}"
+                        Content="{Binding IntervalsFilePath}"
                         />
 
 

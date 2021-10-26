@@ -13,9 +13,23 @@ namespace EmailSender.Logger
 
         public NLogLogger()
         {
-            //loggerSender = LogManager.GetCurrentClassLogger("Sender");
+            //create new config for logger
+            var config = new NLog.Config.LoggingConfiguration();
+
+            // Targets where to log to: File 
+            var logfile = new NLog.Targets.FileTarget("logfile") {
+                FileName = ".\\Logs\\${logger}\\${shortdate}.log",
+                Layout = "${longdate}|${logger}|${level: uppercase = true}| ${message}"
+            };
+
+            // Rules for mapping loggers to targets            
+            config.AddRule(LogLevel.Info,  LogLevel.Fatal, logfile);
+
+            // Apply config           
+            LogManager.Configuration = config;
+            
             loggerSender = LogManager.GetLogger("Sender");
-            loggerReader = LogManager.GetLogger("Reader");
+            loggerReader = LogManager.GetLogger("Reader");            
         }
 
         public void Trace(string message)

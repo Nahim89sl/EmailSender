@@ -11,7 +11,7 @@ namespace EmailSender.Services
     {
         public async Task CheckAccount()
         {
-            int i = 0;
+            return;
         }
 
         public async Task SendEmail(Receiver receiver, Receiver hiddeReceiver, Letter letter)

@@ -7,7 +7,6 @@ using EmailSender.Settings;
 using EmailSender.Settings.Models;
 using Stylet;
 using StyletIoC;
-using System;
 using System.Collections.ObjectModel;
 using System.IO;
 using System.Linq;
@@ -42,11 +41,6 @@ namespace EmailSender.ViewModels
         int countToHidden;
         int countToOurMails;
         int countMailListRounds;
-        int countLettersToSave;
-
-
-        int nextDopPause;
-        int nextChangeInterval;
 
         private int _changeIntTime;  //period for changing interval of pause
         private PauseInterval _currentInterval;  //this interval now use sender
@@ -99,6 +93,7 @@ namespace EmailSender.ViewModels
             {
                 StartSenderCommand();
             }
+            
         }
         
         #endregion

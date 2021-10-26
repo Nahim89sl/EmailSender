@@ -1,12 +1,6 @@
 ﻿using EmailSender.ViewModels;
-using NLog;
 using Stylet;
-using Stylet.Logging;
 using StyletIoC;
-using System;
-using System.Collections.Generic;
-using System.Configuration;
-using System.Text;
 using EmailSender.Interfaces;
 using EmailSender.Logger;
 using EmailSender.Models;
@@ -31,7 +25,7 @@ namespace EmailSender
 
         protected override void OnStart()
         {
-           
+            Stylet.Logging.LogManager.Enabled = true;
         }
 
         protected override void ConfigureIoC(IStyletIoCBuilder builder)
@@ -42,7 +36,9 @@ namespace EmailSender
             //get settings service
             builder.Bind<ISettings>().To<AppSettingService>().InSingletonScope();
             builder.Bind<ILogger>().To<NLogLogger>().InSingletonScope();
+            //builder.Bind<ILogger>().To<StyletLogger>().InSingletonScope();
             builder.Bind<IConsts>().ToFactory(container => new Consts());
+            
             //load settings
             ioc = builder.BuildContainer();
             settings = ioc.Get<ISettings>().Load();

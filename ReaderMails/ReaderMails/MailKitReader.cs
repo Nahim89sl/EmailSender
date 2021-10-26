@@ -1,17 +1,16 @@
 ﻿using MailKit;
 using MailKit.Net.Imap;
 using MailKit.Security;
-using NLog;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using MailKit.Search;
 using ReaderMails.Models;
 using ReaderMails.Interfaces;
+using NLog;
 
 namespace ReaderMails
-{
-    
+{  
     /// <summary>
     /// This class loggin in mail server
     /// than read all mails in INBOX

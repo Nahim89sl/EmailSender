@@ -8,15 +8,13 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="EPPlus" Version="5.4.0" />
-    <PackageReference Include="Microsoft.Data.Sqlite.Core" Version="5.0.0" />
-    <PackageReference Include="NLog" Version="4.7.5" />
-    <PackageReference Include="NLog.Config" Version="4.7.5" />
-    <PackageReference Include="Ookii.Dialogs.Wpf.NETCore" Version="2.1.0" />
+    <PackageReference Include="EPPlus" Version="5.8.0" />
+    <PackageReference Include="Microsoft.Data.Sqlite.Core" Version="5.0.11" />
+    <PackageReference Include="Ookii.Dialogs.Wpf.NETCore" Version="2.2.1" />
     <PackageReference Include="sqlite" Version="3.13.0" />
-    <PackageReference Include="Stylet" Version="1.3.4" />
-    <PackageReference Include="System.Data.SQLite" Version="1.0.113.6" />
-    <PackageReference Include="Telegram.Bot" Version="15.7.1" />
+    <PackageReference Include="Stylet" Version="1.3.6" />
+    <PackageReference Include="System.Data.SQLite" Version="1.0.115" />
+    <PackageReference Include="Telegram.Bot" Version="16.0.2" />
   </ItemGroup>
 
   <ItemGroup>
