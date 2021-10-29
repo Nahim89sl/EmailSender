@@ -172,7 +172,6 @@ namespace EmailSender.ViewModels
                 _settings.DopPauseTime = value;
             }
         }
-
         
         public PauseInterval DopPauseInterval
         {
@@ -204,7 +203,6 @@ namespace EmailSender.ViewModels
             }
         }
 
-
         public int SendToHidden
         {
             get
@@ -218,8 +216,6 @@ namespace EmailSender.ViewModels
                 _settings.SendToHidden = value;
             }
         }
-
-
         public int ReceiverId
         {
             get
@@ -231,8 +227,6 @@ namespace EmailSender.ViewModels
                 SetAndNotify(ref this._receiverId, value);
             }
         }
-
-
         public int TotalReceivers
         {
             get
@@ -244,9 +238,6 @@ namespace EmailSender.ViewModels
                 SetAndNotify(ref this._totalReceivers, value);
             }
         }
-
-
-
         public int SendOurMail
         {
             get
@@ -260,13 +251,8 @@ namespace EmailSender.ViewModels
                 _settings.SendOurMail = value;
             }
         }
-
-
         public ObservableCollection<PauseInterval> PauseIntervals { get; set; }
         public BindableCollection<Receiver> OurReceivers { get; set; }
-
-
-
         public bool IsAutoStart
         {
             get
@@ -385,68 +371,69 @@ namespace EmailSender.ViewModels
             NotifyOfPropertyChange(nameof(this.CanStartSenderCommand));
             NotifyOfPropertyChange(nameof(this.CanStopSenderCommand));
             Task.Run(async ()=> {
-                while (isSenderRun)
+                var readyReceivers = _receivers.Where(a => ((a.StatusSend == _consts.ReceiverStatusNotSend) || (a.StatusSend == _consts.ReceiverStatusWariant))).ToList();
+                foreach(var receiver in readyReceivers)
                 {
-                    //take redy Receiver for send message
-                    var receiver = _receivers.Where(a => ((a.StatusSend == _consts.ReceiverStatusNotSend)||(a.StatusSend == _consts.ReceiverStatusWariant))).FirstOrDefault();
-                    if (receiver != null)
+                    if (isSenderRun)
                     {
                         //change prop ReceiverId for progress bar visibility
-                        Execute.OnUIThread(()=> {
+
+                        Execute.OnUIThread(() => {
                             ReceiverId = receiver.IdReceiver;
                             NotifyOfPropertyChange(nameof(ReceiverId));
                         });
-                        
+
                         //check if we need to send to our mails
-                        if(countToOurMails > SendOurMail)
-                        {                            
+                        if ((countToOurMails > SendOurMail))
+                        {
                             var ourReceiver = GetOurMail(receiver);
                             _logger.InfoSender($"Try send to our mail {ourReceiver.Email}");
                             textConv.LetterRandomizeText(ourReceiver, _templateLetter);
                             await _sender.SendEmail(ourReceiver, new Receiver(), ourReceiver.Letter);
                             CheckStatuses(ourReceiver);
-                            
+
                             ourReceiver.Count++;
                             countToOurMails = 0;
                             Thread.Sleep(Pause.GetPause());
                         }
 
+                        //Send to receiver
                         _logger.InfoSender($"Try send to {receiver.Email}");
                         textConv.LetterRandomizeText(receiver, _templateLetter);
 
-                        await _sender.SendEmail(receiver, GetHidden(), receiver.Letter);                     
+                        await _sender.SendEmail(receiver, GetHidden(), receiver.Letter);
                         CheckStatuses(receiver);
-
-                        Thread.Sleep(Pause.GetPause());
-                        countToHidden++;
-                        countToOurMails++;
 
                         //add status of receiver to database
                         receiver.StatusSend = _consts.ReceiverStatusSended;
                         _saver.SaveReceiver(receiver);
+
+                        Thread.Sleep(Pause.GetPause());
+                        countToHidden++;
+                        countToOurMails++;
                     }
-                    else
-                    {
-                        if(countMailListRounds < MailListRounds)
-                        {
-                            countMailListRounds++;
-                            UpdateMailList();
-                        }
-                        else
-                        {
-                            isSenderRun = false;
-                            break;
-                        }                        
-                    }                    
                 }
+
+                if ((countMailListRounds < MailListRounds)&& !readyReceivers.Any(x => x.StatusSend == _consts.ReceiverStatusNotSend))
+                {
+                    countMailListRounds++;
+                    UpdateMailList();
+                    return;
+                }
+                else
+                {
+                    isSenderRun = false;
+                }
+
                 _logger.InfoSender("Sending finished");
                 _notification.FinishSendMessage($"{_acc.Server} finished sending mails");
-                Execute.OnUIThread(()=> {
+                Execute.OnUIThread(() => {
                     _windMng.ShowMessageBox("Sending finished");
                     isSenderRun = false;
                     NotifyOfPropertyChange(nameof(this.CanStartSenderCommand));
                     NotifyOfPropertyChange(nameof(this.CanStopSenderCommand));
                 });
+                
             });
         }
 
@@ -493,6 +480,8 @@ namespace EmailSender.ViewModels
                 NotifyOfPropertyChange(nameof(_receivers));
             });
             _saver.SaveChangesAsync(_receivers, _fieldMapping);
+
+            SenderService();
         }
 
         private void CheckStatuses(Receiver receiver)
