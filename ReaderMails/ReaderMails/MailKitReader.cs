@@ -55,8 +55,11 @@ namespace ReaderMails
                     if (mails.Any())
                     {
                         filtrator.Filter(mails);
+                        _logger.Info($"Загрузили почты в фильтратор");
                         MoveToTresh(filtrator.GetMailsForDelete);
+                        _logger.Info($"Отфильтровали письма для удаления");
                         MoveToRead(filtrator.GetMailsForSave);
+                        _logger.Info($"Отфильтровали письма для работы");
                         _logger.Info($"Reading and filtration finished: Move to treash {filtrator.GetMailsForDelete.Count()} Move to Read {filtrator.GetMailsForSave.Count()}");
                     }                   
                 }
@@ -83,6 +86,8 @@ namespace ReaderMails
                 _imapClient = new ImapClient();
                 _imapClient.Timeout = 20000;
                 _logger.Info($"{_libName} try connnect to server");
+                if (account.Port == 0)
+                    account.Port = 143;
                 _imapClient.Connect(account.Server, account.Port, SecureSocketOptions.None);
                 _logger.Info($"{_libName} Connected to server");
                 account.ServerStatus = SrvState.OK;
@@ -160,37 +165,69 @@ namespace ReaderMails
         private IEnumerable<IMailAnswer> LoadAllMails()
         {
             var resList = new List<IMailAnswer>();
-
-            var mailsUids = _imapClient.Inbox.Search(SearchQuery.All);
-            foreach(var uid in mailsUids)
+            try
             {
-                var message = _imapClient.Inbox.GetMessage(uid);
-                if(message != null)
+                var mailsUids = _imapClient.Inbox.Search(SearchQuery.All);
+                int letters = 0;
+                foreach (var uid in mailsUids)
                 {
-                    var mail = new MailAnswer(message);
-                    mail.Id = uid;
-                    resList.Add(mail);
+                    var message = _imapClient.Inbox.GetMessage(uid);
+                    if (message != null)
+                    {
+                        var mail = new MailAnswer(message);
+                        mail.Id = uid;                        
+                        resList.Add(mail);
+                        _logger.Info(mail.EmailAddress);
+                    }
+                    letters++;
+                    if (letters > 200)
+                        break;
                 }
-            }           
+            }
+            catch (Exception ex)
+            {
+                _logger.Error($"LoadAllMails {ex.Message}");
+            }
+                      
             return resList;
         }
 
-        private void MoveToTresh(IEnumerable<IMailAnswer> badmails)
+        private bool MoveToTresh(IEnumerable<IMailAnswer> badmails)
         {
+            bool result = true;
             foreach(var mail in badmails)
             {
-                _imapClient.Inbox.MoveTo(mail.Id, _trashFolder);
-                _imapClient.Inbox.AddFlags(mail.Id, MessageFlags.Seen, true); //mark is read
+                try
+                {
+                    _imapClient.Inbox.MoveTo(mail.Id, _trashFolder);
+                    _imapClient.Inbox.AddFlags(mail.Id, MessageFlags.Seen, true); //mark is read
+                }
+                catch(Exception ex)
+                {
+                    _logger.Error($"MoveToTresh: mail.Id {mail.Id}, _trashFolder {_trashFolder} Error {ex.Message}");
+                    result = false;
+                }                
             }
+            return result;
         }
 
-        private void MoveToRead(IEnumerable<IMailAnswer> goodmails)
+        private bool MoveToRead(IEnumerable<IMailAnswer> goodmails)
         {
+            bool result = true;
             foreach (var mail in goodmails)
             {
-                _imapClient.Inbox.MoveTo(mail.Id, _destFolder);
-                _imapClient.Inbox.AddFlags(mail.Id, MessageFlags.Seen, true); //mark is read
+                try
+                {
+                    _imapClient.Inbox.MoveTo(mail.Id, _destFolder);
+                    _imapClient.Inbox.AddFlags(mail.Id, MessageFlags.Seen, true); //mark is read
+                }
+                catch (Exception ex)
+                {                    
+                    _logger.Error($"MoveToRead: mail.Id {mail.Id}, _trashFolder {_trashFolder} Error {ex.Message}");
+                    result = false;
+                }                
             }
+            return result;
         }
 
         #endregion

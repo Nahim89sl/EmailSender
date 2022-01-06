@@ -9,6 +9,7 @@ using EmailSender.Models;
 using Stylet;
 using System.Linq;
 using ReaderMails.Interfaces;
+using System;
 
 namespace EmailSender.Services
 {
@@ -48,32 +49,48 @@ namespace EmailSender.Services
 
         public async Task<bool> SendAnswersAsync(IEnumerable<IMailAnswer> mailAnswers)
         {
-            _logger.InfoReader("Старт работы автоответчика");
+            _logger.InfoReader($"Старт работы автоответчика {mailAnswers.Count()}");
             foreach(var answer in mailAnswers)
             {
-                //Create object of receiver
-                var receiver = _receivers.Where(r => r.Email.Equals(answer.EmailAddress)).FirstOrDefault();
-                if(receiver == null)
+                try
                 {
-                    _logger.ErrorReader($"Не нашли {answer.EmailAddress} в нашем списке");
-                    receiver = new Receiver() { Email = answer.From, Letter = _answerLettrer };
+                    //Create object of receiver
+                    _logger.InfoReader($"Ответ на {answer.EmailAddress} ");
+
+                    var receiver = _receivers.Where(r => r.Email == answer.EmailAddress).FirstOrDefault();
+                    if (receiver == null)
+                    {
+                        _logger.ErrorReader($"Не нашли {answer.EmailAddress} в нашем списке");
+                        receiver = new Receiver() { Email = answer.EmailAddress, Letter = _answerLettrer };
+                    }
+
+                    if (receiver.StatusSend == _statuses.ReceiverStatusAutoanswered)
+                    {
+                        _logger.InfoReader($"{receiver.Email} уже отвечали");
+                        return true;
+                    }
+
+                    //Randomize text of letter
+                    _textConvertor.LetterRandomizeText(receiver, _answerLettrer);
+
+                    //send letter with answer
+                    await _sender.SendEmail(receiver, new Receiver(), receiver.Letter);
+                    _logger.InfoReader($"Отправили автоответ {receiver.Email}");
+
+                    //change status of receiver                    
+                    receiver.StatusSend = _statuses.ReceiverStatusAutoanswered;
+
+                    //change status in db                    
+                    _dbService.SaveReceiver(receiver);
+
+                    //notify to telegram
+                    _notification.AnswerGetMessage($"Отправили автоответ {receiver.Email}");
                 }
-                
-                //Randomize text of letter
-                _textConvertor.LetterRandomizeText(receiver, _answerLettrer);
-
-                //send letter with answer
-                await _sender.SendEmail(receiver, new Receiver(), receiver.Letter);
-                _logger.InfoReader($"Отправили автоответ {receiver.Address}");
-
-                //change status of receiver                    
-                receiver.StatusSend = _statuses.ReceiverStatusAutoanswered;
-                                       
-                //change status in db                    
-                _dbService.SaveReceiver(receiver);
-                                       
-                //notify to telegram
-                _notification.AnswerGetMessage($"Отправили автоответ {receiver.Address}");                
+                catch (Exception ex)
+                {
+                    _logger.ErrorReader($"SendAnswersAsync: {ex.Message} ");
+                }
+                             
             }
             return true;
         }

@@ -29,7 +29,7 @@ namespace ReaderMails.Models
 
         public string From => GetFrom();
         public string EmailAddress => GetAddress();
-        public string EmailSubject => Message?.Subject.ToString() ?? string.Empty;
+        public string EmailSubject => Message?.Subject?.ToString() ?? string.Empty;
         public string EmailText => GetLetterText();
 
         
@@ -39,6 +39,7 @@ namespace ReaderMails.Models
 
         private string GetLetterText()
         {
+            string noBody = "No body";
             if (Message == null)
                 return "No body";
             try
@@ -55,14 +56,14 @@ namespace ReaderMails.Models
 
                 if ((Message.Body != null))
                 {
-                    return Message.GetTextBody(MimeKit.Text.TextFormat.Text);
+                    return Message.GetTextBody(MimeKit.Text.TextFormat.Text) ?? noBody;
                 }
             }
             catch
             {
-                return "No body";
+                return noBody;
             }
-            return "No body";
+            return noBody;
         }
 
         private string GetFrom()

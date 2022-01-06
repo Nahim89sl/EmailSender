@@ -124,13 +124,12 @@ namespace EmailSender.Services
                 var inList1 = answer.EmailText.ExistWords(NotExistList_1);
                 var inList2 = answer.EmailText.ExistWords(NotExistList_2);
                
-                _logger.InfoReader($"******** NOT EXIST Mail:**********************");
+                _logger.InfoReader($"\n******** NOT EXIST Mail:**********************");
                 _logger.InfoReader($"Coincidence list 1:  {inList1}");
                 _logger.InfoReader($"Coincidence list 2:  {inList2}");
-                _logger.InfoReader($"{answer.EmailSubject}");
-                _logger.InfoReader($"{answer.EmailText}");
-
-                
+                //_logger.InfoReader($"{answer.EmailSubject}");
+                //_logger.InfoReader($"{answer.EmailText}");
+              
                 var email = answer.EmailText.ExstractEmailFromText();
                 if(email != string.Empty)
                 {

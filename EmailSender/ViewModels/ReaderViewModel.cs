@@ -411,7 +411,9 @@ namespace EmailSender.ViewModels
                                                     SpamList, SpamList, NotExistList_1, NotExistList_1,
                                                     NotExistList_2, NotExistList_2,
                                                     _settings.AnswerTitleList, _settings.AnswerBodyList, EmailBlackList);
-                
+                if (filtrator == null)
+                    _logger.ErrorReader("Filtrator не создался корректно");
+
                 Reader.ReadMails(filtrator);
                 _reporter.WorkWithResults(filtrator);
             }

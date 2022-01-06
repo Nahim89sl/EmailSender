@@ -1,6 +1,4 @@
-﻿using MailKit;
-using MimeKit;
-using ReaderMails.Enums;
+﻿using ReaderMails.Enums;
 using ReaderMails.Extations;
 using ReaderMails.Interfaces;
 using System.Collections.Generic;
@@ -90,62 +88,62 @@ namespace ReaderMails
                 //bad mails
                 if (_filterBadWordsTitle.NotNull())
                 {
-                    if (answer.EmailSubject.ExistWords(_filterBadWordsTitle) != string.Empty)
+                    if (answer.EmailSubject?.ExistWords(_filterBadWordsTitle) != string.Empty)
                         answer.Status = MailStatus.Bad;
                 }
                 if (_filterBadWordsBody.NotNull())
                 {
-                    if (answer.EmailText.ExistWords(_filterBadWordsBody) != string.Empty)
+                    if (answer.EmailText?.ExistWords(_filterBadWordsBody) != string.Empty)
                         answer.Status = MailStatus.Bad;
                 }
                 //spam mails
                 if (_filterSpamWordsTitle.NotNull())
                 {
-                    if (answer.EmailSubject.ExistWords(_filterSpamWordsTitle) != string.Empty)
+                    if (answer.EmailSubject?.ExistWords(_filterSpamWordsTitle) != string.Empty)
                         answer.Status = MailStatus.Spam;
                 }
                 if (_filterSpamWordsTitle.NotNull())
                 {
-                    if (answer.EmailText.ExistWords(_filterSpamWordsBody) != string.Empty)
+                    if (answer.EmailText?.ExistWords(_filterSpamWordsBody) != string.Empty)
                         answer.Status = MailStatus.Spam;
                 }
                 //unexist1
                 if (_filterUnexistWordsTitle1.NotNull())
                 {
-                    if (answer.EmailSubject.ExistWords(_filterUnexistWordsTitle1) != string.Empty)
+                    if (answer.EmailSubject?.ExistWords(_filterUnexistWordsTitle1) != string.Empty)
                         answer.Status = MailStatus.Unexist1;
                 }
                 if (_filterUnexistWordsBody1.NotNull())
                 {
-                    if (answer.EmailText.ExistWords(_filterUnexistWordsBody1) != string.Empty)
+                    if (answer.EmailText?.ExistWords(_filterUnexistWordsBody1) != string.Empty)
                         answer.Status = MailStatus.Unexist1;
                 }
                 //unexist2
                 if (_filterUnexistWordsTitle2.NotNull())
                 {
-                    if (answer.EmailSubject.ExistWords(_filterUnexistWordsTitle2) != string.Empty)
+                    if (answer.EmailSubject?.ExistWords(_filterUnexistWordsTitle2) != string.Empty)
                         answer.Status = MailStatus.Unexist2;
                 }
                 if (_filterUnexistWordsBody2.NotNull())
                 {
-                    if (answer.EmailText.ExistWords(_filterUnexistWordsBody2) != string.Empty)
+                    if (answer.EmailText?.ExistWords(_filterUnexistWordsBody2) != string.Empty)
                         answer.Status = MailStatus.Unexist2;
                 }
                 //auto answer
                 if (_filterAnswerWordsTitle.NotNull())
                 {
-                    if (answer.EmailSubject.ExistWords(_filterAnswerWordsTitle) != string.Empty)
+                    if (answer.EmailSubject?.ExistWords(_filterAnswerWordsTitle) != string.Empty)
                         answer.Status = MailStatus.AutoAnswer;
                 }
                 if (_filterAnswerWordsBody.NotNull())
                 {
-                    if (answer.EmailText.ExistWords(_filterAnswerWordsBody) != string.Empty)
+                    if (answer.EmailText?.ExistWords(_filterAnswerWordsBody) != string.Empty)
                         answer.Status = MailStatus.AutoAnswer;
                 }
                 //balck list
                 if (_filterBadEmails.NotNull())
                 {
-                    if (answer.EmailText.ExistWords(_filterBadEmails) != string.Empty)
+                    if (answer.EmailText?.ExistWords(_filterBadEmails) != string.Empty)
                         answer.Status = MailStatus.BalckList;
                 }
                 //good mails
