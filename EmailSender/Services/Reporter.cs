@@ -104,7 +104,10 @@ namespace EmailSender.Services
             var receiver = _receivers.Where(r => r.Email.Equals(answer.EmailAddress)).FirstOrDefault();
             if (receiver != null)
             {
-                receiver.StatusSend = _statuses.ReceiverStatusAnswered;
+                if(receiver.StatusSend != _statuses.ReceiverStatusAutoanswered)
+                {
+                    receiver.StatusSend = _statuses.ReceiverStatusAnswered;
+                }              
                 //change status in db
                 _dbService.SaveReceiver(receiver);
                 _notification.AnswerGetMessage($"{answer.EmailAddress}\n {answer.EmailSubject}");
