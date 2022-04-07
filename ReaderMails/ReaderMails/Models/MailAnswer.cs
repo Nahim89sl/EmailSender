@@ -29,9 +29,8 @@ namespace ReaderMails.Models
 
         public string From => GetFrom();
         public string EmailAddress => GetAddress();
-        public string EmailSubject => Message?.Subject?.ToString() ?? string.Empty;
+        public string EmailSubject => GetSubject();
         public string EmailText => GetLetterText();
-
         
         #endregion
 
@@ -88,6 +87,13 @@ namespace ReaderMails.Models
             {
                 return string.Empty;
             }
+        }
+
+        private string GetSubject()
+        {
+            if(Message is null || Message.Subject is null)
+                return "no subject";
+            return "no subject";
         }
 
         #endregion
