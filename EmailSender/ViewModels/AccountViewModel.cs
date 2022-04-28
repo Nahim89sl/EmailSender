@@ -114,6 +114,20 @@ namespace EmailSender.ViewModels
             }
         }
 
+        private int _serverPort;
+        public int ServerPort
+        {
+            get
+            {
+                return MainAccount.Port;
+            }
+            set
+            {
+                SetAndNotify(ref this._serverPort, value);
+                MainAccount.Port = _serverPort;
+            }
+        }
+
         //test receiver address
         public String ReceiverAddress { get; set; }
         public string TestSubject { get; set; }

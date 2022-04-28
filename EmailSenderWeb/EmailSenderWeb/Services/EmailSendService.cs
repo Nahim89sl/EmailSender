@@ -37,7 +37,7 @@ namespace EmailReaderWeb
             try
             {
                 //go to login page
-                response = await client.GetAsync("http://" + mailServer.Server + "/webmail/");
+                response = await client.GetAsync("https://webmail." + mailServer.Server+ "/");
                 var responseContent = await response.Content.ReadAsStringAsync();
                 //try get token from answer
                 token = GetToken(responseContent);
@@ -86,8 +86,9 @@ namespace EmailReaderWeb
         
         public async Task SendAsync(ServerAccount mailServer, string receiver, string hiddenReceiver, string subject, string mailText)
         {
+
             //go to compose mail
-            var response = await client.GetAsync($"http://{mailServer.Server}/webmail/?_task=mail&_action=compose");
+            var response = await client.GetAsync($"https://webmail.{mailServer.Server}/");
             var responseContent = await response.Content.ReadAsStringAsync();
 
             //check auth

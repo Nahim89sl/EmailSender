@@ -1,16 +1,17 @@
 ﻿using System;
 using System.Threading.Tasks;
 using EmailReaderWeb.Models;
+using EmailSenderWeb.Services;
 
 namespace EmailReaderWeb
 {
     public class SenderWeb
     {
-        private readonly EmailSendService _sendService;
+        private readonly EmailSmtpSerivce _sendService;
 
         public SenderWeb()
         {
-            _sendService = new EmailSendService();
+            _sendService = new EmailSmtpSerivce();
         }
         
         public async Task CheckAuth(ServerAccount account)
