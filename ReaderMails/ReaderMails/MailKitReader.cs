@@ -86,8 +86,7 @@ namespace ReaderMails
                 _imapClient = new ImapClient();
                 _imapClient.Timeout = 20000;
                 _logger.Info($"{_libName} try connnect to server");
-                if (account.Port == 0)
-                    account.Port = 143;
+                account.Port = 143;
                 _imapClient.Connect(account.Server, account.Port, SecureSocketOptions.None);
                 _logger.Info($"{_libName} Connected to server");
                 account.ServerStatus = SrvState.OK;
